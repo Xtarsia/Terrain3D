@@ -242,11 +242,17 @@ void Terrain3D::_build_meshes(const int p_mesh_lods, const int p_mesh_size) {
 				if (l != 0 && (x == 1 || x == 2) && (y == 1 || y == 2)) {
 					continue;
 				}
-
-				RID tile = RS->instance_create2(_meshes[GeoClipMap::TILE], scenario);
-				RS->instance_geometry_set_cast_shadows_setting(tile, RenderingServer::ShadowCastingSetting(_cast_shadows));
-				RS->instance_set_layer_mask(tile, _render_layers);
-				_data.tiles.push_back(tile);
+				if (l == 0 && (x == 1 || x == 2) && (y == 1 || y == 2)) {
+					RID tile = RS->instance_create2(_meshes[GeoClipMap::TILE_D1], scenario);
+					RS->instance_geometry_set_cast_shadows_setting(tile, RenderingServer::ShadowCastingSetting(_cast_shadows));
+					RS->instance_set_layer_mask(tile, _render_layers);
+					_data.tiles.push_back(tile);
+				} else {
+					RID tile = RS->instance_create2(_meshes[GeoClipMap::TILE], scenario);
+					RS->instance_geometry_set_cast_shadows_setting(tile, RenderingServer::ShadowCastingSetting(_cast_shadows));
+					RS->instance_set_layer_mask(tile, _render_layers);
+					_data.tiles.push_back(tile);
+				}
 			}
 		}
 

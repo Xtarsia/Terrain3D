@@ -22,6 +22,7 @@ public:
 		TRIM,
 		CROSS,
 		SEAM,
+		TILE_D1,
 	};
 
 	static Vector<RID> generate(const int p_resolution, const int p_clipmap_levels);
