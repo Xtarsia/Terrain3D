@@ -117,6 +117,10 @@ void Terrain3D::__process(const double p_delta) {
 	// If camera has moved enough, re-center the terrain on it.
 	if (is_instance_valid(_camera_instance_id) && _camera->is_inside_tree()) {
 		Vector3 cam_pos = _camera->get_global_position();
+		Vector3 cam_dir = _camera->get_global_transform().get_basis().get_column(2);
+		real_t cam_height = _storage->get_height(cam_pos);
+		cam_height = isnan(cam_height) ? 0.0f : cam_height;
+		cam_pos += cam_dir * MIN(- (_mesh_size),ABS(cam_pos.y - cam_height));
 		Vector2 cam_pos_2d = Vector2(cam_pos.x, cam_pos.z);
 		if (_camera_last_position.distance_to(cam_pos_2d) > 0.2f) {
 			snap(cam_pos);

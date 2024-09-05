@@ -222,18 +222,6 @@ float get_height(vec2 uv) {
  	return height;
 }
 
-float gain( float x, float k ) {
-	float a = 0.5*pow(2.0*((x<0.5)?x:1.0-x), k);
-	return (x<0.5)?a:1.0-a;
-}
-
-float height_mix(float a_height, float b_height, float blend) {
-	float ma = max(a_height + (1.0 - blend), b_height + blend) - (1.001 - blend_sharpness);
-	float b1 = max(a_height + (1.0 - blend) - ma, 0.0);
-	float b2 = max(b_height + blend - ma, 0.0);
-	return (b1 + b2) / (b1 + b2);
-}
-
 vec3 get_detail_height(vec2 uv, uint control, vec3 normal, float h) {
 	bool auto_shader = v_region.z < 0 || bool(control & 0x1u);
 	int base = int(auto_shader) * auto_base_texture + int(!auto_shader) * int(control >>27u & 0x1Fu);
@@ -244,10 +232,12 @@ vec3 get_detail_height(vec2 uv, uint control, vec3 normal, float h) {
 			, 0., 1.) + 
 			 float(!auto_shader) * float(control >>14u & 0xFFu) * 0.003921568627450; // 1./255.0
 	uv = uv * 0.5;
-	float d_base = texture(_texture_array_albedo, vec3(uv * _texture_uv_scale_array[base],float(base))).a - 0.5;
-	float d_over = texture(_texture_array_albedo, vec3(uv * _texture_uv_scale_array[over],float(over))).a - 0.5;
-	float d_height = (1.0 - blend) * d_base * 4.0 + blend * d_over * 0.5;
-	return normal * d_height;
+	float d_base = textureLod(_texture_array_albedo, vec3(uv * _texture_uv_scale_array[base],float(base)), 0.0).a - 0.5;
+	float d_over = textureLod(_texture_array_albedo, vec3(uv * _texture_uv_scale_array[over],float(over)), 0.0).a - 0.5;
+	//float d_height = blend * d_base > (1.0 - blend) * d_over ? d_base + (blend * d_over) : (1.0 - blend) * d_base + d_over;
+	d_base = d_base * 1.0;
+	d_over = d_over * 1.0;
+	return normal * (float(d_over * blend > d_base * (1.0 - blend)));
 }
 
 void vertex() {
@@ -291,7 +281,7 @@ void vertex() {
 		
 	}
 	if (v_vertex_xz_dist < 16.0) {
-		float far_factor = 1.0 - clamp(smoothstep(12.0, 16.0, v_vertex_xz_dist), 0.0, 1.0);
+		float far_factor = 1.0 - clamp(smoothstep(10.0, 16.0, v_vertex_xz_dist), 0.0, 1.0);
 		VERTEX += get_detail_height(UV, control, v_normal, v_vertex.y) * far_factor * test_depth;
 	}
 		

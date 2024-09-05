@@ -264,14 +264,13 @@ Vector<RID> GeoClipMap::generate(const int p_size, const int p_levels) {
 
 		aabb = AABB(Vector3(0.f, 0.f, 0.f), Vector3(PATCH_VERT_RESOLUTION, 0.1f, PATCH_VERT_RESOLUTION));
 		
-		_subdivide_2(vertices, indices);
-		_subdivide_2(vertices, indices);
-		tile_mesh = _create_mesh(vertices, indices, aabb);
-		_subdivide_2(vertices, indices);
-		_subdivide_2(vertices, indices);
-		_subdivide_2(vertices, indices);
-		_subdivide_2(vertices, indices);
 		tile_mesh_d = _create_mesh(vertices, indices, aabb);
+		//_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
+		tile_mesh = _create_mesh(vertices, indices, aabb);
+		//_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
+		
 		//tile_mesh_d2 = _create_mesh(vertices, indices, aabb);
 	}
 
@@ -352,8 +351,8 @@ Vector<RID> GeoClipMap::generate(const int p_size, const int p_levels) {
 				indices[n++] = tr;
 			}
 		}
-		_subdivide_2(vertices, indices);
-		_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
 		filler_mesh = _create_mesh(vertices, indices, aabb);
 	}
 
@@ -412,8 +411,8 @@ Vector<RID> GeoClipMap::generate(const int p_size, const int p_levels) {
 			indices[n++] = start_of_horizontal + (i + 0) * 2 + 1;
 			indices[n++] = start_of_horizontal + (i + 1) * 2 + 0;
 		}
-		_subdivide_2(vertices, indices);
-		_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
 		trim_mesh = _create_mesh(vertices, indices, aabb);
 	}
 
@@ -484,12 +483,12 @@ Vector<RID> GeoClipMap::generate(const int p_size, const int p_levels) {
 			indices[n++] = start_of_vertical + tl;
 		}
 
-		_subdivide_2(vertices, indices);
-		_subdivide_2(vertices, indices);
-		_subdivide_2(vertices, indices);
-		_subdivide_2(vertices, indices);
-		_subdivide_2(vertices, indices);
-		_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
+		//_subdivide_2(vertices, indices);
 		cross_mesh = _create_mesh(vertices, indices, aabb);
 	}
 
