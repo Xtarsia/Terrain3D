@@ -232,12 +232,14 @@ vec3 get_detail_height(vec2 uv, uint control, vec3 normal, float h) {
 			, 0., 1.) + 
 			 float(!auto_shader) * float(control >>14u & 0xFFu) * 0.003921568627450; // 1./255.0
 	uv = uv * 0.5;
-	float d_base = textureLod(_texture_array_albedo, vec3(uv * _texture_uv_scale_array[base],float(base)), 0.0).a - 0.5;
-	float d_over = textureLod(_texture_array_albedo, vec3(uv * _texture_uv_scale_array[over],float(over)), 0.0).a - 0.5;
-	//float d_height = blend * d_base > (1.0 - blend) * d_over ? d_base + (blend * d_over) : (1.0 - blend) * d_base + d_over;
-	d_base = d_base * 1.0;
-	d_over = d_over * 1.0;
-	return normal * (float(d_over * blend > d_base * (1.0 - blend)));
+	float d_base = textureLod(_texture_array_albedo, vec3(uv * _texture_uv_scale_array[base],float(base)), 0.0).a * 2.0;
+	float d_over = textureLod(_texture_array_albedo, vec3(uv * _texture_uv_scale_array[over],float(over)), 0.0).a * 0.5;
+
+	// auto shader blend doesnt seem to work correctly here???
+	float d_height = blend < 0.95 ?
+		d_base - 0.7 + d_over * blend * blend :
+		d_over + 0.1 + d_base * (1.0 - blend * blend);
+	return normal * (d_height - 0.5);
 }
 
 void vertex() {
@@ -280,8 +282,8 @@ void vertex() {
 		
 		
 	}
-	if (v_vertex_xz_dist < 16.0) {
-		float far_factor = 1.0 - clamp(smoothstep(10.0, 16.0, v_vertex_xz_dist), 0.0, 1.0);
+	if (v_vertex_xz_dist < 32.0) {
+		float far_factor = 1.0 - clamp(smoothstep(12.0, 16.0, v_vertex_xz_dist), 0.0, 1.0);
 		VERTEX += get_detail_height(UV, control, v_normal, v_vertex.y) * far_factor * test_depth;
 	}
 		

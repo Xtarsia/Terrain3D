@@ -53,7 +53,7 @@ _shader_parameters = {
 "noise2_scale": 0.076,
 "noise3_scale": 0.225,
 "noise_texture": SubResource("NoiseTexture2D_bov7h"),
-"test_depth": 1.0,
+"test_depth": 0.5,
 "tri_scale_reduction": 0.3,
 "vertex_normals_distance": 128.0,
 "world_noise_height": 34.0,
@@ -99,5 +99,4 @@ metadata/_edit_lock_ = true
 [node name="LOD-1" type="Node3D" parent="Terrain3D"]
 script = ExtResource("10_nvps2")
 size = 16
-divisor = 192
 metadata/_edit_lock_ = true
