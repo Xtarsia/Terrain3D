@@ -22,6 +22,9 @@ public:
 		TRIM,
 		CROSS,
 		SEAM,
+		TILE_INNER,
+		FILLER_INNER,
+		TRIM_INNER,
 	};
 
 	static Vector<RID> generate(const int p_resolution, const int p_clipmap_levels);
