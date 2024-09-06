@@ -237,8 +237,8 @@ vec3 get_detail_height(vec2 uv, uint control, vec3 normal, float h) {
 
 	// auto shader blend doesnt seem to work correctly here???
 	float d_height = blend < 0.95 ?
-		d_base - 0.7 + d_over * blend * blend :
-		d_over + 0.1 + d_base * (1.0 - blend * blend);
+		d_base - 0.7 + d_over * blend :
+		d_over + 0.1 + d_base * (1.0 - blend);
 	return normal * (d_height - 0.5);
 }
 
@@ -283,7 +283,7 @@ void vertex() {
 		
 	}
 	if (v_vertex_xz_dist < 32.0) {
-		float far_factor = 1.0 - clamp(smoothstep(12.0, 16.0, v_vertex_xz_dist), 0.0, 1.0);
+		float far_factor = 1.0 - clamp(smoothstep(12.0, 48.0, v_vertex_xz_dist), 0.0, 1.0);
 		VERTEX += get_detail_height(UV, control, v_normal, v_vertex.y) * far_factor * test_depth;
 	}
 		

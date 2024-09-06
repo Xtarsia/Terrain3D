@@ -98,5 +98,6 @@ metadata/_edit_lock_ = true
 
 [node name="LOD-1" type="Node3D" parent="Terrain3D"]
 script = ExtResource("10_nvps2")
-size = 16
+size = 12
+divisor = 192
 metadata/_edit_lock_ = true
