@@ -199,9 +199,11 @@ Vector<RID> GeoClipMap::generate(const int p_size, const int p_levels) {
 		}
 
 		aabb = AABB(Vector3(0.f, 0.f, 0.f), Vector3(PATCH_VERT_RESOLUTION, 0.1f, PATCH_VERT_RESOLUTION));
-		tile_inner_mesh = _create_mesh(vertices, indices, aabb);
+		
 		_subdivide_half(vertices, indices);
 		tile_mesh = _create_mesh(vertices, indices, aabb);
+		_subdivide_half(vertices, indices);
+		tile_inner_mesh = _create_mesh(vertices, indices, aabb);
 	}
 
 	// Create a filler mesh
@@ -412,7 +414,8 @@ Vector<RID> GeoClipMap::generate(const int p_size, const int p_levels) {
 			indices[n++] = start_of_vertical + tr;
 			indices[n++] = start_of_vertical + tl;
 		}
-
+		_subdivide_half(vertices, indices);
+		_subdivide_half(vertices, indices);
 		cross_mesh = _create_mesh(vertices, indices, aabb);
 	}
 
