@@ -42,6 +42,7 @@ _shader_parameters = {
 "dual_scale_near": 100.0,
 "dual_scale_reduction": 0.3,
 "dual_scale_texture": 0,
+"enable_uv_projection": true,
 "height_blending": true,
 "macro_variation1": Color(0.878431, 0.862745, 0.901961, 1),
 "macro_variation2": Color(0.898039, 0.898039, 0.803922, 1),

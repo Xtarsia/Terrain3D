@@ -54,6 +54,7 @@ uniform uint _background_mode = 1u;  // NONE = 0, FLAT = 1, NOISE = 2
 uniform uint _mouse_layer = 0x80000000u; // Layer 32
 
 // Public uniforms
+uniform bool enable_uv_projection = true;
 uniform float vertex_normals_distance : hint_range(0, 1024) = 128.0;
 uniform bool height_blending = true;
 uniform float blend_sharpness : hint_range(0, 1) = 0.87;
@@ -570,7 +571,7 @@ float blend_weights(float weight, float detail) {
 }
 
 vec2 get_projected_uv(vec2 p_uv, vec2 uv) {
-	if (v_region.z < 0) {
+	if (v_region.z < 0 || !enable_uv_projection) {
 		return uv;
 	}
 	vec3 p_normal = normalize(round(gather_normal(p_uv * _region_texel_size)*0.50001));
