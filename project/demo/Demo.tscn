@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://domhm87hbhbg1" path="res://demo/components/Player.tscn" id="3_ht63y"]
 [ext_resource type="PackedScene" uid="uid://djhl3foqkj4e2" path="res://demo/components/Tunnel.tscn" id="3_kdh0b"]
 [ext_resource type="PackedScene" uid="uid://bb2lp50sjndus" path="res://demo/components/Environment.tscn" id="3_yqldq"]
-[ext_resource type="Shader" path="res://vertex_gather.gdshader" id="7_3lfxv"]
+[ext_resource type="Shader" path="res://vertex_gather_projection2.gdshader" id="7_ugjxp"]
 [ext_resource type="Terrain3DAssets" uid="uid://dal3jhw6241qg" path="res://demo/data/assets.tres" id="8_g2of2"]
 
 [sub_resource type="Gradient" id="Gradient_vr1m7"]
@@ -53,7 +53,6 @@ _shader_parameters = {
 "noise3_scale": 0.225,
 "noise_texture": SubResource("NoiseTexture2D_bov7h"),
 "tri_scale_reduction": 0.3,
-"vertex_normals_distance": 128.0,
 "world_noise_height": 34.0,
 "world_noise_lod_distance": 7500.0,
 "world_noise_max_octaves": 4,
@@ -66,7 +65,7 @@ world_background = 2
 auto_shader = true
 dual_scaling = true
 shader_override_enabled = true
-shader_override = ExtResource("7_3lfxv")
+shader_override = ExtResource("7_ugjxp")
 
 [node name="Demo" type="Node"]
 script = ExtResource("1_k7qca")

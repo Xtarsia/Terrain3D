@@ -54,7 +54,7 @@ uniform uint _mouse_layer = 0x80000000u; // Layer 32
 
 // Public uniforms
 uniform bool enable_uv_projection = true;
-uniform float vertex_normals_distance : hint_range(0, 1024) = 128.0;
+//uniform float vertex_normals_distance : hint_range(0, 1024) = 128.0;
 uniform bool height_blending = true;
 uniform float blend_sharpness : hint_range(0, 1) = 0.87;
 uniform float auto_slope : hint_range(0, 10) = 1.0;
@@ -94,7 +94,6 @@ varying float v_vertex_xz_dist;
 varying flat ivec3 v_region;
 varying flat vec2 v_uv_offset;
 varying flat vec2 v_uv2_offset;
-varying vec3 v_normal;
 
 ////////////////////////
 // General Functions
@@ -266,34 +265,13 @@ void vertex() {
 			(hole || (_background_mode == 0u && (get_region_uv(UV - _region_texel_size) & v_region).z < 0))) {
 		VERTEX.x = 0. / 0.;
 	} else {
-		// Set final vertex height & calculate vertex normals. ONE lookup!
-		vec3 region_uv = get_real_region_uv2(UV2);
-		vec4 texels = vec4(0.0);
-		float h = 0.0, u = 0.0, v = 0.0;
-		if (region_uv.z >= 0.0) {
-			// Ensure we do not overshoot by reducing the loopup range by 1 texel
-			region_uv.xy *= 1.0 - _region_texel_size;
-			// Generate index to select correct height value to match collision
-			const mat2 texel_map = mat2(vec2(3.0, 0.0), vec2(2.0, 1.0));
-			int index = int(texel_map[int(region_uv.x + 0.5)][int(region_uv.y + 0.5)]);
-			// Center the lookup range, account for floating point error.
-			region_uv.xy += _region_texel_size * 0.4989;
-			texels = textureGather(_height_maps, region_uv);
-			VERTEX.y = texels[index];
-			// Normal is always calculated based on bottom left.
-			h = texels[3];
-			u = texels[2];
-			v = texels[0];
-		}
+		// Set final vertex height
+		VERTEX.y = texelFetch(_height_maps, v_region, 0).r;
 		// world noise
 		if (_background_mode == 2u) {
 			float noise_height = get_noise_height(UV2);
 			VERTEX.y += noise_height;
-			h += noise_height;
-			u += get_noise_height(UV2 + vec2(_region_texel_size, 0.0));
-			v += get_noise_height(UV2 + vec2(0.0, _region_texel_size));
 		}
-		v_normal = vec3(h - u, _vertex_spacing, h - v);
 		v_vertex.y = VERTEX.y;
 	}
 	
@@ -316,6 +294,9 @@ void vertex() {
 ////////////////////////
 
 // 1 lookup
+// Utilises textureGather to generate a normal value.bool
+// Some UV rescaling and offset ensures that none of the samples
+// will ever be beyond the edge of the any given region.
 vec3 gather_normal(vec2 uv) {
 	vec3 gather_uv = get_real_region_uv2(uv * _region_texel_size + _region_texel_size);
 	// ensure edge samples dont overshoot, align uv range over
@@ -511,6 +492,9 @@ vec2 project_uv_from_normal(vec3 normal) {
 	if (v_region.z < 0 || !enable_uv_projection) {
 		return v_vertex.xz;
 	}
+	// rounding like this gets a small number of directional divisions
+	// without having too much granularity, which breaks texture continuity
+	// has to be slightly larger than 0.5 to avoid rounding to vec3(0)!
 	vec3 p_normal = normalize(round(normal*0.50001));
 	vec3 p_tangent = normalize(cross(p_normal, vec3(0, 0, 1)));
 	return vec2(dot(v_vertex,p_tangent),dot(v_vertex,normalize(cross(p_tangent,p_normal))));
@@ -530,7 +514,9 @@ void fragment() {
 	vec2 texel_pos = fract(uv_floor * 0.5) * 2.0;
 	// Create a cross hatch grid of alternating 0/1 horizontal and vertical stripes 1 unit wide in XY 
 	vec4 mirror = vec4(texel_pos, 1.0 - texel_pos);
+	
 	// Bilinear interpolation of difference of uv and floor(uv)
+	// This is shared so has to always be calculated.
 	vec2 weights1 = uv - uv_floor;
 	weights1 = mix(weights1, vec2(1.0) - weights1, mirror.xy);
 	vec2 weights0 = vec2(1.0) - weights1;
@@ -567,7 +553,6 @@ void fragment() {
 	}
 	// world noise normals
 	if (region_uv.z < 0.0 && _background_mode == 2u) {
-		//w_normal = v_normal;
 		float h = get_noise_height(uv2);
 		float u = get_noise_height(uv2 + vec2(_region_texel_size, 0.0));
 		float v = get_noise_height(uv2 + vec2(0.0, _region_texel_size));
@@ -587,8 +572,8 @@ void fragment() {
 	vec4 albedo_height;
 	vec4 normal_rough;
 	
-	// The size of 1 control map texel is less than 1 fragment quad, 
-	// skip bilinear blend and do single lookups.
+	// The size of 1 control map texel is less than 1 fragment, 
+	// so we can skip the bilinear blend and do single lookups.
 	if (ddxy_length > 2.0) {
 		indexUV[0] = get_region_uv(uv_floor + mirror.xy);
 		control[0] = texelFetch(_control_maps, indexUV[0], 0).r;
@@ -624,8 +609,8 @@ void fragment() {
 		float noise_weight = smoothstep(1.0,0.5,v_vertex_xz_dist * 0.025);
 		if (noise_weight > 0.0) {
 			vec2 weights1 = uv - uv_floor;
-			//float blend_noise = (fast_noise(rotate(uv, -0.7, 0.3) * 12.0) - 0.5) * noise_weight;
-			float blend_noise = (texture(noise_texture, uv*noise3_scale).r - 0.5) * noise_weight;
+			float blend_noise = (fast_noise(rotate(uv, -0.7, 0.3) * 12.0) - 0.5) * noise_weight;
+			//float blend_noise = (texture(noise_texture, uv*noise3_scale).r - 0.5) * noise_weight;
 			weights1.x += blend_noise * parabola(weights1.x);
 			weights1.y += blend_noise * parabola(weights1.y);
 			weights1 = mix(weights1, vec2(1.0) - weights1, mirror.xy);
