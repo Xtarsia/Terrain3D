@@ -53,7 +53,7 @@ public:
 	void append_location(const Vector2i &p_region_loc, const int p_mesh_id, const TypedArray<Transform3D> &p_xforms,
 			const TypedArray<Color> &p_colors, const bool p_clear = false, const bool p_update = true);
 	void append_region(const Ref<Terrain3DRegion> &p_region, const int p_mesh_id, const TypedArray<Transform3D> &p_xforms,
-			const TypedArray<Color> &p_colors, const bool p_clear = false, const bool p_update = true);
+			const TypedArray<Color> &p_colors, const Vector2i p_region_loc, const bool p_clear = false, const bool p_update = true);
 	void update_transforms(const AABB &p_aabb);
 	void copy_paste_dfr(const Terrain3DRegion *p_src_region, const Rect2 &p_src_rect, const Terrain3DRegion *p_dst_region);
 

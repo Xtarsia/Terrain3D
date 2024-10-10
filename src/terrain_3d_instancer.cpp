@@ -99,6 +99,10 @@ void Terrain3DInstancer::_update_mmis(const Vector2i &p_region_loc, const int p_
 				LOG(WARN, "Terrain3D parent nodes have non-zero transform. Resetting instancer global_transform");
 				mmi->set_global_transform(Transform3D());
 			}
+			Transform3D t = mmi->get_global_transform();
+			int region_size = region->get_region_size();
+			t.origin.x += region_loc.x * region_size;
+			t.origin.z += region_loc.y * region_size;
 		}
 		LOG(DEBUG, "mm: ", mesh_dict);
 	}
@@ -461,13 +465,14 @@ void Terrain3DInstancer::append_location(const Vector2i &p_region_loc, const int
 		LOG(WARN, "Null region found at: ", p_region_loc);
 		return;
 	}
-	append_region(region, p_mesh_id, p_xforms, p_colors, p_clear, p_update);
+	append_region(region, p_mesh_id, p_xforms, p_colors, p_region_loc, p_clear, p_update);
 }
 
 void Terrain3DInstancer::append_region(const Ref<Terrain3DRegion> &p_region, const int p_mesh_id,
-		const TypedArray<Transform3D> &p_xforms, const TypedArray<Color> &p_colors, const bool p_clear, const bool p_update) {
+		const TypedArray<Transform3D> &p_xforms, const TypedArray<Color> &p_colors, const Vector2i p_region_loc, const bool p_clear, const bool p_update) {
 	Dictionary mesh_dict = p_region->get_multimeshes();
-
+	int region_size = p_region->get_region_size();
+	Vector2 global_to_local_offset = Vector2(p_region_loc.x * region_size, p_region_loc.y * region_size);
 	// Collect old data
 	TypedArray<Transform3D> old_xforms;
 	TypedArray<Color> old_colors;
@@ -498,7 +503,10 @@ void Terrain3DInstancer::append_region(const Ref<Terrain3DRegion> &p_region, con
 		mm->set_instance_color(i, old_colors[i]);
 	}
 	for (int i = 0; i < p_xforms.size(); i++) {
-		mm->set_instance_transform(i + old_count, p_xforms[i]);
+		Transform3D t = p_xforms[i];
+		t.origin.x -= global_to_local_offset.x;
+		t.origin.z -= global_to_local_offset.y;
+		mm->set_instance_transform(i + old_count, t);
 		mm->set_instance_color(i + old_count, p_colors[i]);
 	}
 
@@ -600,7 +608,7 @@ void Terrain3DInstancer::copy_paste_dfr(const Terrain3DRegion *p_src_region, con
 				}
 			}
 		}
-		append_region(Ref<Terrain3DRegion>(p_dst_region), mesh_id, xforms, colors, false, false);
+		append_region(Ref<Terrain3DRegion>(p_dst_region), mesh_id, xforms, colors, p_dst_region->get_location(), false, false);
 	}
 }
 
