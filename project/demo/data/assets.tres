@@ -1,9 +1,13 @@
-[gd_resource type="Terrain3DAssets" load_steps=9 format=3 uid="uid://dal3jhw6241qg"]
+[gd_resource type="Terrain3DAssets" load_steps=15 format=3 uid="uid://dal3jhw6241qg"]
 
 [ext_resource type="Texture2D" uid="uid://br7bfxcxh60df" path="res://demo/assets/textures/rock030_alb_ht.png" id="1_v81ad"]
 [ext_resource type="Texture2D" uid="uid://cr72kjil43vgj" path="res://demo/assets/textures/rock030_nrm_rgh.png" id="2_72dup"]
 [ext_resource type="Texture2D" uid="uid://ddprscrpsofah" path="res://demo/assets/textures/ground037_alb_ht.png" id="3_g8f2m"]
 [ext_resource type="Texture2D" uid="uid://c1ots7w6i0i1q" path="res://demo/assets/textures/ground037_nrm_rgh.png" id="4_aw5y1"]
+[ext_resource type="Texture2D" uid="uid://cq65b5atrrmo" path="res://rocks2/packed_albedo_height.png" id="5_g5bmd"]
+[ext_resource type="Texture2D" uid="uid://bqbe60w23awib" path="res://rocks2/packed_normal_roughness.png" id="6_bcoxo"]
+[ext_resource type="Texture2D" uid="uid://cn1rfynoywlc" path="res://dirt/packed_albedo_height.png" id="7_rbor3"]
+[ext_resource type="Texture2D" uid="uid://dtqirhpvolguj" path="res://dirt/packed_normal_roughness.png" id="8_viptx"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aubfq"]
 transparency = 4
@@ -26,6 +30,8 @@ name = "Rock"
 albedo_color = Color(1.596, 1.56, 1.5, 1)
 albedo_texture = ExtResource("1_v81ad")
 normal_texture = ExtResource("2_72dup")
+uv_scale = 0.223
+detiling = 0.208
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_od0q7"]
 name = "Grass"
@@ -33,7 +39,26 @@ id = 1
 albedo_color = Color(0.67451, 0.74902, 0.686275, 1)
 albedo_texture = ExtResource("3_g8f2m")
 normal_texture = ExtResource("4_aw5y1")
+uv_scale = 0.361
+detiling = 0.231
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_2duyt"]
+name = "assets"
+id = 2
+albedo_color = Color(1.062, 1.081, 1.11, 1)
+albedo_texture = ExtResource("5_g5bmd")
+normal_texture = ExtResource("6_bcoxo")
+uv_scale = 0.807
+detiling = 0.685
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_m75hl"]
+name = "assets"
+id = 3
+albedo_color = Color(0.787, 0.857, 0.841, 1)
+albedo_texture = ExtResource("7_rbor3")
+normal_texture = ExtResource("8_viptx")
+detiling = 0.423
 
 [resource]
 mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_dw1mh")])
-texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_mup2f"), SubResource("Terrain3DTextureAsset_od0q7")])
+texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_mup2f"), SubResource("Terrain3DTextureAsset_od0q7"), SubResource("Terrain3DTextureAsset_2duyt"), SubResource("Terrain3DTextureAsset_m75hl")])
