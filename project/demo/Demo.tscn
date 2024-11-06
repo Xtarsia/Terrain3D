@@ -1,33 +1,14 @@
-[gd_scene load_steps=17 format=3 uid="uid://chol2xlfbq7cu"]
+[gd_scene load_steps=14 format=3 uid="uid://chol2xlfbq7cu"]
 
 [ext_resource type="Script" path="res://demo/src/DemoScene.gd" id="1_k7qca"]
 [ext_resource type="PackedScene" uid="uid://d2jihfohphuue" path="res://demo/components/UI.tscn" id="2_nqak5"]
 [ext_resource type="PackedScene" uid="uid://dwnhqfjq7v1pq" path="res://demo/components/Borders.tscn" id="3_cw38j"]
 [ext_resource type="PackedScene" uid="uid://domhm87hbhbg1" path="res://demo/components/Player.tscn" id="3_ht63y"]
 [ext_resource type="PackedScene" uid="uid://djhl3foqkj4e2" path="res://demo/components/Tunnel.tscn" id="3_kdh0b"]
+[ext_resource type="PackedScene" uid="uid://bb2lp50sjndus" path="res://demo/components/Environment.tscn" id="4_nae4d"]
 [ext_resource type="Shader" path="res://test.gdshader" id="7_ok5f1"]
 [ext_resource type="Terrain3DAssets" uid="uid://dal3jhw6241qg" path="res://demo/data/assets.tres" id="8_g2of2"]
 [ext_resource type="Script" path="res://demo/high_density_mesh.gd" id="9_h7owm"]
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_vibap"]
-sky_top_color = Color(0.192157, 0.282353, 0.509804, 1)
-sky_horizon_color = Color(0.505882, 0.615686, 0.709804, 1)
-ground_bottom_color = Color(0.211765, 0.313726, 0.552941, 1)
-ground_horizon_color = Color(0.505882, 0.615686, 0.709804, 1)
-ground_curve = 0.13
-
-[sub_resource type="Sky" id="Sky_srg7c"]
-sky_material = SubResource("ProceduralSkyMaterial_vibap")
-
-[sub_resource type="Environment" id="Environment_8jcgm"]
-background_mode = 2
-sky = SubResource("Sky_srg7c")
-ambient_light_source = 3
-ambient_light_color = Color(0.55, 0.55, 0.55, 1)
-ambient_light_sky_contribution = 0.3
-tonemap_mode = 3
-
-[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_0gcl0"]
 
 [sub_resource type="Gradient" id="Gradient_vr1m7"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -72,7 +53,7 @@ _shader_parameters = {
 "noise3_scale": 0.225,
 "noise_texture": SubResource("NoiseTexture2D_bov7h"),
 "texture_height_data": null,
-"tri_scale_reduction": 0.3,
+"tri_scale_reduction": 0.15,
 "vertex_normals_distance": 128.0,
 "world_noise_height": 34.0,
 "world_noise_lod_distance": 7500.0,
@@ -93,23 +74,14 @@ script = ExtResource("1_k7qca")
 
 [node name="UI" parent="." instance=ExtResource("2_nqak5")]
 
-[node name="Environment" type="Node3D" parent="."]
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
-environment = SubResource("Environment_8jcgm")
-camera_attributes = SubResource("CameraAttributesPractical_0gcl0")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Environment"]
-transform = Transform3D(-0.866026, -0.353553, 0.353553, 0, 0.707106, 0.707107, -0.5, 0.612372, -0.612372, 0, 0, 0)
-light_color = Color(1, 0.989093, 0.98133, 1)
-shadow_enabled = true
-shadow_blur = 2.0
-directional_shadow_blend_splits = true
-directional_shadow_max_distance = 256.0
-
 [node name="Borders" parent="." instance=ExtResource("3_cw38j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 512, -3, 512)
 collision_mask = 3
+
+[node name="Environment" parent="." instance=ExtResource("4_nae4d")]
+
+[node name="DirectionalLight3D" parent="Environment" index="1"]
+transform = Transform3D(-0.866026, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, 0.433013, -0.75, 0, 0, 0)
 
 [node name="Tunnel" parent="." instance=ExtResource("3_kdh0b")]
 
@@ -124,26 +96,22 @@ collision_mask = 3
 top_level = true
 metadata/_edit_lock_ = true
 
-[node name="High_Density_mesh2" type="Node3D" parent="Terrain3D"]
+[node name="L-1" type="Node3D" parent="Terrain3D"]
+script = ExtResource("9_h7owm")
+size = 48
+divisor = 192
+offset = 0.15
+
+[node name="L-2" type="Node3D" parent="Terrain3D"]
 script = ExtResource("9_h7owm")
 size = 32
 divisor = 256
-offset = 0.25
-
-[node name="High_Density_mesh3" type="Node3D" parent="Terrain3D"]
-script = ExtResource("9_h7owm")
-size = 16
-divisor = 256
 offset = 0.35
 
-[node name="High_Density_mesh4" type="Node3D" parent="Terrain3D"]
+[node name="L-3" type="Node3D" parent="Terrain3D"]
 script = ExtResource("9_h7owm")
-size = 8
-divisor = 256
+size = 16
+divisor = 384
 offset = 0.45
 
-[node name="High_Density_mesh5" type="Node3D" parent="Terrain3D"]
-script = ExtResource("9_h7owm")
-size = 4
-divisor = 256
-offset = 0.55
+[editable path="Environment"]

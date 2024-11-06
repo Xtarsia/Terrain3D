@@ -331,13 +331,12 @@ void vertex() {
 
 	// UV coordinates in region space + texel offset. Values are 0 to 1 within regions
 	UV2 = fma(UV, vec2(_region_texel_size), vec2(0.5 * _region_texel_size));
-	
+
 	// dirty stand in for real negative LOD  clipmap mesh punches hole in each level to avoid overlaps
-	bool punch_1 = (v_vertex_xz_dist < 13.5) && VERTEX.y < 0.1;
-	bool punch_2 = (v_vertex_xz_dist < 7.0 ||  v_vertex_xz_dist > 15.0) && VERTEX.y < 0.3 && VERTEX.y > 0.2;
-	bool punch_3 = (v_vertex_xz_dist < 3.0 ||  v_vertex_xz_dist > 7.5) && VERTEX.y < 0.4 && VERTEX.y > 0.3;
-	bool punch_4 = (v_vertex_xz_dist < 1.0 ||  v_vertex_xz_dist > 3.125) && VERTEX.y < 0.5 && VERTEX.y > 0.4;
-	bool punch_5 = (v_vertex_xz_dist > 1.075) && VERTEX.y > 0.5;
+	bool punch_1 = (v_vertex_xz_dist < 22.25) && VERTEX.y < 0.1;
+	bool punch_2 = (v_vertex_xz_dist < 14.5 ||  v_vertex_xz_dist > 24.0) && VERTEX.y < 0.2 && VERTEX.y > 0.1;
+	bool punch_3 = (v_vertex_xz_dist < 6.775 ||  v_vertex_xz_dist > 15.0) && VERTEX.y < 0.4 && VERTEX.y > 0.3;
+	bool punch_4 = (v_vertex_xz_dist > 7.0) &&  VERTEX.y > 0.4;
 
 	// Discard vertices for Holes. 1 lookup
 	v_region = get_region_uv(UV);
@@ -346,7 +345,7 @@ void vertex() {
 
 	// Show holes to all cameras except mouse camera (on exactly 1 layer)
 	if ( !(CAMERA_VISIBLE_LAYERS == _mouse_layer) &&
-			(punch_1 || punch_2 || punch_3 || punch_4 || punch_5 ||
+			(punch_1 || punch_2 || punch_3 || punch_4 ||
 			hole || (_background_mode == 0u && (get_region_uv(UV - _region_texel_size) & v_region).z < 0))) {
 		VERTEX.x = 0. / 0.;
 	} else {
@@ -401,23 +400,22 @@ void vertex() {
 			weights1 = mix(weights1, vec2(1.0) - weights1, mirror.xy);
 			vec2 weights0 = vec2(1.0) - weights1;
 			// Adjust final weights by texture's height/depth + noise. 1 lookup
-			
+
 			vec4 weights;
 			weights.x = weights0.x * weights0.y;
 			weights.y = weights0.x * weights1.y;
 			weights.z = weights1.x * weights0.y;
 			weights.w = weights1.x * weights1.y;
-			float weight_sum = weights.x + weights.y + weights.z + weights.w;
-			float weight_inv = 1.0 / weight_sum;
+			weights *= 1.0 / (weights.x + weights.y + weights.z + weights.w);
 
 			// Weighted average of albedo & height
-			vec4 albedo_height = weight_inv * (
+			vec4 albedo_height =
 				mat[0].alb_ht * weights.x +
 				mat[1].alb_ht * weights.y +
 				mat[2].alb_ht * weights.z +
-				mat[3].alb_ht * weights.w ) - 0.5;
-				
-			VERTEX += albedo_height.a * v_normal * smoothstep(1.0, 0.0, v_vertex_xz_dist / 32.) * 0.25;
+				mat[3].alb_ht * weights.w - 0.5;
+
+			VERTEX += albedo_height.a * v_normal * smoothstep(1.0, 0.5, v_vertex_xz_dist / 32.) * 0.333;
 		}
 
 		// Due to a bug caused by the GPUs linear interpolation across edges of region maps,

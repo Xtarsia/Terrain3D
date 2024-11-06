@@ -396,7 +396,7 @@ func update_decal() -> void:
 				decal.modulate.a = 1.0
 	decal.size.y = max(1000, decal.size.y)
 	decal.albedo_mix = 1.0
-	decal.cull_mask = 1 << ( plugin.terrain.get_mouse_layer() - 1 )
+	#decal.cull_mask = 1 << ( plugin.terrain.get_mouse_layer() - 1 )
 	decal_timer.start()
 
 	for gradient_decal in gradient_decals:

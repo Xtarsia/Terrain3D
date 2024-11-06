@@ -50,8 +50,9 @@ func _build(_btn:bool = false) -> void:
 	RenderingServer.mesh_add_surface_from_arrays(rd_mesh, RenderingServer.PRIMITIVE_TRIANGLES, lod_mesh.surface_get_arrays(0))
 	RenderingServer.mesh_surface_set_material(rd_mesh, 0, mat)
 	rd_instance = RenderingServer.instance_create2(rd_mesh, scenario)
-	RenderingServer.instance_set_extra_visibility_margin(rd_instance, 5000.0)
-	RenderingServer.instance_geometry_set_cast_shadows_setting(rd_instance, RenderingServer.SHADOW_CASTING_SETTING_ON)
+	RenderingServer.instance_set_extra_visibility_margin(rd_instance, 1000.0)
+	RenderingServer.instance_geometry_set_cast_shadows_setting(rd_instance, RenderingServer.SHADOW_CASTING_SETTING_OFF)
+	RenderingServer.instance_set_visible(rd_instance, self.visible)
 	subdiv = true
 	
 func _ready():
