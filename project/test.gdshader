@@ -361,7 +361,7 @@ void vertex() {
 			_vertex_spacing,
 			v_vertex.y - v)
 		);
-		if (CAMERA_VISIBLE_LAYERS != _mouse_layer && v_vertex_xz_dist / 32. < 1.0) {
+		if (CAMERA_VISIBLE_LAYERS != _mouse_layer && v_vertex_xz_dist / 48. < 1.0) {
 		// Idenfity 4 vertices surrounding this pixel
 			vec2 texel_pos = UV;
 			highp vec2 texel_pos_floor = floor(UV);
@@ -415,7 +415,7 @@ void vertex() {
 				mat[2].alb_ht * weights.z +
 				mat[3].alb_ht * weights.w - 0.5;
 
-			VERTEX += albedo_height.a * v_normal * smoothstep(1.0, 0.5, v_vertex_xz_dist / 32.) * 0.333;
+			VERTEX += albedo_height.a * v_normal * smoothstep(1.0, 0.5, v_vertex_xz_dist / 48.) * 0.333;
 		}
 
 		// Due to a bug caused by the GPUs linear interpolation across edges of region maps,
