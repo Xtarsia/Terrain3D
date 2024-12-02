@@ -8,7 +8,9 @@
 [ext_resource type="Texture2D" uid="uid://lcpaks7wn45b" path="res://rock/packed_normal_roughness.png" id="6_mq124"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aubfq"]
-transparency = 4
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
 cull_mode = 2
 vertex_color_use_as_albedo = true
 backlight_enabled = true
@@ -20,6 +22,7 @@ distance_fade_max_distance = 480.0
 [sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_dw1mh"]
 height_offset = 0.5
 density = 10.0
+visibility_range = 0.0
 material_override = SubResource("StandardMaterial3D_aubfq")
 generated_type = 1
 

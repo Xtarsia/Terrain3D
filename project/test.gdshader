@@ -18,8 +18,6 @@ render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlic
  *
  */
 
-uniform sampler2D texture_height_data : hint_default_black, filter_linear, repeat_disable;
-
 // Private uniforms
 
 uniform float _region_size = 1024.0;
@@ -335,8 +333,8 @@ void vertex() {
 	// dirty stand in for real negative LOD  clipmap mesh punches hole in each level to avoid overlaps
 	bool punch_1 = (v_vertex_xz_dist < 22.25) && VERTEX.y < 0.1;
 	bool punch_2 = (v_vertex_xz_dist < 14.5 ||  v_vertex_xz_dist > 24.0) && VERTEX.y < 0.2 && VERTEX.y > 0.1;
-	bool punch_3 = (v_vertex_xz_dist < 6.775 ||  v_vertex_xz_dist > 15.0) && VERTEX.y < 0.4 && VERTEX.y > 0.3;
-	bool punch_4 = (v_vertex_xz_dist > 7.0) &&  VERTEX.y > 0.4;
+	bool punch_3 = (v_vertex_xz_dist < 6.775 ||  v_vertex_xz_dist > 15.0) && VERTEX.y < 0.3 && VERTEX.y > 0.2;
+	bool punch_4 = (v_vertex_xz_dist > 7.5) &&  VERTEX.y > 0.3;
 
 	// Discard vertices for Holes. 1 lookup
 	v_region = get_region_uv(UV);
@@ -345,7 +343,7 @@ void vertex() {
 
 	// Show holes to all cameras except mouse camera (on exactly 1 layer)
 	if ( !(CAMERA_VISIBLE_LAYERS == _mouse_layer) &&
-			(punch_1 || punch_2 || punch_3 || punch_4 ||
+			(//punch_1 || punch_2 || punch_3 || punch_4 ||
 			hole || (_background_mode == 0u && (get_region_uv(UV - _region_texel_size) & v_region).z < 0))) {
 		VERTEX.x = 0. / 0.;
 	} else {
@@ -415,7 +413,7 @@ void vertex() {
 				mat[2].alb_ht * weights.z +
 				mat[3].alb_ht * weights.w - 0.5;
 
-			VERTEX += albedo_height.a * v_normal * smoothstep(1.0, 0.5, v_vertex_xz_dist / 48.) * 0.333;
+			//VERTEX += albedo_height.a * v_normal * smoothstep(1.0, 0.5, v_vertex_xz_dist / 48.) * 0.333;
 		}
 
 		// Due to a bug caused by the GPUs linear interpolation across edges of region maps,
@@ -618,6 +616,13 @@ void fragment() {
 	// Calculate Terrain Normals. 4 lookups
 	vec3 w_tangent, w_binormal;
 	vec3 w_normal = get_normal(uv2, w_tangent, w_binormal);
+
+	// screenspace normals
+	vec3 s_normal = normalize(cross(dFdy(VERTEX), dFdx(VERTEX)));
+	w_normal = mat3(INV_VIEW_MATRIX) * s_normal;
+	//w_normal = vec3(0,1,0);
+	w_tangent = cross(w_normal, vec3(0, 0, 1));
+	w_binormal = cross(w_normal, w_tangent);
 	NORMAL = mat3(VIEW_MATRIX) * w_normal;
 	TANGENT = mat3(VIEW_MATRIX) * w_tangent;
 	BINORMAL = mat3(VIEW_MATRIX) * w_binormal;
@@ -702,15 +707,13 @@ void fragment() {
 	// Wetness/roughness modifier, converting 0-1 range to -1 to 1 range
 	float roughness = fma(color_map.a - 0.5, 2.0, normal_rough.a);
 
-	if (CAMERA_VISIBLE_LAYERS != _mouse_layer) {
 	// Apply PBR
 	ALBEDO = albedo_height.rgb * color_map.rgb * macrov;
 	ROUGHNESS = roughness;
 	SPECULAR = 1. - normal_rough.a;
 	NORMAL_MAP = normal_rough.rgb;
 	NORMAL_MAP_DEPTH = 1.0;
-	} else {
-		ALBEDO = vec3(albedo_height.a);
-	}
+
+	//ALBEDO = COLOR.bbb;
 
 }

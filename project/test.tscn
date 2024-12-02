@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://bor55uifyyahp"]
+
+[ext_resource type="Script" path="res://test.gd" id="1_v34wo"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_sm14x"]
+size = Vector2(1, 1)
+subdivide_width = 63
+subdivide_depth = 63
+
+[node name="Node3D" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.09375, 0, 16.0938)
+mesh = SubResource("PlaneMesh_sm14x")
+script = ExtResource("1_v34wo")

@@ -1,0 +1,1477 @@
+[gd_scene load_steps=11 format=3 uid="uid://ddurikvdvmiim"]
+
+[ext_resource type="Script" path="res://node_3d.gd" id="1_xrh50"]
+[ext_resource type="Material" uid="uid://bag8kj6eketdj" path="res://clipmap.material" id="2_t0m82"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_0ylal"]
+material = ExtResource("2_t0m82")
+size = Vector2(16, 16)
+subdivide_width = 15
+subdivide_depth = 15
+center_offset = Vector3(8, 0, 8)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_20ccf"]
+material = ExtResource("2_t0m82")
+size = Vector2(2, 66)
+subdivide_width = 1
+subdivide_depth = 65
+center_offset = Vector3(1, 0, 33)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_c267n"]
+material = ExtResource("2_t0m82")
+size = Vector2(66, 2)
+subdivide_width = 65
+subdivide_depth = 1
+center_offset = Vector3(33, 0, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_xymog"]
+material = ExtResource("2_t0m82")
+size = Vector2(68, 2)
+subdivide_width = 67
+subdivide_depth = 1
+center_offset = Vector3(34, 0, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_yvg7f"]
+material = ExtResource("2_t0m82")
+size = Vector2(2, 68)
+subdivide_width = 1
+subdivide_depth = 67
+center_offset = Vector3(1, 0, 34)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_m6b41"]
+material = ExtResource("2_t0m82")
+subdivide_width = 1
+subdivide_depth = 1
+center_offset = Vector3(1, 0, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_x6nsi"]
+material = ExtResource("2_t0m82")
+size = Vector2(4, 16)
+subdivide_width = 3
+subdivide_depth = 15
+center_offset = Vector3(2, 0, 8)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_s4wx5"]
+material = ExtResource("2_t0m82")
+size = Vector2(16, 4)
+subdivide_width = 15
+subdivide_depth = 3
+center_offset = Vector3(8, 0, 2)
+
+[node name="16_size" type="Node3D"]
+top_level = true
+visible = false
+
+[node name="L0" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4716, 0, -3588)
+script = ExtResource("1_xrh50")
+snap_step = 2.0
+cam = NodePath("")
+
+[node name="TILE" type="MeshInstance3D" parent="L0"]
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE2" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -16)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE3" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, -16)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE4" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, 0)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE5" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 16)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE6" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 16)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE7" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 0)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE8" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, -16)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE9" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, -32)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE10" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -32)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE11" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, -32)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE12" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, -32)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE13" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, -16)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE14" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, 0)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE15" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, 16)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE16" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, 16)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TRIM_LO1" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, -32)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_20ccf")
+
+[node name="TRIM_LO2" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_c267n")
+
+[node name="TRIM_LO3" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_20ccf")
+
+[node name="TRIM_LO4" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 32)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_c267n")
+
+[node name="E1" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E2" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E3" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="E4" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="C1" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C2" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C3" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C4" type="MeshInstance3D" parent="L0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="L1" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 4716, 0, -3588)
+visible = false
+script = ExtResource("1_xrh50")
+snap_step = 4.0
+cam = NodePath("")
+
+[node name="TILE" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE12" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE2" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE7" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE8" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE9" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE3" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE6" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE5" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE4" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE10" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE11" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="FILL1" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL2" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL3" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="FILL4" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="E1" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E2" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -38)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E3" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="E4" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="C1" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C2" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0, -38)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C3" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C4" type="MeshInstance3D" parent="L1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -38)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="L2" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 4720, 0, -3592)
+visible = false
+script = ExtResource("1_xrh50")
+snap_step = 8.0
+cam = NodePath("")
+
+[node name="TILE" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE12" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE2" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE7" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE8" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE9" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE3" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE6" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE5" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE4" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE10" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE11" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="E1" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E2" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E3" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="E4" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="C1" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C2" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, 36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C3" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C4" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, 36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="FILL1" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL2" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL3" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="FILL4" type="MeshInstance3D" parent="L2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="L3" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+transform = Transform3D(8, 0, 0, 0, 8, 0, 0, 0, 8, 4720, 0, -3584)
+visible = false
+script = ExtResource("1_xrh50")
+snap_step = 16.0
+cam = NodePath("")
+
+[node name="TILE" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE12" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE2" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE7" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE8" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE9" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE3" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE6" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE5" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE4" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE10" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE11" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="E1" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E2" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E3" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="E4" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="C1" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C2" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C3" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C4" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="FILL1" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL2" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL3" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="FILL4" type="MeshInstance3D" parent="L3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="L4" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+transform = Transform3D(16, 0, 0, 0, 16, 0, 0, 0, 16, 4704, 0, -3584)
+visible = false
+script = ExtResource("1_xrh50")
+cam = NodePath("")
+
+[node name="TILE" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE12" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE2" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE7" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE8" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE9" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE3" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE6" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE5" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE4" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE10" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE11" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="E1" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E2" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E3" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="E4" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="C1" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C2" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C3" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C4" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="FILL1" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL2" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL3" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="FILL4" type="MeshInstance3D" parent="L4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="L5" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+transform = Transform3D(32, 0, 0, 0, 32, 0, 0, 0, 32, 4736, 0, -3584)
+visible = false
+script = ExtResource("1_xrh50")
+snap_step = 64.0
+cam = NodePath("")
+
+[node name="TILE" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE12" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE2" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE7" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE8" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE9" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE3" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE6" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE5" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE4" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE10" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE11" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="E1" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E2" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E3" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="E4" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="C1" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C2" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C3" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C4" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="FILL1" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL2" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL3" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="FILL4" type="MeshInstance3D" parent="L5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="L6" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+transform = Transform3D(64, 0, 0, 0, 64, 0, 0, 0, 64, 4736, 0, -3584)
+visible = false
+script = ExtResource("1_xrh50")
+snap_step = 128.0
+cam = NodePath("")
+
+[node name="TILE" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE12" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE2" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE7" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE8" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE9" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE3" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE6" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE5" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE4" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE10" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE11" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="E1" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E2" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E3" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="E4" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="C1" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C2" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C3" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C4" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="FILL1" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL2" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL3" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="FILL4" type="MeshInstance3D" parent="L6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="L7" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+transform = Transform3D(128, 0, 0, 0, 128, 0, 0, 0, 128, 4608, 0, -3584)
+visible = false
+script = ExtResource("1_xrh50")
+snap_step = 256.0
+cam = NodePath("")
+
+[node name="TILE" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE12" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE2" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE7" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE8" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE9" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE3" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE6" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE5" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE4" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE10" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE11" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="E1" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E2" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E3" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="E4" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="C1" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C2" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C3" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C4" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="FILL1" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL2" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL3" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="FILL4" type="MeshInstance3D" parent="L7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="L8" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+transform = Transform3D(256, 0, 0, 0, 256, 0, 0, 0, 256, 4608, 0, -3584)
+visible = false
+script = ExtResource("1_xrh50")
+snap_step = 512.0
+cam = NodePath("")
+
+[node name="TILE" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE12" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE2" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE7" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE8" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE9" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE3" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE6" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE5" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE4" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE10" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE11" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="E1" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E2" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -38)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E3" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="E4" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="C1" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C2" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0, -38)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C3" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C4" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -38)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="FILL1" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL2" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL3" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="FILL4" type="MeshInstance3D" parent="L8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="L9" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+transform = Transform3D(512, 0, 0, 0, 512, 0, 0, 0, 512, 5120, 0, -4096)
+visible = false
+script = ExtResource("1_xrh50")
+snap_step = 1024.0
+cam = NodePath("")
+
+[node name="TILE" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE12" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE2" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE7" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE8" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE9" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE3" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE6" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE5" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE4" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE10" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE11" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="E1" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E2" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E3" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="E4" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="C1" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C2" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C3" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -38, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C4" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="FILL1" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL2" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL3" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="FILL4" type="MeshInstance3D" parent="L9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="L10" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+transform = Transform3D(1024, 0, 0, 0, 1024, 0, 0, 0, 1024, 4096, 0, -4096)
+visible = false
+script = ExtResource("1_xrh50")
+snap_step = 2048.0
+cam = NodePath("")
+
+[node name="TILE" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE12" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE2" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE7" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 2)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE8" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE9" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE3" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE6" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE5" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE4" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE10" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="TILE11" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_0ylal")
+
+[node name="E1" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E2" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_xymog")
+
+[node name="E3" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="E4" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_yvg7f")
+
+[node name="C1" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C2" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C3" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -36, 0, 34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="C4" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -36)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_m6b41")
+
+[node name="FILL1" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -34)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL2" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0, 18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_x6nsi")
+
+[node name="FILL3" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, 14)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")
+
+[node name="FILL4" type="MeshInstance3D" parent="L10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -18)
+extra_cull_margin = 100.0
+mesh = SubResource("PlaneMesh_s4wx5")

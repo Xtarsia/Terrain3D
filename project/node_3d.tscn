@@ -1,0 +1,230 @@
+[gd_scene load_steps=16 format=3 uid="uid://b87hm54hnadsh"]
+
+[ext_resource type="Script" path="res://t3d_generated_clip_map.gd" id="2_jscga"]
+[ext_resource type="Script" path="res://camera.gd" id="3_10vcm"]
+[ext_resource type="Material" uid="uid://by2w2heewjwfv" path="res://t3d_terrain.material" id="3_qwrbf"]
+[ext_resource type="Material" uid="uid://d1b5e8dke6siy" path="res://t3d_detail.material" id="4_nxr24"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_k5gsw"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_5cm0a"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_q8isy"]
+sky_material = SubResource("ProceduralSkyMaterial_5cm0a")
+
+[sub_resource type="Environment" id="Environment_ac7hj"]
+background_mode = 2
+sky = SubResource("Sky_q8isy")
+tonemap_mode = 3
+ssao_power = 3.0
+ssao_detail = 5.0
+fog_enabled = true
+fog_sun_scatter = 0.1
+fog_density = 0.0001
+fog_sky_affect = 0.1
+fog_height_density = 0.0012
+
+[sub_resource type="Gradient" id="Gradient_e55h8"]
+offsets = PackedFloat32Array(0.2, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_56sla"]
+noise_type = 2
+frequency = 0.03
+cellular_jitter = 3.0
+cellular_return_type = 0
+domain_warp_enabled = true
+domain_warp_type = 1
+domain_warp_amplitude = 50.0
+domain_warp_fractal_type = 2
+domain_warp_fractal_lacunarity = 1.5
+domain_warp_fractal_gain = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_lach2"]
+seamless = true
+color_ramp = SubResource("Gradient_e55h8")
+noise = SubResource("FastNoiseLite_56sla")
+
+[sub_resource type="Terrain3DMaterial" id="Terrain3DMaterial_pltbt"]
+_shader_parameters = {
+"auto_base_texture": 0,
+"auto_height_reduction": 0.1,
+"auto_overlay_texture": 1,
+"auto_slope": 1.0,
+"blend_sharpness": 0.87,
+"dual_scale_far": 170.0,
+"dual_scale_near": 100.0,
+"dual_scale_reduction": 0.3,
+"dual_scale_texture": 0,
+"height_blending": true,
+"macro_variation1": Color(1, 1, 1, 1),
+"macro_variation2": Color(1, 1, 1, 1),
+"noise1_angle": 0.0,
+"noise1_offset": Vector2(0.5, 0.5),
+"noise1_scale": 0.04,
+"noise2_scale": 0.076,
+"noise3_scale": 0.225,
+"noise_texture": SubResource("NoiseTexture2D_lach2"),
+"tri_scale_reduction": 0.3,
+"vertex_normals_distance": 128.0
+}
+auto_shader = true
+dual_scaling = true
+show_checkered = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fxbh7"]
+transparency = 4
+cull_mode = 2
+vertex_color_use_as_albedo = true
+backlight_enabled = true
+backlight = Color(0.5, 0.5, 0.5, 1)
+distance_fade_mode = 1
+distance_fade_min_distance = 960.0
+distance_fade_max_distance = 480.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_fgcdd"]
+height_offset = 0.5
+density = 10.0
+material_override = SubResource("StandardMaterial3D_fxbh7")
+generated_type = 1
+
+[sub_resource type="Terrain3DAssets" id="Terrain3DAssets_44un1"]
+mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_fgcdd")])
+
+[node name="Node3D" type="Node3D"]
+metadata/_edit_lock_ = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -499.557, 90.6047, 0.346997)
+mesh = SubResource("CapsuleMesh_k5gsw")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ac7hj")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, 0.25, -0.433013, 0, 0.866026, 0.500001, 0.5, 0.433013, -0.750001, 0, 0, 0)
+light_energy = 0.2
+shadow_enabled = true
+directional_shadow_blend_splits = true
+directional_shadow_fade_start = 0.0
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.530576, 0.461092, -0.711255, 0, 0.839103, 0.543973, 0.847638, -0.288619, 0.445208, -505.031, 94.1852, 4.01489)
+script = ExtResource("3_10vcm")
+
+[node name="Terrain3D" type="Terrain3D" parent="."]
+data_directory = "res://temp"
+material = SubResource("Terrain3DMaterial_pltbt")
+assets = SubResource("Terrain3DAssets_44un1")
+top_level = true
+visible = false
+metadata/_edit_lock_ = true
+
+[node name="Generated_ClipMap" type="Node3D" parent="." node_paths=PackedStringArray("t3d", "cam")]
+script = ExtResource("2_jscga")
+t3d = NodePath("../Terrain3D")
+terrain_mat = ExtResource("3_qwrbf")
+details_mat = ExtResource("4_nxr24")
+tesselation = 0
+tesselation_size = 16
+cull_margin = 90.0
+cam = NodePath("../Camera3D")
+metadata/_edit_lock_ = true
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -499.036, 90.6233, 3.24784)
+visible = false
+light_color = Color(1, 0.876715, 0.799554, 1)
+light_energy = 4.609
+shadow_enabled = true
+shadow_normal_bias = 1.00061
+distance_fade_enabled = true
+distance_fade_begin = 100.0
+distance_fade_shadow = 5.0
+distance_fade_length = 5.0
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -499.588, 90.2788, -3.99027)
+visible = false
+light_color = Color(0.994805, 0.759765, 0.961762, 1)
+light_energy = 4.609
+shadow_enabled = true
+shadow_normal_bias = 1.09115
+distance_fade_enabled = true
+distance_fade_begin = 100.0
+distance_fade_shadow = 5.0
+distance_fade_length = 5.0
+
+[node name="OmniLight3D3" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -491.722, 89.906, 1.70474)
+visible = false
+light_color = Color(1, 0.847094, 0.559042, 1)
+light_energy = 4.609
+shadow_enabled = true
+shadow_normal_bias = 1.217
+distance_fade_enabled = true
+distance_fade_begin = 100.0
+distance_fade_shadow = 5.0
+distance_fade_length = 5.0
+
+[node name="OmniLight3D4" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -490.036, 89.8444, 10.2478)
+visible = false
+light_color = Color(0.594197, 1, 0.600173, 1)
+light_energy = 4.609
+shadow_enabled = true
+shadow_normal_bias = 0.761461
+distance_fade_enabled = true
+distance_fade_begin = 100.0
+distance_fade_shadow = 5.0
+distance_fade_length = 5.0
+
+[node name="OmniLight3D5" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -481.036, 90.1969, 8.24784)
+visible = false
+light_color = Color(0.489575, 0.86543, 0.989159, 1)
+light_energy = 4.609
+shadow_enabled = true
+shadow_normal_bias = 1.1447
+distance_fade_enabled = true
+distance_fade_begin = 100.0
+distance_fade_shadow = 5.0
+distance_fade_length = 5.0
+
+[node name="OmniLight3D6" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -475.036, 89.4668, 14.2478)
+visible = false
+light_color = Color(0.996092, 0.704273, 0.593304, 1)
+light_energy = 4.609
+shadow_enabled = true
+shadow_normal_bias = 0.753352
+distance_fade_enabled = true
+distance_fade_begin = 100.0
+distance_fade_shadow = 5.0
+distance_fade_length = 5.0
+
+[node name="OmniLight3D7" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -465.036, 89.1279, 16.2478)
+visible = false
+light_color = Color(3.36915e-06, 0.885542, 0.704876, 1)
+light_energy = 4.609
+shadow_enabled = true
+shadow_normal_bias = 1.24311
+distance_fade_enabled = true
+distance_fade_begin = 100.0
+distance_fade_shadow = 5.0
+distance_fade_length = 5.0
+
+[node name="OmniLight3D8" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -455.036, 87.2413, 22.2478)
+visible = false
+light_color = Color(0.999999, 0.886468, 0.481595, 1)
+light_energy = 4.609
+shadow_enabled = true
+shadow_normal_bias = 1.2085
+distance_fade_enabled = true
+distance_fade_begin = 100.0
+distance_fade_shadow = 5.0
+distance_fade_length = 5.0

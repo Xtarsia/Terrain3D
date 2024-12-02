@@ -1,0 +1,38 @@
+[gd_scene load_steps=7 format=3 uid="uid://b87hm54hnadsh"]
+
+[ext_resource type="Script" path="res://camera.gd" id="3_10vcm"]
+[ext_resource type="Material" uid="uid://bwod8trrxjm03" path="res://terrain.material" id="3_mh85r"]
+[ext_resource type="Script" path="res://generated_clip_map.gd" id="4_0c0y0"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_5cm0a"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_q8isy"]
+sky_material = SubResource("ProceduralSkyMaterial_5cm0a")
+
+[sub_resource type="Environment" id="Environment_ac7hj"]
+background_mode = 2
+sky = SubResource("Sky_q8isy")
+tonemap_mode = 2
+glow_enabled = true
+
+[node name="Node3D" type="Node3D"]
+metadata/_edit_lock_ = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ac7hj")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, 0.433013, -0.75, 0, 0, 0)
+directional_shadow_blend_splits = true
+
+[node name="Generated_ClipMap" type="Node3D" parent="." node_paths=PackedStringArray("cam")]
+script = ExtResource("4_0c0y0")
+lod_levels = 10
+cam = NodePath("../Camera3D")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+far = 16000.0
+script = ExtResource("3_10vcm")
+shader_mat = ExtResource("3_mh85r")
