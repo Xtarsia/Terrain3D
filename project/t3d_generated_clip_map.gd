@@ -56,7 +56,7 @@ var divs: Array[int] = [1, 2, 4, 8, 16, 32]
 		tesselation = clamp(value, 0, 5)
 		_generate_clipmap()
 
-@export_range(8, 32, 4) var tesselation_size: int = 16 :
+@export_range(8, 32, 4) var tesselation_size: int = 24 :
 	set(value):
 		tesselation_size = clamp(value, 8, 32)
 		_generate_clipmap()
