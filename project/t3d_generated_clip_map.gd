@@ -35,6 +35,8 @@ enum {
 		_update_mesh_size(mesh_size)
 		_generate_clipmap()
 
+@export_range(0.25, 8.0) var vertex_scaling: float = 1.0
+
 @export_range(0, 10, 1) var lod_levels: int = 7 : 
 	set(value):
 		lod_levels = clamp(value, 0, 10)
@@ -48,14 +50,15 @@ enum Tesselation {
 	HIGH,
 	ULTRA
 }
+var divs: Array[int] = [1, 2, 4, 8, 16, 32]
 @export var tesselation: Tesselation = Tesselation.MEDIUM :
 	set(value):
 		tesselation = clamp(value, 0, 5)
 		_generate_clipmap()
 
-@export_range(16, 64, 4) var tesselation_size: int = 24 :
+@export_range(8, 32, 4) var tesselation_size: int = 16 :
 	set(value):
-		tesselation_size = clamp(value, 8, 64)
+		tesselation_size = clamp(value, 8, 32)
 		_generate_clipmap()
 
 @export var tesselation_shadow_cast: RenderingServer.ShadowCastingSetting = RenderingServer.SHADOW_CASTING_SETTING_ON :
@@ -115,7 +118,12 @@ func _update_mesh_size(size: int) -> void:
 		Vector3(-size * 2, 0, -size),
 		Vector3(-size * 2, 0, 0),
 		Vector3(-size * 2, 0, size),
-		Vector3(-size, 0, size)
+		Vector3(-size, 0, size),
+		#inner tiles
+		#Vector3(0, 0, 0),
+		#Vector3(-size, 0, 0),
+		#Vector3(0, 0, -size),
+		#Vector3(-size, 0, -size)
 	]
 	tile_pos = [
 		Vector3(2, 0, size + 2),
@@ -168,6 +176,7 @@ func _update_mesh_size(size: int) -> void:
 		Vector3(size + 2, 0, size - 2),
 		Vector3(-size * 2 - 2, 0, -size - 2)
 	]
+	
 	hd_tile_pos = []
 	for x in size:
 		for y in size:
@@ -211,7 +220,6 @@ func _generate_clipmap() -> void:
 	
 	var symetric_detail: bool = symetric_mesh #(tesselation == Tesselation.DISABLED && symetric_mesh or tesselation != Tesselation.DISABLED)
 	# 8 HD_TILE_VL - 2 x 2 tile
-	var divs: Array[int] = [1, 2, 4, 8, 16, 32]
 	_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, divs[Tesselation.VERY_LOW]))
 	# 9 HD_TILE_L - 2 x 2 tile
 	_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, divs[Tesselation.LOW]))
@@ -233,7 +241,8 @@ func _generate_clipmap() -> void:
 		aabb = _array_meshs[TILE].get_aabb()
 		aabb.position.y = -cull_margin
 		aabb.size.y = cull_margin * 2.0
-		for i in 12:
+		var lod_zero_tiles: int = 12#16 if level == 0 else 12
+		for i in lod_zero_tiles:
 			tile_rids.append(RenderingServer.instance_create2(_array_meshs[TILE].get_rid(), scenario))
 			RenderingServer.instance_set_custom_aabb(tile_rids[i], aabb);
 			RenderingServer.instance_set_layer_mask(tile_rids[i], t3d.render_layers)
@@ -321,35 +330,16 @@ func _generate_clipmap() -> void:
 			
 			var hd_tile_rids: Array[RID] = []
 			aabb = _array_meshs[TAB].get_aabb()
-			aabb.position.y = -cull_margin
-			aabb.size.y = cull_margin * 2.0
+			aabb.position.y = -8.0#-cull_margin
+			aabb.size.y = 16.0#cull_margin * 2.0
 			for i in hd_tile_pos.size():
 				# Tiles outside the Tesselation area are populated with TABs.
-				if tesselation > 0 and abs(hd_tile_pos[i].x) < min(tesselation_size / 8, mesh_size) and abs(hd_tile_pos[i].z) < min(tesselation_size / 8, mesh_size):
+				#if tesselation > 0 and abs(hd_tile_pos[i].x) < min(tesselation_size, mesh_size) and abs(hd_tile_pos[i].z) < min(tesselation_size, mesh_size):
+				if tesselation > 0 and Vector2(hd_tile_pos[i].x, hd_tile_pos[i].z).length() < min(tesselation_size, mesh_size):
 					hd_tile_rids.append(RenderingServer.instance_create2(_array_meshs[max(tesselation + 7, 8)].get_rid(), scenario))
 					RenderingServer.instance_set_custom_aabb(hd_tile_rids[i], aabb);
 					RenderingServer.instance_geometry_set_cast_shadows_setting(hd_tile_rids[i], tesselation_shadow_cast)
 					RenderingServer.instance_set_layer_mask(hd_tile_rids[i], t3d.render_layers)
-					hd_tile_pos[i].y = min(tesselation_size / 8, mesh_size)
-					print(hd_tile_pos[i].y)
-				elif tesselation > 0 and abs(hd_tile_pos[i].x) < min(tesselation_size / 4, mesh_size) and abs(hd_tile_pos[i].z) < min(tesselation_size / 4, mesh_size):
-					hd_tile_rids.append(RenderingServer.instance_create2(_array_meshs[max(tesselation + 6, 8)].get_rid(), scenario))
-					RenderingServer.instance_set_custom_aabb(hd_tile_rids[i], aabb);
-					RenderingServer.instance_geometry_set_cast_shadows_setting(hd_tile_rids[i], tesselation_shadow_cast)
-					RenderingServer.instance_set_layer_mask(hd_tile_rids[i], t3d.render_layers)
-					hd_tile_pos[i].y = min(tesselation_size / 4, mesh_size)
-				elif tesselation > 0 and abs(hd_tile_pos[i].x) < min(tesselation_size / 2, mesh_size) and abs(hd_tile_pos[i].z) < min(tesselation_size / 2, mesh_size):
-					hd_tile_rids.append(RenderingServer.instance_create2(_array_meshs[max(tesselation + 5, 8)].get_rid(), scenario))
-					RenderingServer.instance_set_custom_aabb(hd_tile_rids[i], aabb);
-					RenderingServer.instance_geometry_set_cast_shadows_setting(hd_tile_rids[i], tesselation_shadow_cast)
-					RenderingServer.instance_set_layer_mask(hd_tile_rids[i], t3d.render_layers)
-					hd_tile_pos[i].y = min(tesselation_size / 2, mesh_size)
-				elif tesselation > 0 and abs(hd_tile_pos[i].x) < min(tesselation_size, mesh_size) and abs(hd_tile_pos[i].z) < min(tesselation_size, mesh_size):
-					hd_tile_rids.append(RenderingServer.instance_create2(_array_meshs[max(tesselation + 4, 8)].get_rid(), scenario))
-					RenderingServer.instance_set_custom_aabb(hd_tile_rids[i], aabb);
-					RenderingServer.instance_geometry_set_cast_shadows_setting(hd_tile_rids[i], tesselation_shadow_cast)
-					RenderingServer.instance_set_layer_mask(hd_tile_rids[i], t3d.render_layers)
-					hd_tile_pos[i].y = min(tesselation_size, mesh_size)
 				else:
 					hd_tile_rids.append(RenderingServer.instance_create2(_array_meshs[TAB].get_rid(), scenario))
 					RenderingServer.instance_set_custom_aabb(hd_tile_rids[i], aabb);
@@ -456,22 +446,23 @@ func _process(_delta: float) -> void:
 	var active_cam: Camera3D = t3d.get_camera()
 	if active_cam == null:
 		return
-	#_update_shadar_parameters() testing only
+	#_update_shadar_parameters()
+	
 	# Updating the camera position is required every frame, as the built in value
 	# gets set to the light position during the shadow pass, which causes tesselation
 	# to be incorrectly calculated for the shadow pass.
 	terrain_mat.set_shader_parameter("camera_pos", active_cam.global_position)
 	details_mat.set_shader_parameter("camera_pos", active_cam.global_position + Vector3(1.0, 0.0, 1.0))
 	# Snap terrain to new position
-	if active_cam.global_position.distance_to(last_cam_pos) > 1.0 or update:
+	if active_cam.global_position.distance_to(last_cam_pos) > 1.0 * vertex_scaling or update:
 		update = false
 		last_cam_pos = active_cam.global_position
 		# edge and corner offsets updated every snap
 		var pos: Vector3 = Vector3(0.0, 0.0, 0.0)
 		for lod in _lod_rids.size():
 			# Snap instance transforms
-			var snap_step: float = pow(2.0, lod + 1.0)
-			var lod_scale: Vector3 = Vector3(pow(2, lod), 1.0, pow(2, lod))
+			var snap_step: float = pow(2.0, lod + 1.0) * vertex_scaling
+			var lod_scale: Vector3 = Vector3(pow(2, lod) * vertex_scaling, 1.0, pow(2, lod) * vertex_scaling)
 			pos.x = floorf(active_cam.global_position.x / snap_step) * snap_step
 			pos.z = floorf(active_cam.global_position.z / snap_step) * snap_step
 			# Reposition edge strips and corner tabs [0, 1, 2]
@@ -533,30 +524,27 @@ func _process(_delta: float) -> void:
 						for instance in _lod_rids[lod][TRIM_A].size():
 							var t: Transform3D = Transform3D.IDENTITY
 							t.origin = trim_a_pos[instance]
+							t = t.scaled(lod_scale)
 							t.origin += pos
 							RenderingServer.instance_set_transform(_lod_rids[lod][TRIM_A][instance], t)
 					TRIM_B:
 						for instance in _lod_rids[lod][TRIM_B].size():
 							var t: Transform3D = Transform3D.IDENTITY
 							t.origin = trim_b_pos[instance]
+							t = t.scaled(lod_scale)
 							t.origin += pos
 							RenderingServer.instance_set_transform(_lod_rids[lod][TRIM_B][instance], t)
 					HD_TILES:
 						for instance in _lod_rids[lod][HD_TILES].size():
 							var t: Transform3D = Transform3D.IDENTITY
-							t.origin.x = hd_tile_pos[instance].x + pos.x
-							t.origin.z = hd_tile_pos[instance].z + pos.z
-							t.origin.y = hd_tile_pos[instance].y
+							t.origin = hd_tile_pos[instance]
+							t = t.scaled(lod_scale)
+							t.origin += pos
+							var height: float = t3d.data.get_height(t.origin + Vector3(1.0, 0.0, 1.0))
+							t.origin.y = height if !is_nan(height) else 0.0
 							RenderingServer.instance_set_transform(_lod_rids[lod][HD_TILES][instance], t)
 					_:
 						pass
-	if true:
-		var snap_step: float = 1.0
-		var pos: Vector3 = Vector3(0.0, 0.0, 0.0)
-		pos.x = floorf(active_cam.global_position.x / snap_step) * snap_step
-		pos.z = floorf(active_cam.global_position.z / snap_step) * snap_step
-
-		pass
 
 func _update_shadar_parameters(_btn: bool = false) -> void:
 	if t3d is not Terrain3D:

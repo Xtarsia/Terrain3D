@@ -268,7 +268,7 @@ void v_get_material(vec2 base_uv, uint control, ivec3 iuv_center, vec3 normal, o
 	}
 	//each time we change scale, recalculate antitiling from baseline to maintain continuity.
 	matUV = detiling(base_uv * mat_scale, uv_center * mat_scale, out_mat.base, na);
-	float lod = 2.;
+	float lod = 0.;
 	albedo_ht = textureLod(_texture_array_albedo, vec3(matUV, float(out_mat.base)), lod);
 
 	// Setup overlay texture to blend
@@ -284,13 +284,6 @@ void v_get_material(vec2 base_uv, uint control, ivec3 iuv_center, vec3 normal, o
 	return;
 }
 
-float blend_weights(float weight, float detail) {
-	weight = smoothstep(0.0, 1.0, weight);
-	//weight = sqrt(weight * 0.5);
-	float result = max(0.1 * weight, fma(10.0, (weight + detail), 1.0f - (detail + 10.0)));
-	return result;
-}
-
 ////////
 
 uniform float mesh_size = 32.0; // set as tile size + 1
@@ -303,31 +296,15 @@ uniform vec3 camera_pos;
 
 
 void vertex() {
-	// subdivided mesh step stored in transform.origin.y
-	// we need the snapped camera position to ensure accurate selection of boundary vertices
-	// Smoothley interpolating  vertices along xz plane suffers from severe rippling.
-	// so that we can avoid gaps along seams, instead we will snap vertices that dont match
-	// the next level, to the next levels grid size. As these positions only update on snap
-	// there is no ripple, however we do get stepping.
-	float mesh_sub_size = MODEL_MATRIX[3].y;
-
-	vec3 camera_pos_local = camera_pos - MODEL_MATRIX[3].xyz;
-	float dist = max(abs(VERTEX.x - camera_pos_local.x), abs(VERTEX.z - camera_pos_local.z));
-	float vertex_lerp = clamp(dist - (mesh_size), 0.0, 1.0);
-	VERTEX.xz -= fract(VERTEX.xz) * vertex_lerp;
-
-
-	float detail_blend =  1.0 - clamp(dist - mesh_size + 4.0, 0.0, 4.0) * 0.25;
-
-
 	// Get camera pos in world vertex coords
-	v_camera_pos = INV_VIEW_MATRIX[3].xyz;
+	v_camera_pos = camera_pos;
 
 	// Get vertex of flat plane in world coordinates and set world UV
 	v_vertex = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 
 	// Camera distance to vertex on flat plane
 	v_vertex_xz_dist = length(v_vertex.xz - v_camera_pos.xz);
+	float detail_blend =  1.0 - clamp(v_vertex_xz_dist - mesh_size + 4.0, 0.0, 4.0) * 0.25;
 	// UV coordinates in world space. Values are 0 to _region_size within regions
 	UV = (v_vertex.xz * _vertex_density);
 
@@ -405,8 +382,9 @@ void vertex() {
 				mat[0].alb_ht * weights.x +
 				mat[1].alb_ht * weights.y +
 				mat[2].alb_ht * weights.z +
-				mat[3].alb_ht * weights.w - 0.5;
+				mat[3].alb_ht * weights.w - 0.333;
 
+			
 			v_vertex.y += albedo_height.a * detail_blend * 0.5;
 
 		// Due to a bug caused by the GPUs linear interpolation across edges of region maps,
@@ -422,10 +400,8 @@ void vertex() {
 
 	VERTEX = (VIEW_MATRIX * vec4(v_vertex, 1.0)).xyz;
 
-
-
 	// LOD color index
-	COLOR.rgb = vec3(mesh_sub_size * 0.125);//mix(vec3(1., 0.33, 0.33), vec3(0.33, 0.33, 0.66), detail_blend);
+	COLOR.rgb = mix(vec3(1., 0.33, 0.33), vec3(0.33, 0.33, 0.66), detail_blend);
 
 }
 // 0 - 3 lookups
@@ -593,6 +569,13 @@ void get_material(vec2 base_uv, uint control, ivec3 iuv_center, vec3 normal, out
 	out_mat.alb_ht = albedo_ht;
 	out_mat.nrm_rg = normal_rg;
 	return;
+}
+
+float blend_weights(float weight, float detail) {
+	weight = smoothstep(0.0, 1.0, weight);
+	//weight = sqrt(weight * 0.5);
+	float result = max(0.1 * weight, fma(10.0, (weight + detail), 1.0f - (detail + 10.0)));
+	return result;
 }
 
 void fragment() {

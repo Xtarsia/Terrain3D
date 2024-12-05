@@ -195,99 +195,6 @@ float get_height(vec2 uv) {
  	return height;
 }
 
-// Moves a point around a pivot point.
-vec2 rotate_around(vec2 point, vec2 pivot, float angle){
-	float x = pivot.x + (point.x - pivot.x) * cos(angle) - (point.y - pivot.y) * sin(angle);
-	float y = pivot.y + (point.x - pivot.x) * sin(angle) + (point.y - pivot.y) * cos(angle);
-	return vec2(x, y);
-}
-float random(in vec2 xy) {
-	return fract(sin(dot(xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
-vec2 detiling(vec2 uv, vec2 uv_center, int mat_id, inout float normal_rotation){
-	if (_texture_detile_array[mat_id] >= 0.001){
-		uv_center = floor(uv_center) + 0.5;
-		float detile = fma(random(uv_center), 2.0, -1.0) * TAU * _texture_detile_array[mat_id]; // -180deg to 180deg
-		uv = rotate_around(uv, uv_center, detile);
-		// Accumulate total rotation for normal rotation
-		normal_rotation += detile;
-	}
-	return uv;
-}
-
-vec4 height_blend(vec4 a_value, float a_height, vec4 b_value, float b_height, float blend) {
-	if(height_blending) {
-		float ma = max(a_height + (1.0 - blend), b_height + blend) - (1.001 - blend_sharpness);
-	    float b1 = max(a_height + (1.0 - blend) - ma, 0.0);
-	    float b2 = max(b_height + blend - ma, 0.0);
-	    return (a_value * b1 + b_value * b2) / (b1 + b2);
-	} else {
-		float contrast = 1.0 - blend_sharpness;
-		float factor = (blend - contrast) / contrast;
-		return mix(a_value, b_value, clamp(factor, 0.0, 1.0));
-	}
-}
-// 2-4 lookups
-void v_get_material(vec2 base_uv, uint control, ivec3 iuv_center, vec3 normal, out Material out_mat) {
-	out_mat = Material(vec4(0.), vec4(0.), 0, 0, 0.0);
-	vec2 uv_center = vec2(iuv_center.xy);
-	int region = iuv_center.z;
-	// Enable Autoshader if outside regions or painted in regions, otherwise manual painted
-	bool auto_shader = region < 0 || bool(control & 0x1u);
-	out_mat.base = int(auto_shader) * auto_base_texture + int(!auto_shader) * int(control >>27u & 0x1Fu);
-	out_mat.over = int(auto_shader) * auto_overlay_texture + int(!auto_shader) * int(control >> 22u & 0x1Fu);
-	out_mat.blend = float(auto_shader) * clamp(
-			dot(vec3(0., 1., 0.), normal * auto_slope * 2. - (auto_slope * 2. - 1.))
-			- auto_height_reduction * .01 * v_vertex.y // Reduce as vertices get higher
-			, 0., 1.) +
-			 float(!auto_shader) * float(control >>14u & 0xFFu) * 0.003921568627450; // 1./255.0
-
-	// Control map scale & rotation, apply to both base and
-	// uv_center. Translate uv center to the current region.
-	uv_center += _region_locations[region] * _region_size;
-	// Define base scale from control map value as array index. 0.5 as baseline.
-	float[8] scale_array = { 0.5, 0.4, 0.3, 0.2, 0.1, 0.8, 0.7, 0.6};
-	float control_scale = scale_array[(control >>7u & 0x7u)];
-	base_uv *= control_scale;
-	uv_center *=  control_scale;
-	// Apply global uv rotation from control map.
-	float uv_rotation = float(control >>10u & 0xFu) / 16. * TAU;
-	base_uv = rotate_around(base_uv, vec2(0), uv_rotation);
-	uv_center = rotate_around(uv_center, vec2(0), uv_rotation);
-	float na = 0.;
-
-	vec2 matUV = base_uv;
-	vec4 albedo_ht = vec4(0.);
-	float mat_scale = _texture_uv_scale_array[out_mat.base];
-	// If dual scaling, apply to base texture
-	if(region < 0) {
-		mat_scale *= tri_scale_reduction;
-	}
-	//each time we change scale, recalculate antitiling from baseline to maintain continuity.
-	matUV = detiling(base_uv * mat_scale, uv_center * mat_scale, out_mat.base, na);
-	float lod = 1.;
-	albedo_ht = textureLod(_texture_array_albedo, vec3(matUV, float(out_mat.base)), lod);
-
-	// Setup overlay texture to blend
-	float mat_scale2 = _texture_uv_scale_array[out_mat.over];
-	vec2 matUV2 = detiling(base_uv * mat_scale2, uv_center * mat_scale2, out_mat.over, na);
-	vec4 albedo_ht2 = textureLod(_texture_array_albedo, vec3(matUV2, float(out_mat.over)), lod);
-
-	if (out_mat.blend > 0.f) {
-		// Blend overlay and base
-		albedo_ht = height_blend(albedo_ht, albedo_ht.a, albedo_ht2, albedo_ht2.a, out_mat.blend);
-	}
-	out_mat.alb_ht = albedo_ht;
-	return;
-}
-
-float blend_weights(float weight, float detail) {
-	weight = smoothstep(0.0, 1.0, weight);
-	//weight = sqrt(weight * 0.5);
-	float result = max(0.1 * weight, fma(10.0, (weight + detail), 1.0f - (detail + 10.0)));
-	return result;
-}
-
 ////////
 
 uniform float mesh_size = 32.0; // set as tile size + 1
@@ -341,7 +248,7 @@ void vertex() {
 			v_vertex.y - u,
 			_vertex_spacing,
 			v_vertex.y - v));
-		
+
 		// Due to a bug caused by the GPUs linear interpolation across edges of region maps,
 		// mask region edges and use vertex normals only across region boundaries.
 		v_region_border_mask = mod(UV.x + 2.5, _region_size) - fract(UV.x) < 5.0 || mod(UV.y + 2.5, _region_size) - fract(UV.y) < 5.0 ? 1. : 0.;
@@ -363,7 +270,7 @@ void vertex() {
 		};
 	int index = int(mod(log2(scale), 3.));
 	COLOR.rgb = col[index];
-	
+
 }
 // 0 - 3 lookups
 vec3 get_normal(vec2 uv, out vec3 tangent, out vec3 binormal) {
@@ -397,7 +304,38 @@ vec2 rotate(vec2 v, float cosa, float sina) {
 	return vec2(fma(cosa, v.x, - sina * v.y), fma(sina, v.x, cosa * v.y));
 }
 
+// Moves a point around a pivot point.
+vec2 rotate_around(vec2 point, vec2 pivot, float angle){
+	float x = pivot.x + (point.x - pivot.x) * cos(angle) - (point.y - pivot.y) * sin(angle);
+	float y = pivot.y + (point.x - pivot.x) * sin(angle) + (point.y - pivot.y) * cos(angle);
+	return vec2(x, y);
+}
+float random(in vec2 xy) {
+	return fract(sin(dot(xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+vec2 detiling(vec2 uv, vec2 uv_center, int mat_id, inout float normal_rotation){
+	if (_texture_detile_array[mat_id] >= 0.001){
+		uv_center = floor(uv_center) + 0.5;
+		float detile = fma(random(uv_center), 2.0, -1.0) * TAU * _texture_detile_array[mat_id]; // -180deg to 180deg
+		uv = rotate_around(uv, uv_center, detile);
+		// Accumulate total rotation for normal rotation
+		normal_rotation += detile;
+	}
+	return uv;
+}
 
+vec4 height_blend(vec4 a_value, float a_height, vec4 b_value, float b_height, float blend) {
+	if(height_blending) {
+		float ma = max(a_height + (1.0 - blend), b_height + blend) - (1.001 - blend_sharpness);
+	    float b1 = max(a_height + (1.0 - blend) - ma, 0.0);
+	    float b2 = max(b_height + blend - ma, 0.0);
+	    return (a_value * b1 + b_value * b2) / (b1 + b2);
+	} else {
+		float contrast = 1.0 - blend_sharpness;
+		float factor = (blend - contrast) / contrast;
+		return mix(a_value, b_value, clamp(factor, 0.0, 1.0));
+	}
+}
 
 
 
@@ -530,6 +468,13 @@ void get_material(vec2 base_uv, uint control, ivec3 iuv_center, vec3 normal, out
 	out_mat.alb_ht = albedo_ht;
 	out_mat.nrm_rg = normal_rg;
 	return;
+}
+
+float blend_weights(float weight, float detail) {
+	weight = smoothstep(0.0, 1.0, weight);
+	//weight = sqrt(weight * 0.5);
+	float result = max(0.1 * weight, fma(10.0, (weight + detail), 1.0f - (detail + 10.0)));
+	return result;
 }
 
 void fragment() {
