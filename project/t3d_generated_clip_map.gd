@@ -10,11 +10,7 @@ enum {
 	FILL_B,
 	TRIM_A,
 	TRIM_B,
-	HD_TILES,
-	HD_TILE_L,
-	HD_TILE_M,
-	HD_TILE_H,
-	HD_TILE_U
+	HD_TILE
 }
 
 @export var create: bool = false :
@@ -44,19 +40,19 @@ enum {
 
 enum Tesselation {
 	DISABLED,
-	VERY_LOW,
 	LOW,
 	MEDIUM,
 	HIGH,
-	ULTRA
+	ULTRA,
+	EXTREME
 }
-var divs: Array[int] = [1, 2, 4, 8, 16, 32]
+var divs: Array[int] = [1, 4, 6, 8, 12, 16]
 @export var tesselation: Tesselation = Tesselation.MEDIUM :
 	set(value):
 		tesselation = clamp(value, 0, 5)
 		_generate_clipmap()
 
-@export_range(8, 32, 4) var tesselation_size: int = 24 :
+@export_range(8, 32, 2) var tesselation_size: int = 24 :
 	set(value):
 		tesselation_size = clamp(value, 8, 32)
 		_generate_clipmap()
@@ -120,10 +116,10 @@ func _update_mesh_size(size: int) -> void:
 		Vector3(-size * 2, 0, size),
 		Vector3(-size, 0, size),
 		#inner tiles
-		#Vector3(0, 0, 0),
-		#Vector3(-size, 0, 0),
-		#Vector3(0, 0, -size),
-		#Vector3(-size, 0, -size)
+		Vector3(0, 0, 0),
+		Vector3(-size, 0, 0),
+		Vector3(0, 0, -size),
+		Vector3(-size, 0, -size)
 	]
 	tile_pos = [
 		Vector3(2, 0, size + 2),
@@ -219,16 +215,8 @@ func _generate_clipmap() -> void:
 	_array_meshs.append(_generate_mesh(Vector2i(mesh_size * 4 + 2, 2), symetric_mesh))
 	
 	var symetric_detail: bool = symetric_mesh #(tesselation == Tesselation.DISABLED && symetric_mesh or tesselation != Tesselation.DISABLED)
-	# 8 HD_TILE_VL - 2 x 2 tile
-	_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, divs[Tesselation.VERY_LOW]))
-	# 9 HD_TILE_L - 2 x 2 tile
-	_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, divs[Tesselation.LOW]))
-	# 10 HD_TILE_M - 2 x 2 tile
-	_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, divs[Tesselation.MEDIUM]))
-	# 11 HD_TILE_H - 2 x 2 tile
-	_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, divs[Tesselation.HIGH]))
-	# 12 HD_TILE_U - 2 x 2 tile
-	_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, divs[Tesselation.ULTRA]))
+	# 8 HD_TILE - 2 x 2 tile
+	_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, divs[tesselation]))
 	
 	_clear_clipmap_rids()
 	
@@ -241,7 +229,7 @@ func _generate_clipmap() -> void:
 		aabb = _array_meshs[TILE].get_aabb()
 		aabb.position.y = -cull_margin
 		aabb.size.y = cull_margin * 2.0
-		var lod_zero_tiles: int = 12#16 if level == 0 else 12
+		var lod_zero_tiles: int = 16 if level == 0  and tesselation == Tesselation.DISABLED else 12
 		for i in lod_zero_tiles:
 			tile_rids.append(RenderingServer.instance_create2(_array_meshs[TILE].get_rid(), scenario))
 			RenderingServer.instance_set_custom_aabb(tile_rids[i], aabb);
@@ -328,23 +316,24 @@ func _generate_clipmap() -> void:
 				RenderingServer.instance_set_layer_mask(trim_b_rids[i], t3d.render_layers)
 			lod.append(trim_b_rids)  # index 7 TRIM_A
 			
-			var hd_tile_rids: Array[RID] = []
-			aabb = _array_meshs[TAB].get_aabb()
-			aabb.position.y = -8.0#-cull_margin
-			aabb.size.y = 16.0#cull_margin * 2.0
-			for i in hd_tile_pos.size():
-				# Tiles outside the Tesselation area are populated with TABs.
-				#if tesselation > 0 and abs(hd_tile_pos[i].x) < min(tesselation_size, mesh_size) and abs(hd_tile_pos[i].z) < min(tesselation_size, mesh_size):
-				if tesselation > 0 and Vector2(hd_tile_pos[i].x, hd_tile_pos[i].z).length() < min(tesselation_size, mesh_size):
-					hd_tile_rids.append(RenderingServer.instance_create2(_array_meshs[max(tesselation + 7, 8)].get_rid(), scenario))
-					RenderingServer.instance_set_custom_aabb(hd_tile_rids[i], aabb);
-					RenderingServer.instance_geometry_set_cast_shadows_setting(hd_tile_rids[i], tesselation_shadow_cast)
-					RenderingServer.instance_set_layer_mask(hd_tile_rids[i], t3d.render_layers)
-				else:
-					hd_tile_rids.append(RenderingServer.instance_create2(_array_meshs[TAB].get_rid(), scenario))
-					RenderingServer.instance_set_custom_aabb(hd_tile_rids[i], aabb);
-					RenderingServer.instance_set_layer_mask(hd_tile_rids[i], t3d.render_layers)
-			lod.append(hd_tile_rids)
+			if tesselation != Tesselation.DISABLED:
+				var hd_tile_rids: Array[RID] = []
+				aabb = _array_meshs[TAB].get_aabb()
+				aabb.position.y = -8.0#-cull_margin
+				aabb.size.y = 16.0#cull_margin * 2.0
+				for i in hd_tile_pos.size():
+					# Tiles outside the Tesselation area are populated with TABs.
+					#if tesselation > 0 and abs(hd_tile_pos[i].x) < min(tesselation_size, mesh_size) and abs(hd_tile_pos[i].z) < min(tesselation_size, mesh_size):
+					if tesselation > 0 and Vector2(hd_tile_pos[i].x, hd_tile_pos[i].z).length() < min(tesselation_size, mesh_size):
+						hd_tile_rids.append(RenderingServer.instance_create2(_array_meshs[HD_TILE].get_rid(), scenario))
+						RenderingServer.instance_set_custom_aabb(hd_tile_rids[i], aabb);
+						RenderingServer.instance_geometry_set_cast_shadows_setting(hd_tile_rids[i], tesselation_shadow_cast)
+						RenderingServer.instance_set_layer_mask(hd_tile_rids[i], t3d.render_layers)
+					else:
+						hd_tile_rids.append(RenderingServer.instance_create2(_array_meshs[TAB].get_rid(), scenario))
+						RenderingServer.instance_set_custom_aabb(hd_tile_rids[i], aabb);
+						RenderingServer.instance_set_layer_mask(hd_tile_rids[i], t3d.render_layers)
+				lod.append(hd_tile_rids)
 			
 		# append lod to lod_rids arrays
 		_lod_rids.append(lod)
@@ -534,15 +523,15 @@ func _process(_delta: float) -> void:
 							t = t.scaled(lod_scale)
 							t.origin += pos
 							RenderingServer.instance_set_transform(_lod_rids[lod][TRIM_B][instance], t)
-					HD_TILES:
-						for instance in _lod_rids[lod][HD_TILES].size():
+					HD_TILE:
+						for instance in _lod_rids[lod][HD_TILE].size():
 							var t: Transform3D = Transform3D.IDENTITY
 							t.origin = hd_tile_pos[instance]
 							t = t.scaled(lod_scale)
 							t.origin += pos
 							var height: float = t3d.data.get_height(t.origin + Vector3(1.0, 0.0, 1.0))
 							t.origin.y = height if !is_nan(height) else 0.0
-							RenderingServer.instance_set_transform(_lod_rids[lod][HD_TILES][instance], t)
+							RenderingServer.instance_set_transform(_lod_rids[lod][HD_TILE][instance], t)
 					_:
 						pass
 

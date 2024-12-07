@@ -731,6 +731,6 @@ script = ExtResource("8_cb5wu")
 t3d = NodePath("..")
 terrain_mat = ExtResource("9_j3rso")
 details_mat = ExtResource("10_lkt0v")
-mesh_size = 48
+mesh_size = 64
 cull_margin = 500.0
 metadata/_edit_lock_ = true
