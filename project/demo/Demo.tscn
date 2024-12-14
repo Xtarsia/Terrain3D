@@ -1,49 +1,34 @@
-[gd_scene load_steps=20 format=3 uid="uid://chol2xlfbq7cu"]
+[gd_scene load_steps=32 format=3 uid="uid://chol2xlfbq7cu"]
 
 [ext_resource type="Script" path="res://demo/src/DemoScene.gd" id="1_k7qca"]
 [ext_resource type="PackedScene" uid="uid://d2jihfohphuue" path="res://demo/components/UI.tscn" id="2_nqak5"]
 [ext_resource type="PackedScene" uid="uid://dwnhqfjq7v1pq" path="res://demo/components/Borders.tscn" id="3_cw38j"]
 [ext_resource type="PackedScene" uid="uid://domhm87hbhbg1" path="res://demo/components/Player.tscn" id="3_ht63y"]
 [ext_resource type="PackedScene" uid="uid://djhl3foqkj4e2" path="res://demo/components/Tunnel.tscn" id="3_kdh0b"]
+[ext_resource type="Material" uid="uid://bbl7fvkifme71" path="res://demo/skymat.tres" id="4_avitu"]
 [ext_resource type="Script" path="res://t3d_generated_clip_map.gd" id="8_cb5wu"]
 [ext_resource type="Terrain3DAssets" uid="uid://dal3jhw6241qg" path="res://demo/data/assets.tres" id="8_g2of2"]
 [ext_resource type="Material" uid="uid://by2w2heewjwfv" path="res://t3d_terrain.material" id="9_j3rso"]
 [ext_resource type="Material" uid="uid://d1b5e8dke6siy" path="res://t3d_detail.material" id="10_lkt0v"]
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_vibap"]
-sky_top_color = Color(0.192157, 0.282353, 0.509804, 1)
-sky_horizon_color = Color(0.505882, 0.615686, 0.709804, 1)
-ground_bottom_color = Color(0.211765, 0.313726, 0.552941, 1)
-ground_horizon_color = Color(0.505882, 0.615686, 0.709804, 1)
-ground_curve = 0.13
+[ext_resource type="Shader" path="res://water.gdshader" id="10_nsnpn"]
+[ext_resource type="PackedScene" uid="uid://coqpjvnnlq3ik" path="res://assets/trees/maple.tscn" id="11_e82tj"]
+[ext_resource type="PackedScene" uid="uid://baumq7hj4vg2r" path="res://assets/trees/elm.tscn" id="11_nmg80"]
+[ext_resource type="PackedScene" uid="uid://ci0qp3hh8ql53" path="res://assets/trees/beech.tscn" id="12_7vxwb"]
+[ext_resource type="ArrayMesh" uid="uid://bjrtavpihjvs6" path="res://assets/fish/fish.mesh" id="15_476pn"]
 
 [sub_resource type="Sky" id="Sky_srg7c"]
-sky_material = SubResource("ProceduralSkyMaterial_vibap")
+sky_material = ExtResource("4_avitu")
 
 [sub_resource type="Environment" id="Environment_8jcgm"]
 background_mode = 2
 sky = SubResource("Sky_srg7c")
 ambient_light_source = 3
-ambient_light_color = Color(0.55, 0.55, 0.55, 1)
-ambient_light_sky_contribution = 0.3
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_sky_contribution = 0.5
+ambient_light_energy = 0.0
 tonemap_mode = 3
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_0gcl0"]
-
-[sub_resource type="GDScript" id="GDScript_sr0dt"]
-script/source = "extends DirectionalLight3D
-
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	rotate_y(1.0 / 15.0 * delta)
-	pass
-"
 
 [sub_resource type="Gradient" id="Gradient_vr1m7"]
 offsets = PackedFloat32Array(0.2, 1)
@@ -674,7 +659,7 @@ _shader_parameters = {
 "vertex_normals_distance": 0.0,
 "world_noise_height": 34.0,
 "world_noise_lod_distance": 7500.0,
-"world_noise_max_octaves": 4,
+"world_noise_max_octaves": 8,
 "world_noise_min_octaves": 2,
 "world_noise_offset": Vector3(2.17, -1.225, 1.9),
 "world_noise_region_blend": 0.33,
@@ -685,6 +670,90 @@ auto_shader = true
 dual_scaling = true
 shader_override_enabled = true
 shader_override = SubResource("Shader_6aq70")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ojpy4"]
+frequency = 0.0044
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_5vxcc"]
+seamless = true
+bump_strength = 32.0
+noise = SubResource("FastNoiseLite_ojpy4")
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_40gx1"]
+seamless = true
+as_normal_map = true
+bump_strength = 32.0
+noise = SubResource("FastNoiseLite_ojpy4")
+
+[sub_resource type="Gradient" id="Gradient_xhckn"]
+offsets = PackedFloat32Array(0, 0.0986395)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_u2w5t"]
+gradient = SubResource("Gradient_xhckn")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_i5ccn"]
+render_priority = 0
+shader = ExtResource("10_nsnpn")
+shader_parameter/absorption_color = Color(0.153209, 0.108392, 0.07109, 1)
+shader_parameter/fresnel_radius = 0.5
+shader_parameter/fresnel_color = Color(0.143483, 0.155624, 8.42288e-08, 1)
+shader_parameter/roughness = 0.15
+shader_parameter/specular = 0.25
+shader_parameter/depth_distance = 1.0
+shader_parameter/beers_law = 4.5
+shader_parameter/displacement_strength = 0.1
+shader_parameter/displacement_scroll_speed = 0.15
+shader_parameter/displacement_scroll_offset = Vector2(-0.2, 0.3)
+shader_parameter/displacement_scale_offset = 0.5
+shader_parameter/displacement_scale = Vector2(0.04, 0.04)
+shader_parameter/displacement_texture = SubResource("NoiseTexture2D_5vxcc")
+shader_parameter/edge_thickness = 0.3
+shader_parameter/edge_speed = 0.05
+shader_parameter/edge_noise_scale = Vector2(0.4, 0.4)
+shader_parameter/edge_noise = SubResource("NoiseTexture2D_40gx1")
+shader_parameter/edge_ramp = SubResource("GradientTexture1D_u2w5t")
+shader_parameter/player_y_offset = -1.0
+shader_parameter/influence_size = 1.0
+shader_parameter/player_wave_frequenzy = 20.0
+shader_parameter/player_wave_speed = 5.0
+shader_parameter/cuastic_color = Color(0.901526, 0.949942, 1, 1)
+shader_parameter/caustic_size = 8.0
+shader_parameter/caustic_range = 25.0
+shader_parameter/caustic_strength = 0.05
+shader_parameter/ssr_mix_strength = 0.65
+shader_parameter/ssr_travel = 100.0
+shader_parameter/ssr_resolution_near = 1.0
+shader_parameter/ssr_resolution_far = 5.0
+shader_parameter/ssr_tolerance = 1.0
+shader_parameter/refraction_strength = 1.25
+shader_parameter/normal_map_strength = 0.47
+shader_parameter/scroll_speed = 0.03
+shader_parameter/scroll_offset = Vector2(0.1, -0.3)
+shader_parameter/scale_offset = 0.5
+shader_parameter/normal_map_scale = Vector2(0.1, 0.1)
+shader_parameter/wind_intensity = 0.5
+shader_parameter/wind_direction = Vector3(0.5, 0, 0.5)
+shader_parameter/normal_map = SubResource("NoiseTexture2D_40gx1")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_k3u5j"]
+material = SubResource("ShaderMaterial_i5ccn")
+size = Vector2(80, 60)
+subdivide_width = 159
+subdivide_depth = 119
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_82itg"]
+emission_shape_scale = Vector3(1, 0, 1)
+emission_shape = 2
+emission_sphere_radius = 2.0
+direction = Vector3(-1, 0, 0)
+spread = 0.0
+flatness = 1.0
+initial_velocity_min = 0.5
+initial_velocity_max = 1.0
+gravity = Vector3(0, 0, 0)
+scale_min = 50.0
+scale_max = 100.0
 
 [node name="Demo" type="Node"]
 script = ExtResource("1_k7qca")
@@ -702,35 +771,71 @@ environment = SubResource("Environment_8jcgm")
 camera_attributes = SubResource("CameraAttributesPractical_0gcl0")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Environment"]
-transform = Transform3D(-0.866026, -0.25, 0.433013, 0, 0.866026, 0.5, -0.5, 0.433013, -0.75, 0, 0, 0)
-light_energy = 1.949
+transform = Transform3D(-0.866026, -0.433013, 0.25, 0, 0.5, 0.866026, -0.5, 0.75, -0.433013, 0, 0, 0)
+light_color = Color(0.999999, 0.956654, 0.921352, 1)
+light_energy = 2.0
 shadow_enabled = true
-shadow_blur = 2.0
 directional_shadow_blend_splits = true
-directional_shadow_max_distance = 128.0
-script = SubResource("GDScript_sr0dt")
 
 [node name="Tunnel" parent="." instance=ExtResource("3_kdh0b")]
 
 [node name="Player" parent="." instance=ExtResource("3_ht63y")]
-transform = Transform3D(-0.993961, 0, -0.109734, 0, 1, 0, 0.109734, 0, -0.993961, 214.519, 109.342, -1811.15)
+transform = Transform3D(-0.993961, 0, -0.109734, 0, 1, 0, 0.109734, 0, -0.993961, 271.294, 107.09, -1748.75)
 
 [node name="Terrain3D" type="Terrain3D" parent="."]
 data_directory = "res://demo/data"
 material = SubResource("Terrain3DMaterial_jrc01")
 assets = ExtResource("8_g2of2")
 collision_mask = 3
-mesh_size = 32
+mesh_lods = 10
+mesh_size = 8
 cull_margin = 1000.0
 top_level = true
-visible = false
 metadata/_edit_lock_ = true
 
-[node name="Generated_ClipMap" type="Node3D" parent="Terrain3D" node_paths=PackedStringArray("t3d")]
+[node name="Generated_ClipMap" type="Node3D" parent="Terrain3D" node_paths=PackedStringArray("player", "t3d")]
 script = ExtResource("8_cb5wu")
+player = NodePath("../../Player")
 t3d = NodePath("..")
 terrain_mat = ExtResource("9_j3rso")
 details_mat = ExtResource("10_lkt0v")
-mesh_size = 64
+tessellation_divisions = 32
+tessellation_depth = 0.3
+tessellation_lod_split = true
 cull_margin = 500.0
 metadata/_edit_lock_ = true
+
+[node name="Water" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 277.925, 106.03, -1741.26)
+mesh = SubResource("PlaneMesh_k3u5j")
+
+[node name="Trees" type="Node3D" parent="."]
+
+[node name="elm" parent="Trees" instance=ExtResource("11_nmg80")]
+transform = Transform3D(-1.72327, 0, -3.38679, 0, 3.8, 0, 3.38679, 0, -1.72327, 263.961, 108.257, -1743.88)
+
+[node name="maple" parent="Trees" instance=ExtResource("11_e82tj")]
+transform = Transform3D(2.92, 0, 0, 0, 2.92, 0.00229336, 0, -0.00229336, 2.92, 251.365, 106.485, -1771.49)
+
+[node name="maple2" parent="Trees" instance=ExtResource("11_e82tj")]
+transform = Transform3D(-0.768361, -0.254495, 2.80558, -0.0672228, 2.90889, 0.245456, -2.81629, 0, -0.771296, 297.927, 108.549, -1773.39)
+
+[node name="maple3" parent="Trees" instance=ExtResource("11_e82tj")]
+transform = Transform3D(-1.37166, -0.17822, 1.73643, -0.0511078, 2.21155, 0.186614, -1.7448, 0.0753273, -1.37055, 312.659, 107.891, -1708.97)
+
+[node name="beech" parent="Trees" instance=ExtResource("12_7vxwb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 242.853, 108.371, -1719.7)
+
+[node name="beech3" parent="Trees" instance=ExtResource("12_7vxwb")]
+transform = Transform3D(1.01781, 0, 0.626163, 0, 1.195, 0, -0.626163, 0, 1.01781, 259.012, 108.047, -1713.76)
+
+[node name="beech4" parent="Trees" instance=ExtResource("12_7vxwb")]
+transform = Transform3D(0.944547, 0.0151152, 1.44334, 0, 1.72491, -0.0180638, -1.44342, 0.00989109, 0.944495, 248.4, 108.047, -1714.03)
+
+[node name="beech2" parent="Trees" instance=ExtResource("12_7vxwb")]
+transform = Transform3D(0.0832712, 0.0547791, 1.63196, 0.0595798, 1.63289, -0.0578504, -1.63179, 0.0624153, 0.0811676, 255.85, 115.678, -1804.56)
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 294.333, 105.615, -1743.6)
+process_material = SubResource("ParticleProcessMaterial_82itg")
+draw_pass_1 = ExtResource("15_476pn")

@@ -1,8 +1,16 @@
 shader_type spatial;
 render_mode blend_mix,depth_draw_always,cull_back,diffuse_burley,specular_schlick_ggx,skip_vertex_transform;
 
-uniform float test1 : hint_range(0.0, 4.0, 0.1) = 0.0;
-uniform float test2 : hint_range(0.0, 4.0, 0.1) = 0.0;
+uniform float tesselation_depth = 0.5;
+uniform float test2 = 0.0;
+
+uniform float mesh_size = 32.0; // set as tile size + 1
+uniform float lod_blend : hint_range(0.0, 1.0, 0.01) = 1.0;
+uniform bool smooth_normals = true;
+uniform bool color_mode = false;
+uniform vec3 camera_pos;
+uniform vec3 snap_pos;
+uniform float tile_div = 1.0;
 
 uniform float _region_size = 1024.0;
 uniform float _region_texel_size = 0.0009765625; // = 1/1024
@@ -231,15 +239,14 @@ vec4 height_blend(vec4 a_value, float a_height, vec4 b_value, float b_height, fl
 	}
 }
 // 2-4 lookups
-void v_get_material(vec2 base_uv, uint control, ivec3 iuv_center, vec3 normal, out Material out_mat) {
-	out_mat = Material(vec4(0.), vec4(0.), 0, 0, 0.0);
+float v_get_detail_height(vec2 base_uv, uint control, ivec3 iuv_center, vec3 normal) {
 	vec2 uv_center = vec2(iuv_center.xy);
 	int region = iuv_center.z;
 	// Enable Autoshader if outside regions or painted in regions, otherwise manual painted
 	bool auto_shader = region < 0 || bool(control & 0x1u);
-	out_mat.base = int(auto_shader) * auto_base_texture + int(!auto_shader) * int(control >>27u & 0x1Fu);
-	out_mat.over = int(auto_shader) * auto_overlay_texture + int(!auto_shader) * int(control >> 22u & 0x1Fu);
-	out_mat.blend = float(auto_shader) * clamp(
+	int base = int(auto_shader) * auto_base_texture + int(!auto_shader) * int(control >>27u & 0x1Fu);
+	int over = int(auto_shader) * auto_overlay_texture + int(!auto_shader) * int(control >> 22u & 0x1Fu);
+	float blend = float(auto_shader) * clamp(
 			dot(vec3(0., 1., 0.), normal * auto_slope * 2. - (auto_slope * 2. - 1.))
 			- auto_height_reduction * .01 * v_vertex.y // Reduce as vertices get higher
 			, 0., 1.) +
@@ -261,41 +268,38 @@ void v_get_material(vec2 base_uv, uint control, ivec3 iuv_center, vec3 normal, o
 
 	vec2 matUV = base_uv;
 	vec4 albedo_ht = vec4(0.);
-	float mat_scale = _texture_uv_scale_array[out_mat.base];
+	float mat_scale = _texture_uv_scale_array[base];
 	// If dual scaling, apply to base texture
 	if(region < 0) {
 		mat_scale *= tri_scale_reduction;
 	}
 	//each time we change scale, recalculate antitiling from baseline to maintain continuity.
-	matUV = detiling(base_uv * mat_scale, uv_center * mat_scale, out_mat.base, na);
-	float lod = 0.;
-	albedo_ht = textureLod(_texture_array_albedo, vec3(matUV, float(out_mat.base)), lod);
+	matUV = detiling(base_uv * mat_scale, uv_center * mat_scale, base, na);
+	float lod = 2.;
+	albedo_ht = textureLod(_texture_array_albedo, vec3(matUV, float(base)), lod);
 
-	// Setup overlay texture to blend
-	float mat_scale2 = _texture_uv_scale_array[out_mat.over];
-	vec2 matUV2 = detiling(base_uv * mat_scale2, uv_center * mat_scale2, out_mat.over, na);
-	vec4 albedo_ht2 = textureLod(_texture_array_albedo, vec3(matUV2, float(out_mat.over)), lod);
-
-	if (out_mat.blend > 0.f) {
+	if (blend > 0.f) {
+		// Setup overlay texture to blend
+		float mat_scale2 = _texture_uv_scale_array[over];
+		vec2 matUV2 = detiling(base_uv * mat_scale2, uv_center * mat_scale2, over, na);
+		vec4 albedo_ht2 = textureLod(_texture_array_albedo, vec3(matUV2, float(over)), lod);
 		// Blend overlay and base
-		albedo_ht = mix(albedo_ht, albedo_ht2, out_mat.blend);//height_blend(albedo_ht, albedo_ht.a, albedo_ht2, albedo_ht2.a, out_mat.blend);
+		albedo_ht = mix(albedo_ht, albedo_ht2, blend);//height_blend(albedo_ht, albedo_ht.a, albedo_ht2, albedo_ht2.a, out_mat.blend);
 	}
-	out_mat.alb_ht = albedo_ht;
-	return;
+	return albedo_ht.a;
 }
-
-////////
-
-uniform float mesh_size = 32.0; // set as tile size + 1
-uniform float lod_blend : hint_range(0.0, 1.0, 0.01) = 1.0;
-uniform bool smooth_normals = true;
-uniform bool color_mode = false;
-uniform vec3 camera_pos;
-
-
 
 
 void vertex() {
+	vec3 camera_pos_local = camera_pos - MODEL_MATRIX[3].xyz;
+	float xz_view_dist = length((MODEL_MATRIX * vec4(VERTEX, 0.0)).xz - (camera_pos_local).xz);
+	float vertex_lerp = round(clamp(xz_view_dist - (mesh_size * 0.5 - 2.0), 0.0, 1.0));
+	VERTEX.xz -= fract(VERTEX.xz * tile_div) * (1.0 / tile_div) * vertex_lerp;
+
+	xz_view_dist = length((MODEL_MATRIX * vec4(VERTEX, 0.0)).xz - (camera_pos_local).xz);
+	vertex_lerp = round(clamp(xz_view_dist - (mesh_size - 1.0), 0.0, 1.0));
+	VERTEX.xz -= fract(VERTEX.xz) * vertex_lerp;
+
 	// Get camera pos in world vertex coords
 	v_camera_pos = camera_pos;
 
@@ -304,7 +308,7 @@ void vertex() {
 
 	// Camera distance to vertex on flat plane
 	v_vertex_xz_dist = length(v_vertex.xz - v_camera_pos.xz);
-	float detail_blend =  1.0 - clamp(v_vertex_xz_dist - mesh_size + 4.0, 0.0, 4.0) * 0.25;
+	float detail_blend =  1.0 - clamp(v_vertex_xz_dist - mesh_size + 6.0, 0.0, 4.0) * 0.25;
 	// UV coordinates in world space. Values are 0 to _region_size within regions
 	UV = (v_vertex.xz * _vertex_density);
 
@@ -357,11 +361,12 @@ void vertex() {
 			};
 
 			// Get the textures for each vertex. 8-16 lookups (2-4 ea)
-			Material mat[4];
-			v_get_material(UV, control[0], indexUV[0], v_normal, mat[0]);
-			v_get_material(UV, control[1], indexUV[1], v_normal, mat[1]);
-			v_get_material(UV, control[2], indexUV[2], v_normal, mat[2]);
-			v_get_material(UV, control[3], indexUV[3], v_normal, mat[3]);
+			float dh[4] = {
+			v_get_detail_height(UV, control[0], indexUV[0], v_normal),
+			v_get_detail_height(UV, control[1], indexUV[1], v_normal),
+			v_get_detail_height(UV, control[2], indexUV[2], v_normal),
+			v_get_detail_height(UV, control[3], indexUV[3], v_normal)
+			};
 
 			// Calculate weight for the pixel position between the vertices
 			// Bilinear interpolation of difference of uv and floor(uv)
@@ -375,17 +380,17 @@ void vertex() {
 			weights.y = weights0.x * weights1.y;
 			weights.z = weights1.x * weights0.y;
 			weights.w = weights1.x * weights1.y;
-			weights *= 1.0 / (weights.x + weights.y + weights.z + weights.w);
+			//weights *= 1.0 / (weights.x + weights.y + weights.z + weights.w);
 
 			// Weighted average of albedo & height
-			vec4 albedo_height =
-				mat[0].alb_ht * weights.x +
-				mat[1].alb_ht * weights.y +
-				mat[2].alb_ht * weights.z +
-				mat[3].alb_ht * weights.w - 0.333;
+			float height =
+				dh[0] * weights.x +
+				dh[1] * weights.y +
+				dh[2] * weights.z +
+				dh[3] * weights.w - 0.25;
 
-			
-			v_vertex.y += albedo_height.a * detail_blend * 0.5;
+
+			v_vertex.y += height * tesselation_depth * detail_blend;
 
 		// Due to a bug caused by the GPUs linear interpolation across edges of region maps,
 		// mask region edges and use vertex normals only across region boundaries.

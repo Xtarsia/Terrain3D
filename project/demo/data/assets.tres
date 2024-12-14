@@ -1,37 +1,25 @@
 [gd_resource type="Terrain3DAssets" load_steps=12 format=3 uid="uid://dal3jhw6241qg"]
 
 [ext_resource type="Texture2D" uid="uid://br7bfxcxh60df" path="res://demo/assets/textures/rock030_alb_ht.png" id="1_v81ad"]
+[ext_resource type="PackedScene" uid="uid://ulgo8f1ahq5i" path="res://assets/test.tscn" id="1_ywg0f"]
 [ext_resource type="Texture2D" uid="uid://btc10pj278l3y" path="res://demo/assets/textures/rock030_nrm_rgh.png" id="2_72dup"]
 [ext_resource type="Texture2D" uid="uid://ddprscrpsofah" path="res://demo/assets/textures/ground037_alb_ht.png" id="3_g8f2m"]
 [ext_resource type="Texture2D" uid="uid://qi5mp53f34ij" path="res://demo/assets/textures/ground037_nrm_rgh.png" id="4_aw5y1"]
 [ext_resource type="Texture2D" uid="uid://dd4it8ipkx3sw" path="res://rock/packed_albedo_height.png" id="5_fq1qo"]
 [ext_resource type="Texture2D" uid="uid://lcpaks7wn45b" path="res://rock/packed_normal_roughness.png" id="6_mq124"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_aubfq"]
-transparency = 2
-alpha_scissor_threshold = 0.5
-alpha_antialiasing_mode = 0
-cull_mode = 2
-vertex_color_use_as_albedo = true
-backlight_enabled = true
-backlight = Color(0.5, 0.5, 0.5, 1)
-distance_fade_mode = 1
-distance_fade_min_distance = 960.0
-distance_fade_max_distance = 480.0
-
-[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_dw1mh"]
-height_offset = 0.5
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_qwqip"]
+name = "test"
 density = 10.0
-visibility_range = 0.0
-material_override = SubResource("StandardMaterial3D_aubfq")
-generated_type = 1
+visibility_range = 128.0
+scene_file = ExtResource("1_ywg0f")
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_mup2f"]
 name = "Rock"
 albedo_color = Color(1.596, 1.56, 1.5, 1)
 albedo_texture = ExtResource("1_v81ad")
 normal_texture = ExtResource("2_72dup")
-uv_scale = 0.346
+uv_scale = 1.384
 detiling = 1.0
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_od0q7"]
@@ -40,7 +28,7 @@ id = 1
 albedo_color = Color(0.67451, 0.74902, 0.686275, 1)
 albedo_texture = ExtResource("3_g8f2m")
 normal_texture = ExtResource("4_aw5y1")
-uv_scale = 0.225
+uv_scale = 0.9
 detiling = 1.0
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_6fs6r"]
@@ -49,9 +37,9 @@ id = 2
 albedo_color = Color(1.116, 1.1, 1.093, 1)
 albedo_texture = ExtResource("5_fq1qo")
 normal_texture = ExtResource("6_mq124")
-uv_scale = 0.685
+uv_scale = 1.37
 detiling = 1.0
 
 [resource]
-mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_dw1mh")])
+mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_qwqip")])
 texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_mup2f"), SubResource("Terrain3DTextureAsset_od0q7"), SubResource("Terrain3DTextureAsset_6fs6r")])

@@ -209,10 +209,10 @@ uniform vec3 camera_pos;
 void vertex() {
 	// Scale derived from x axis basis vector - x & z axis scales must be the same.
 	float scale = length(MODEL_MATRIX[0].xyz);
-	vec3 camera_pos_local = camera_pos - MODEL_MATRIX[3].xyz;
-	float xz_view_dist = length((MODEL_MATRIX * vec4(VERTEX, 0.0)).xz - (camera_pos_local).xz) / scale;
+	v_vertex = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float xz_view_dist = length(v_vertex.xz - (camera_pos).xz) / scale;
 	float vertex_lerp = clamp((xz_view_dist - (mesh_size * 1.5)) / mix(1.0, mesh_size * 0.33, lod_blend), 0.0, 1.0) * 2.0;
-	VERTEX.xz -= fract(VERTEX.xz * 0.5) * vertex_lerp;
+	VERTEX.xz -= fract(VERTEX.xz * 0.5) * vertex_lerp * round((fract(abs(v_vertex.xz / scale) / (4.)) - (0.5) ) * (4.0));
 
 	// Get camera pos in world vertex coords
 	v_camera_pos = INV_VIEW_MATRIX[3].xyz;
