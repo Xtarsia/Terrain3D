@@ -291,14 +291,25 @@ float v_get_detail_height(vec2 base_uv, uint control, ivec3 iuv_center, vec3 nor
 
 
 void vertex() {
-	vec3 camera_pos_local = camera_pos - MODEL_MATRIX[3].xyz;
+	// this is for circular tessellation, however it is very wasteful,
+	// and only looks better if using smaller distance and divisions
+	//vec3 camera_pos_local = camera_pos - MODEL_MATRIX[3].xyz;
+	//float xz_view_dist = length((MODEL_MATRIX * vec4(VERTEX, 0.0)).xz - (camera_pos_local).xz);
+	//float vertex_lerp = round(clamp(xz_view_dist - (mesh_size * 0.5 - 2.0), 0.0, 1.0));
+	//VERTEX.xz -= fract(VERTEX.xz * tile_div) * (1.0 / tile_div) * vertex_lerp;
+
+	//xz_view_dist = length((MODEL_MATRIX * vec4(VERTEX, 0.0)).xz - (camera_pos_local).xz);
+	//vertex_lerp = round(clamp(xz_view_dist - (mesh_size - 1.0), 0.0, 1.0));
+	//VERTEX.xz -= fract(VERTEX.xz) * vertex_lerp;
+
+	vec3 camera_pos_local = snap_pos - MODEL_MATRIX[3].xyz;
 	float xz_view_dist = length((MODEL_MATRIX * vec4(VERTEX, 0.0)).xz - (camera_pos_local).xz);
-	float vertex_lerp = round(clamp(xz_view_dist - (mesh_size * 0.5 - 2.0), 0.0, 1.0));
-	VERTEX.xz -= fract(VERTEX.xz * tile_div) * (1.0 / tile_div) * vertex_lerp;
+	float vertex_lerp = round(clamp(xz_view_dist - (mesh_size * 0.5), 0.0, 1.0));
+	//VERTEX.xz -= fract(VERTEX.xz * tile_div) * (1.0 / tile_div) * vertex_lerp;
 
 	xz_view_dist = length((MODEL_MATRIX * vec4(VERTEX, 0.0)).xz - (camera_pos_local).xz);
-	vertex_lerp = round(clamp(xz_view_dist - (mesh_size - 1.0), 0.0, 1.0));
-	VERTEX.xz -= fract(VERTEX.xz) * vertex_lerp;
+	vertex_lerp = (clamp(xz_view_dist - (mesh_size + 1.0), 0.0, 1.0));
+	//VERTEX.xz -= fract(VERTEX.xz) * vertex_lerp;
 
 	// Get camera pos in world vertex coords
 	v_camera_pos = camera_pos;
@@ -308,7 +319,7 @@ void vertex() {
 
 	// Camera distance to vertex on flat plane
 	v_vertex_xz_dist = length(v_vertex.xz - v_camera_pos.xz);
-	float detail_blend =  1.0 - clamp(v_vertex_xz_dist - mesh_size + 6.0, 0.0, 4.0) * 0.25;
+	float detail_blend =  1.0 - clamp(v_vertex_xz_dist - mesh_size + 2.0, 0.0, 4.0) * 0.25;
 	// UV coordinates in world space. Values are 0 to _region_size within regions
 	UV = (v_vertex.xz * _vertex_density);
 

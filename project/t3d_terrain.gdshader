@@ -1,6 +1,8 @@
 shader_type spatial;
 render_mode blend_mix,depth_draw_always,cull_back,diffuse_burley,specular_schlick_ggx,skip_vertex_transform;
 
+uniform float test : hint_range(0.0, 1.0, 0.01) = 0.0;
+
 uniform float _region_size = 1024.0;
 uniform float _region_texel_size = 0.0009765625; // = 1/1024
 uniform float _vertex_spacing = 1.0;
@@ -211,8 +213,19 @@ void vertex() {
 	float scale = length(MODEL_MATRIX[0].xyz);
 	v_vertex = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	float xz_view_dist = length(v_vertex.xz - (camera_pos).xz) / scale;
-	float vertex_lerp = clamp((xz_view_dist - (mesh_size * 1.5)) / mix(1.0, mesh_size * 0.33, lod_blend), 0.0, 1.0) * 2.0;
-	VERTEX.xz -= fract(VERTEX.xz * 0.5) * vertex_lerp * round((fract(abs(v_vertex.xz / scale) / (4.)) - (0.5) ) * (4.0));
+	float vertex_lerp = clamp((xz_view_dist - (mesh_size * 1.6)) / mix(1.0, mesh_size * 0.4, lod_blend), 0.0, 0.5) * 2.0;
+	//VERTEX.xz -= fract(VERTEX.xz * 0.5) * vertex_lerp;// * round((fract(abs(v_vertex.xz / scale) / (4.)) - (0.5) ) * (4.0));
+	//VERTEX.xz += (fract(VERTEX.xz - 0.5)) * vertex_lerp * round((fract((VERTEX.xz - 0.5) * 0.5) - 0.5) * 4.0) - vertex_lerp * 0.5;
+	ivec2 shift_pos = ivec2((fract(VERTEX.xz * 0.5) * 4.0));
+	const mat4 shift_index = mat4(
+		vec4(0, 0, 1, 0), vec4(0, 2, 0, 3),
+		vec4(4, 0, 0, 0), vec4(0, 5, 0, 6)
+	);
+	const vec2 shift_values[7] = {
+		vec2(0.0, 0.0), vec2(0.0, 1.0), vec2(-0.5), vec2(-0.5, 0.5),
+		vec2(1.0, 0.0), vec2(0.5, -0.5), vec2(0.5)
+	};
+	VERTEX.xz += shift_values[int(shift_index[shift_pos.x][shift_pos.y])] * vertex_lerp;
 
 	// Get camera pos in world vertex coords
 	v_camera_pos = INV_VIEW_MATRIX[3].xyz;

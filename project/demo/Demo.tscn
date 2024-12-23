@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://chol2xlfbq7cu"]
+[gd_scene load_steps=30 format=3 uid="uid://chol2xlfbq7cu"]
 
 [ext_resource type="Script" path="res://demo/src/DemoScene.gd" id="1_k7qca"]
 [ext_resource type="PackedScene" uid="uid://d2jihfohphuue" path="res://demo/components/UI.tscn" id="2_nqak5"]
@@ -14,7 +14,6 @@
 [ext_resource type="PackedScene" uid="uid://coqpjvnnlq3ik" path="res://assets/trees/maple.tscn" id="11_e82tj"]
 [ext_resource type="PackedScene" uid="uid://baumq7hj4vg2r" path="res://assets/trees/elm.tscn" id="11_nmg80"]
 [ext_resource type="PackedScene" uid="uid://ci0qp3hh8ql53" path="res://assets/trees/beech.tscn" id="12_7vxwb"]
-[ext_resource type="ArrayMesh" uid="uid://bjrtavpihjvs6" path="res://assets/fish/fish.mesh" id="15_476pn"]
 
 [sub_resource type="Sky" id="Sky_srg7c"]
 sky_material = ExtResource("4_avitu")
@@ -727,7 +726,7 @@ shader_parameter/ssr_resolution_near = 1.0
 shader_parameter/ssr_resolution_far = 5.0
 shader_parameter/ssr_tolerance = 1.0
 shader_parameter/refraction_strength = 1.25
-shader_parameter/normal_map_strength = 0.47
+shader_parameter/normal_map_strength = 0.25
 shader_parameter/scroll_speed = 0.03
 shader_parameter/scroll_offset = Vector2(0.1, -0.3)
 shader_parameter/scale_offset = 0.5
@@ -741,19 +740,6 @@ material = SubResource("ShaderMaterial_i5ccn")
 size = Vector2(80, 60)
 subdivide_width = 159
 subdivide_depth = 119
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_82itg"]
-emission_shape_scale = Vector3(1, 0, 1)
-emission_shape = 2
-emission_sphere_radius = 2.0
-direction = Vector3(-1, 0, 0)
-spread = 0.0
-flatness = 1.0
-initial_velocity_min = 0.5
-initial_velocity_max = 1.0
-gravity = Vector3(0, 0, 0)
-scale_min = 50.0
-scale_max = 100.0
 
 [node name="Demo" type="Node"]
 script = ExtResource("1_k7qca")
@@ -799,9 +785,8 @@ player = NodePath("../../Player")
 t3d = NodePath("..")
 terrain_mat = ExtResource("9_j3rso")
 details_mat = ExtResource("10_lkt0v")
-tessellation_divisions = 32
+tessellation_divisions = 12
 tessellation_depth = 0.3
-tessellation_lod_split = true
 cull_margin = 500.0
 metadata/_edit_lock_ = true
 
@@ -834,8 +819,3 @@ transform = Transform3D(0.944547, 0.0151152, 1.44334, 0, 1.72491, -0.0180638, -1
 
 [node name="beech2" parent="Trees" instance=ExtResource("12_7vxwb")]
 transform = Transform3D(0.0832712, 0.0547791, 1.63196, 0.0595798, 1.63289, -0.0578504, -1.63179, 0.0624153, 0.0811676, 255.85, 115.678, -1804.56)
-
-[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 294.333, 105.615, -1743.6)
-process_material = SubResource("ParticleProcessMaterial_82itg")
-draw_pass_1 = ExtResource("15_476pn")

@@ -12,6 +12,7 @@
 name = "test"
 density = 10.0
 visibility_range = 128.0
+cast_shadows = 0
 scene_file = ExtResource("1_ywg0f")
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_mup2f"]
@@ -28,7 +29,7 @@ id = 1
 albedo_color = Color(0.67451, 0.74902, 0.686275, 1)
 albedo_texture = ExtResource("3_g8f2m")
 normal_texture = ExtResource("4_aw5y1")
-uv_scale = 0.9
+uv_scale = 0.3
 detiling = 1.0
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_6fs6r"]

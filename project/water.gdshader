@@ -255,10 +255,10 @@ void fragment() {
 	// Calculate Fragment Depth
 	vec4 clip_pos = PROJECTION_MATRIX * vec4(VERTEX, 1.0);
 	clip_pos.xyz /= clip_pos.w;
-	DEPTH = clip_pos.z;
+	//DEPTH = clip_pos.z;
 	// Refract UV
 	vec2 refracted_uv = SCREEN_UV;
-	refract_uv(refracted_uv, NORMAL_MAP, sqrt(DEPTH) * relative_depth);
+	refract_uv(refracted_uv, NORMAL_MAP, sqrt(clip_pos.z) * relative_depth);
 
 	vec3 screen;
 	float depth_blend;
@@ -316,7 +316,7 @@ void fragment() {
 		current_depth = get_view_position_from_uv(current_screen_pos, texture(depth_texture, current_screen_pos).x, INV_PROJECTION_MATRIX).z - current_view_pos.z;
 
 		if (current_depth > -0.0001 && current_depth <= ssr_tolerance * current_stepD) {
-			sampled_color = textureLod(screen_texture, current_screen_pos, 0.5).rgb;
+			sampled_color = textureLod(screen_texture, current_screen_pos, 0.0).rgb;
 			vec2 ruv = 1.0 - abs(current_screen_pos * 2.0 - 1.0);
 			ruv = pow(ruv, vec2(0.5));
 			alpha_hit = clamp(min(ruv.x, ruv.y), 0.0, 1.0);
