@@ -219,11 +219,11 @@ void vertex() {
 	ivec2 shift_pos = ivec2((fract(VERTEX.xz * 0.5) * 4.0));
 	const mat4 shift_index = mat4(
 		vec4(0, 0, 1, 0), vec4(0, 2, 0, 3),
-		vec4(4, 0, 0, 0), vec4(0, 5, 0, 6)
+		vec4(4, 0, 0, 0), vec4(0, 3, 0, 2)
 	);
-	const vec2 shift_values[7] = {
-		vec2(0.0, 0.0), vec2(0.0, 1.0), vec2(-0.5), vec2(-0.5, 0.5),
-		vec2(1.0, 0.0), vec2(0.5, -0.5), vec2(0.5)
+	const vec2 shift_values[5] = {
+		vec2(0.0, 0.0), vec2(0.0, -1.0), vec2(-0.5), vec2(-0.5, 0.5),
+		vec2(-1.0, 0.0)
 	};
 	VERTEX.xz += shift_values[int(shift_index[shift_pos.x][shift_pos.y])] * vertex_lerp;
 
