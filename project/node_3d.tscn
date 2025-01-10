@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://b4j8xo0qb8g0t"]
+
+[ext_resource type="Script" path="res://node_3d.gd" id="1_qu04v"]
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_qu04v")
+grid_size = Vector2i(64, 64)
+tile_size = 128
+regen = null
