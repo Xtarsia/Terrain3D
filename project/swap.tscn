@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://d261ke5464xu0"]
+
+[ext_resource type="Script" path="res://swap.gd" id="1_6o32w"]
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_6o32w")
+tile_size = 64
+grid_size = 128
