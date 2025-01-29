@@ -1,12 +1,45 @@
-[gd_scene load_steps=5 format=3 uid="uid://bn5nf4esciwex"]
+[gd_scene load_steps=9 format=3 uid="uid://bn5nf4esciwex"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_33eyr"]
+distance_fade_mode = 2
+distance_fade_min_distance = 80.0
+distance_fade_max_distance = 64.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_u4ac2"]
+material = SubResource("StandardMaterial3D_33eyr")
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_ntfxj"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xb8kd"]
+albedo_color = Color(0, 0.742595, 0.819244, 1)
+distance_fade_mode = 2
+distance_fade_min_distance = 144.0
+distance_fade_max_distance = 128.0
 
-[sub_resource type="BoxMesh" id="BoxMesh_74bvi"]
+[sub_resource type="SphereMesh" id="SphereMesh_p3ow4"]
+material = SubResource("StandardMaterial3D_xb8kd")
+radial_segments = 16
+rings = 8
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_g2vnq"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bve2f"]
+albedo_color = Color(0.838044, 0.235598, 0.975346, 1)
+distance_fade_mode = 2
+distance_fade_min_distance = 208.0
+distance_fade_max_distance = 192.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_nyyja"]
+material = SubResource("StandardMaterial3D_bve2f")
+radial_segments = 7
+rings = 5
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ggido"]
+albedo_color = Color(0.985678, 0, 0.169898, 1)
+distance_fade_mode = 2
+distance_fade_min_distance = 528.0
+distance_fade_max_distance = 512.0
+
+[sub_resource type="SphereMesh" id="SphereMesh_ub1t0"]
+material = SubResource("StandardMaterial3D_ggido")
+radial_segments = 4
+rings = 2
 
 [node name="TestMultimesh" type="Node3D"]
 
@@ -14,16 +47,15 @@
 
 [node name="MeshInstance3D1" type="MeshInstance3D" parent="Node3D"]
 mesh = SubResource("SphereMesh_u4ac2")
-skeleton = NodePath("../..")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="Node3D"]
-mesh = SubResource("CapsuleMesh_ntfxj")
-skeleton = NodePath("../..")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.715342, 0, 0)
+mesh = SubResource("SphereMesh_p3ow4")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="Node3D"]
-mesh = SubResource("BoxMesh_74bvi")
-skeleton = NodePath("../..")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.47214, 0, 0)
+mesh = SubResource("SphereMesh_nyyja")
 
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="Node3D"]
-mesh = SubResource("CylinderMesh_g2vnq")
-skeleton = NodePath("../..")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.20912, 0, 0)
+mesh = SubResource("SphereMesh_ub1t0")

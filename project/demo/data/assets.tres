@@ -21,20 +21,20 @@ height_offset = 0.5
 material_override = SubResource("StandardMaterial3D_mapyw")
 generated_type = 1
 
-[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_or12t"]
-name = "TestMultimesh"
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_oro1c"]
+name = "MultimeshLODs"
 id = 1
-height_offset = 3.0
-density = 2.0
+height_offset = 2.0
+visibility_margin = 64.0
 maximum_lod = 3
-minimum_shadow_lod = 2
+minimum_shadow_lod = 1
 maximum_shadow_lod = 2
-lod_0_visibility_range = 25.0
-lod_1_visibility_range = 40.0
-lod_2_visibility_range = 60.0
-lod_3_visibility_range = 150.0
+lod_0_visibility_range = 64.0
+lod_1_visibility_range = 128.0
+lod_2_visibility_range = 192.0
+lod_3_visibility_range = 512.0
 scene_file = ExtResource("1_07hwj")
-visibility_range = 25.0
+visibility_range = 64.0
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_mup2f"]
 name = "Rock"
@@ -52,5 +52,5 @@ uv_scale = 0.2
 detiling = 0.161
 
 [resource]
-mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_2qf8x"), SubResource("Terrain3DMeshAsset_or12t")])
+mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_2qf8x"), SubResource("Terrain3DMeshAsset_oro1c")])
 texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_mup2f"), SubResource("Terrain3DTextureAsset_od0q7")])
