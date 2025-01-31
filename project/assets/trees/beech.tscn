@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://ci0qp3hh8ql53"]
+
+[ext_resource type="PackedScene" uid="uid://by2wdtviclevf" path="res://assets/trees/beech.fbx" id="1_5ickp"]
+[ext_resource type="Material" uid="uid://ccaru5dijeu1x" path="res://assets/trees/beech_trunk.material" id="2_awdkf"]
+[ext_resource type="Material" uid="uid://prwj5w1ipwgv" path="res://assets/trees/beech_leaf.material" id="3_fsgp4"]
+
+[node name="beech" instance=ExtResource("1_5ickp")]
+
+[node name="bark01_0" parent="." index="0"]
+surface_material_override/0 = ExtResource("2_awdkf")
+
+[node name="beech leaf_1" parent="bark01_0" index="0"]
+surface_material_override/0 = ExtResource("3_fsgp4")

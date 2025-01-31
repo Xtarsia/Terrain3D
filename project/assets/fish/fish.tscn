@@ -1,0 +1,45 @@
+[gd_scene load_steps=8 format=3 uid="uid://d1kqrnsa3hpy6"]
+
+[ext_resource type="PackedScene" uid="uid://mxkb0fmt66fd" path="res://assets/fish/TailorsculptedLOD0WithAnim.fbx" id="1_dyund"]
+[ext_resource type="Texture2D" uid="uid://bccu5s7gg0og6" path="res://assets/fish/Tailor_low_DefaultMaterial_BaseColor.png" id="2_mrqmj"]
+[ext_resource type="Texture2D" uid="uid://pfnwhk2hq3ku" path="res://assets/fish/Tailor_low_DefaultMaterial_Height.png" id="3_jrb3n"]
+[ext_resource type="Texture2D" uid="uid://t4xreg3vbehx" path="res://assets/fish/Tailor_low_DefaultMaterial_Metallic.png" id="4_a3fpk"]
+[ext_resource type="Texture2D" uid="uid://dwywko31lbobt" path="res://assets/fish/Tailor_low_DefaultMaterial_Normal.png" id="5_yyxvg"]
+[ext_resource type="Texture2D" uid="uid://v7wbikrlah5f" path="res://assets/fish/Tailor_low_DefaultMaterial_Roughness.png" id="6_6txgx"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dijkw"]
+albedo_texture = ExtResource("2_mrqmj")
+metallic = 1.0
+metallic_texture = ExtResource("4_a3fpk")
+roughness_texture = ExtResource("6_6txgx")
+normal_enabled = true
+normal_texture = ExtResource("5_yyxvg")
+heightmap_texture = ExtResource("3_jrb3n")
+heightmap_flip_texture = true
+
+[node name="TailorsculptedLOD0WithAnim" instance=ExtResource("1_dyund")]
+
+[node name="Armature" parent="." index="0"]
+transform = Transform3D(2.52394e-06, 4.12572e-06, 15.4918, -1.35434e-06, -15.4918, 4.12572e-06, 15.4918, -1.35434e-06, -2.52394e-06, -0.295643, 0, 0)
+
+[node name="Skeleton3D" parent="Armature" index="0"]
+bones/0/rotation = Quaternion(0.71407, 0.0359631, -0.0367816, 0.698182)
+bones/1/position = Vector3(-1.20957e-09, -0.00217349, -0.00128792)
+bones/1/rotation = Quaternion(0.977968, 0.00344403, -0.0173636, 0.208006)
+bones/3/rotation = Quaternion(-0.0112389, -0.00049397, -0.043906, 0.998972)
+bones/4/rotation = Quaternion(6.07935e-11, 2.48423e-13, 0.0039584, 0.999992)
+bones/5/rotation = Quaternion(-1.40213e-14, -3.69782e-15, 0.0575515, 0.998343)
+bones/6/rotation = Quaternion(-0.00535051, -0.000261847, 0.0482349, 0.998822)
+bones/8/rotation = Quaternion(-0.0571712, 0.920681, 0.373741, 0.0969311)
+bones/10/rotation = Quaternion(-0.360285, -0.140738, -0.0468957, 0.920972)
+bones/12/rotation = Quaternion(3.88903e-08, 0.999094, -0.0425499, -1.06789e-06)
+bones/14/rotation = Quaternion(-0.49227, 0.0780149, 0.0837805, 0.862882)
+bones/16/rotation = Quaternion(-0.147502, -0.691551, -0.147502, 0.691551)
+bones/18/rotation = Quaternion(0.130991, -0.694868, 0.130991, 0.694868)
+bones/20/rotation = Quaternion(0.976325, 3.29243e-05, -4.61494e-05, 0.216311)
+
+[node name="Tailor_LOD0" parent="Armature/Skeleton3D" index="0"]
+surface_material_override/0 = SubResource("StandardMaterial3D_dijkw")
+
+[node name="AnimationPlayer" parent="." index="1"]
+autoplay = "Armature|Swim_01"

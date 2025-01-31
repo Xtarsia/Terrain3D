@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://coqpjvnnlq3ik"]
+
+[ext_resource type="PackedScene" uid="uid://b65nbb8i8p5q7" path="res://assets/trees/maple.fbx" id="1_7d28v"]
+[ext_resource type="Material" uid="uid://d1h6dviidlxcq" path="res://assets/trees/maple_trunk.material" id="2_l6yow"]
+[ext_resource type="Material" uid="uid://b05kf77b3b35c" path="res://assets/trees/maple_leaf.material" id="3_sr0c6"]
+
+[node name="maple" instance=ExtResource("1_7d28v")]
+
+[node name="bark02_0" parent="." index="0"]
+surface_material_override/0 = ExtResource("2_l6yow")
+
+[node name="leaf maple_1" parent="bark02_0" index="0"]
+surface_material_override/0 = ExtResource("3_sr0c6")

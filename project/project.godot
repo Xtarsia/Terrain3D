@@ -36,3 +36,15 @@ import/blender/enabled=false
 
 textures/vram_compression/import_etc2_astc=true
 occlusion_culling/use_occlusion_culling=true
+mesh_lod/lod_change/threshold_pixels=0.0
+
+[shader_globals]
+
+main_camera_position={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+player_position={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}

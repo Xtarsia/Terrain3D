@@ -1,0 +1,13 @@
+[gd_scene load_steps=4 format=3 uid="uid://baumq7hj4vg2r"]
+
+[ext_resource type="PackedScene" uid="uid://dmtj8nwkp7uf6" path="res://assets/trees/elm.fbx" id="1_f7n6i"]
+[ext_resource type="Material" uid="uid://r22j5d7ypx6w" path="res://assets/trees/elm_trunk.material" id="2_x6nys"]
+[ext_resource type="Material" uid="uid://pv1rgfgka815" path="res://assets/trees/elm_leaf.material" id="3_44fos"]
+
+[node name="elm" instance=ExtResource("1_f7n6i")]
+
+[node name="bark07_0" parent="." index="0"]
+surface_material_override/0 = ExtResource("2_x6nys")
+
+[node name="elm leaf_1" parent="bark07_0" index="0"]
+surface_material_override/0 = ExtResource("3_44fos")

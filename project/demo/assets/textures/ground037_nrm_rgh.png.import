@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c1ots7w6i0i1q"
+uid="uid://qi5mp53f34ij"
 path.bptc="res://.godot/imported/ground037_nrm_rgh.png-02372c72ee87f1844ee708d952e43e96.bptc.ctex"
 path.astc="res://.godot/imported/ground037_nrm_rgh.png-02372c72ee87f1844ee708d952e43e96.astc.ctex"
 metadata={
@@ -27,10 +27,10 @@ mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
-process/fix_alpha_border=true
+process/fix_alpha_border=false
 process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0
