@@ -2,6 +2,7 @@ shader_type spatial;
 render_mode blend_mix,depth_draw_always,cull_back,diffuse_burley,specular_schlick_ggx,skip_vertex_transform;
 
 uniform float test : hint_range(0.0, 1.0, 0.01) = 0.0;
+uniform int mode = 0;
 
 uniform float _region_size = 1024.0;
 uniform float _region_texel_size = 0.0009765625; // = 1/1024
@@ -207,39 +208,40 @@ uniform vec3 camera_pos;
 
 
 void vertex() {
-	// Scale derived from x axis basis vector - x & z axis scales must be the same.
-	float lod = length(MODEL_MATRIX[0].xyz);
+	// Scale derived from x axis basis x component.
+	float lod = length(MODEL_MATRIX[0][0]);
 	v_vertex = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	// circular
-	//float xz_view_dist = length(v_vertex.xz - (camera_pos).xz + 2.0) / lod;
+	//float xz_view_dist = length(v_vertex.xz - (camera_pos).xz) / lod;
+	//float vertex_lerp = smoothstep(0.5, 1.0, (xz_view_dist - (mesh_size + 2.0)) / (mesh_size - 2.0));
 	// square
-	float xz_view_dist = max(abs(v_vertex.x - (camera_pos).x + 4.0), abs(v_vertex.z - (camera_pos).z + 4.0)) / lod;
-	float vertex_lerp = clamp((xz_view_dist - (mesh_size * 1.5)) / mix(1.0, mesh_size * 0.5, lod_blend), 0.0, 0.5) * 2.0;
-	#define SYMETRIC
-	#ifdef MID_POINT_SYMETRIC
-	ivec2 shift_pos = ivec2((fract(VERTEX.xz * 0.5) * 4.0));
-	const mat4 shift_index = mat4(
-		vec4(0, 0, 1, 0), vec4(0, 2, 0, 3),
-		vec4(4, 0, 0, 0), vec4(0, 3, 0, 2)
-	);
-	const vec2 shift_values[5] = {
-		vec2(0.0, 0.0), vec2(0.0, 1.0), vec2(0.5), vec2(0.5, -0.5),
-		vec2(1.0, 0.0)
-	};
-	vec2 shift = shift_values[int(shift_index[shift_pos.x][shift_pos.y])];
+	float xz_view_dist = max(abs(v_vertex.x - camera_pos.x), abs(v_vertex.z - camera_pos.z)) / lod;
+	float vertex_lerp = smoothstep(0.05, 0.95, (xz_view_dist - (mesh_size + 2.0)) / (mesh_size - 2.0));
+	// account for edge trims	
 	vec2 start_pos = v_vertex.xz * _region_texel_size;
-	vec2 end_pos = (v_vertex.xz - shift * lod) * _region_texel_size;
-	#endif
-	#ifdef SYMETRIC
-	vec2 shift = fract(VERTEX.xz * 0.5) * round((fract(v_vertex.xz * 0.25 / lod) - 0.5) * 4.0) * 2.0;
-	vec2 start_pos = v_vertex.xz * _region_texel_size;
-	vec2 end_pos = (v_vertex.xz - shift * lod) * _region_texel_size;
-	#endif
-	#ifdef STANDARD
-	vec2 shift = fract(VERTEX.xz * 0.5) * 2.0;
-	vec2 start_pos = v_vertex.xz * _region_texel_size;
-	vec2 end_pos = (v_vertex.xz - shift * lod) * _region_texel_size;
-	#endif
+	vec2 end_pos = start_pos;
+	vec2 shift = vec2(0.);
+	switch (mode) {
+		case 0:
+			shift = fract(VERTEX.xz * 0.5) * 2.0;
+			end_pos = (v_vertex.xz - shift * lod) * _region_texel_size;
+			break;
+		case 1:
+			shift = fract(VERTEX.xz * 0.5) * round((fract(v_vertex.xz * 0.25 / lod) - 0.5) * 4.0) * 2.0;
+			end_pos = (v_vertex.xz - shift * lod) * _region_texel_size;
+			break;
+		case 2:
+			ivec2 shift_pos = ivec2((fract(VERTEX.xz * 0.5) * 4.0));
+			const vec2 shift_values[16] = {
+				vec2(0.0, 0.0), vec2(0.0, 0.0), vec2(0.0, 1.0), vec2(0.0, 0.0),
+				vec2(0.0, 0.0), vec2(0.5, 0.5), vec2(0.0, 0.0), vec2(0.5,-0.5),
+				vec2(1.0, 0.0), vec2(0.0, 0.0), vec2(0.0, 0.0), vec2(0.0, 0.0),
+				vec2(0.0, 0.0), vec2(0.5,-0.5), vec2(0.0, 0.0), vec2(0.5, 0.5)
+			};
+			shift = shift_values[shift_pos.x * 4 + shift_pos.y];
+			end_pos = (v_vertex.xz - shift * lod) * _region_texel_size;
+			break;
+	}
 	VERTEX.xz -= shift * vertex_lerp;
 
 	// Get camera pos in world vertex coords
@@ -291,13 +293,13 @@ void vertex() {
 	VERTEX = (VIEW_MATRIX * vec4(v_vertex, 1.0)).xyz;
 
 	// LOD color index
-	//vec3[3] col = {
-		//mix(vec3(1., 0.33, 0.33),vec3(0.33, 1.0, 0.33), vertex_lerp * 0.5),
-		//mix(vec3(0.33, 1.0, 0.33),vec3(0.33, 0.33, 1.0), vertex_lerp * 0.5),
-		//mix(vec3(0.33, 0.33, 1.0),vec3(1., 0.33, 0.33), vertex_lerp * 0.5)
-		//};
-	//int index = int(mod(log2(scale), 3.));
-	//COLOR.rgb = col[index];
+	vec3[3] col = {
+		mix(vec3(1., 0.33, 0.33),vec3(0.33, 1.0, 0.33), vertex_lerp),
+		mix(vec3(0.33, 1.0, 0.33),vec3(0.33, 0.33, 1.0), vertex_lerp),
+		mix(vec3(0.33, 0.33, 1.0),vec3(1., 0.33, 0.33), vertex_lerp)
+		};
+	int index = int(mod(log2(lod), 3.));
+	COLOR.rgb = col[index];
 
 }
 // 0 - 3 lookups

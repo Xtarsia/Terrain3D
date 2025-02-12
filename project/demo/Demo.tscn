@@ -837,27 +837,30 @@ subdivide_depth = 119
 script = ExtResource("1_k7qca")
 
 [node name="UI" parent="." instance=ExtResource("2_nqak5")]
+visible = false
 
 [node name="Borders" parent="." instance=ExtResource("3_cw38j")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 512, -3, 512)
+visible = false
 collision_mask = 3
 
 [node name="Environment" parent="." instance=ExtResource("4_avsoy")]
 
 [node name="Tunnel" parent="." instance=ExtResource("3_kdh0b")]
+visible = false
 
 [node name="Player" parent="." instance=ExtResource("3_ht63y")]
 transform = Transform3D(-0.993961, 0, -0.109734, 0, 1, 0, 0.109734, 0, -0.993961, 271.294, 107.09, -1748.75)
+visible = false
 
 [node name="Terrain3D" type="Terrain3D" parent="."]
 data_directory = "res://demo/data"
 material = SubResource("Terrain3DMaterial_jrc01")
 assets = ExtResource("8_g2of2")
 collision_mask = 3
-mesh_lods = 10
-mesh_size = 8
 cull_margin = 1000.0
 top_level = true
+visible = false
 metadata/_edit_lock_ = true
 
 [node name="Generated_ClipMap" type="Node3D" parent="Terrain3D" node_paths=PackedStringArray("player", "t3d")]
@@ -867,16 +870,15 @@ player = NodePath("../../Player")
 t3d = NodePath("..")
 terrain_mat = ExtResource("9_j3rso")
 details_mat = ExtResource("10_lkt0v")
-mesh_size = 32
-lod_levels = 10
 tessellation_divisions = 0
-tessellation_distance = 16
-symetric_mesh = true
+tessellation_distance = 4
+mesh_mode = 1
 cull_margin = 500.0
 metadata/_edit_lock_ = true
 
 [node name="Water" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 277.925, 106.03, -1741.26)
+visible = false
 mesh = SubResource("PlaneMesh_k3u5j")
 
 [node name="Trees" type="Node3D" parent="."]

@@ -17,6 +17,12 @@ enum {
 	HD_TILE_FAR
 }
 
+enum grid_mode {
+	DIAGONAL,
+	ALTERNATING,
+	SYMETRIC
+}
+
 @export var create: bool = false :
 	set(value):
 		_generate_clipmap()
@@ -82,10 +88,11 @@ enum {
 
 ## TODO still has problems, snap value has to be doubled to work with blending
 ## which breaks the current layout, maybe fixable in vertex().
-@export var symetric_mesh: bool = false :
+@export var mesh_mode: grid_mode = grid_mode.DIAGONAL :
 	set(value):
-		symetric_mesh = value
+		mesh_mode = value
 		_generate_clipmap()
+		terrain_mat.set_shader_parameter("mode", value)
 
 @export var cull_margin: float = 200.0 :
 	set(value):
@@ -114,8 +121,7 @@ var offset_a: int = 0
 var offset_b: int = 0
 var offset_c: int = 0
 var edge_pos: Array[Vector3] = []
-#var tab_pos_x: Array[Vector3] = []
-#var tab_pos_z: Array[Vector3] = []
+
 
 var _position_arrays_init = false
 
@@ -170,18 +176,6 @@ func _update_mesh_size(size: int) -> void:
 		Vector3(offset_c, offset_c,-offset_a),
 		Vector3(offset_a, -offset_a ,-offset_b)
 	]
-	#tab_pos_x = [
-		#Vector3(offset_c, offset_c, -offset_a),
-		#Vector3(offset_a, -offset_a, -offset_b),
-		#Vector3(offset_a, -offset_a, -offset_b),
-		#Vector3(offset_c, offset_c, -offset_a)
-	#]
-	#tab_pos_z = [
-		#Vector3(offset_c, offset_c, -offset_a),
-		#Vector3(offset_a, -offset_a, -offset_b),
-		#Vector3(offset_c, offset_c, -offset_a),
-		#Vector3(offset_a, -offset_a, -offset_b)
-	#]
 	fill_a_pos = [
 		Vector3(size - 2, 0, -size * 2 - 2),
 		Vector3(-size - 2, 0, size + 2)
@@ -212,37 +206,36 @@ func _generate_clipmap() -> void:
 		return
 	if _position_arrays_init == false:
 		_update_mesh_size(mesh_size)
-	scenario = get_world_3d().scenario
+	_clear_clipmap_rids()
 	_array_meshs.clear()
 	# Create initial set of Mesh blocks to build the clipmap
 	# 0 Tile - mesh_size x mesh_size tiles
-	_array_meshs.append(_generate_mesh(Vector2i(mesh_size, mesh_size), symetric_mesh))
+	_array_meshs.append(_generate_mesh(Vector2i(mesh_size, mesh_size), mesh_mode))
 	# 1 EdgeA - 2 x (mesh_size * 4 + 8) strips to bridge LOD transitions along Z axis
-	_array_meshs.append(_generate_mesh(Vector2i(2, mesh_size * 4 + 8), symetric_mesh))
+	_array_meshs.append(_generate_mesh(Vector2i(2, mesh_size * 4 + 8), mesh_mode))
 	# 2 EdgeB - (mesh_size * 4 + 4) x 2 strips to bridge LOD transitions along X asis
-	_array_meshs.append(_generate_mesh(Vector2i(mesh_size * 4 + 4, 2), symetric_mesh))
+	_array_meshs.append(_generate_mesh(Vector2i(mesh_size * 4 + 4, 2), mesh_mode))
 	##TODO Remove TABs
 	# 3 Tab - 2 x 2 corner tabs to bridge corner LOD transitions
-	#_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_mesh))
+	#_array_meshs.append(_generate_mesh(Vector2i(2, 2), mesh_mode))
 	
 	# 3 FillA - 4 x mesh_size
-	_array_meshs.append(_generate_mesh(Vector2i(4, mesh_size), symetric_mesh))
+	_array_meshs.append(_generate_mesh(Vector2i(4, mesh_size), mesh_mode))
 	# 4 FillB - mesh_size x 4
-	_array_meshs.append(_generate_mesh(Vector2i(mesh_size, 4), symetric_mesh))
+	_array_meshs.append(_generate_mesh(Vector2i(mesh_size, 4), mesh_mode))
 	# 5 TrimA - 2 x (mesh_size * 4 + 2) strips for LOD0 Z axis edge
-	_array_meshs.append(_generate_mesh(Vector2i(2, mesh_size * 4 + 2), symetric_mesh))
+	_array_meshs.append(_generate_mesh(Vector2i(2, mesh_size * 4 + 2), mesh_mode))
 	# 6 TrimB - (mesh_size * 4 + 4) x 2 strips for LOD0 X axis edge
-	_array_meshs.append(_generate_mesh(Vector2i(mesh_size * 4 + 2, 2), symetric_mesh))
+	_array_meshs.append(_generate_mesh(Vector2i(mesh_size * 4 + 2, 2), mesh_mode))
 	
-	#var symetric_detail: bool = symetric_mesh #(tessellation == tessellation.DISABLED && symetric_mesh or tessellation != tessellation.DISABLED)
+	#var symetric_detail: bool = mesh_mode #(tessellation == tessellation.DISABLED && mesh_mode or tessellation != tessellation.DISABLED)
 	# 8 HD_TILE_NEAR - 2 x 2 tile
 	#_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, max(tessellation_divisions, 1)))
 	# 9 HD_TILE_FAR - 2 x 2 tile
 	#_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, max(tessellation_divisions / 2, 1)))
 	
-	_clear_clipmap_rids()
-	
 	# Setup RenderingServer instances for each LOD level
+	scenario = get_world_3d().scenario
 	var aabb: AABB
 	for level in lod_levels + 1:
 		var lod: Array[Array] = []
@@ -319,7 +312,6 @@ func _generate_clipmap() -> void:
 		if level == 0:
 			var trim_a_rids: Array[RID] = []
 			aabb = _array_meshs[TRIM_A].get_aabb()
-			## TODO set aabb to 4m(?) fixed bounds once positioned along y during snap update
 			aabb.position.y = -cull_margin
 			aabb.size.y = cull_margin * 2.0
 			for i in 2:
@@ -372,7 +364,7 @@ func _generate_clipmap() -> void:
 		_lod_rids.append(lod)
 	
 	# update shader with new mesh size
-	terrain_mat.set_shader_parameter("mesh_size", mesh_size + 1)
+	terrain_mat.set_shader_parameter("mesh_size", mesh_size + 2)
 	details_mat.set_shader_parameter("mesh_size", min(tessellation_distance, mesh_size) - 4.0)
 	if tessellation_lod_split and tessellation_divisions >= 4:
 		details_mat.set_shader_parameter("tile_div", max(tessellation_divisions / 2, 1))
@@ -383,7 +375,7 @@ func _generate_clipmap() -> void:
 	#t3d.hide()
 
 
-func _generate_mesh(size: Vector2i, symetric: bool = false, divisions: int = 1) -> ArrayMesh:
+func _generate_mesh(size: Vector2i, mode: grid_mode = grid_mode.DIAGONAL, divisions: int = 1) -> ArrayMesh:
 	var immediate_mesh: ImmediateMesh = ImmediateMesh.new()
 	immediate_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
 	var n: Vector3 = Vector3(0,1,0)
@@ -396,7 +388,7 @@ func _generate_mesh(size: Vector2i, symetric: bool = false, divisions: int = 1) 
 			var bottom_right: Vector3 = Vector3(x + 1, 0, y) / divisions
 			
 			# midpoint symetric
-			if false:
+			if mode == grid_mode.SYMETRIC:
 				var center: Vector3 = (top_left + top_right + bottom_left + bottom_right) / 4.0
 				
 				# Triangle 1: bottom_left, bottom_right, center
@@ -462,7 +454,7 @@ func _generate_mesh(size: Vector2i, symetric: bool = false, divisions: int = 1) 
 				immediate_mesh.surface_set_normal(n)
 				immediate_mesh.surface_set_tangent(t)
 				immediate_mesh.surface_add_vertex(center)
-			elif (x + y) % 2 == 0 or not symetric:
+			elif (x + y) % 2 == 0 or not mode == grid_mode.ALTERNATING:
 				immediate_mesh.surface_set_uv(Vector2(bottom_left.x,bottom_left.z))
 				immediate_mesh.surface_set_normal(n)
 				immediate_mesh.surface_set_tangent(t)
@@ -536,7 +528,7 @@ func _exit_tree() -> void:
 	_clear_clipmap_rids()
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var active_cam: Camera3D = t3d.get_camera()
 	if active_cam == null:
 		return
@@ -553,21 +545,25 @@ func _process(_delta: float) -> void:
 	if active_cam.global_position.distance_to(last_cam_pos) > 1.0 * vertex_scaling or update:
 		update = false
 		last_cam_pos = active_cam.global_position
-		# edge and corner offsets updated every snap
+		# edge offsets updated every snap
 		var pos: Vector3 = Vector3(0.0, 0.0, 0.0)
 		for lod in _lod_rids.size():
-			# Snap instance transforms
+			# Calculate snap_step and lod_scale
 			var snap_step: float = pow(2.0, lod + 1.0) * vertex_scaling
 			var lod_scale: Vector3 = Vector3(pow(2, lod) * vertex_scaling, 1.0, pow(2, lod) * vertex_scaling)
-			pos.x = floorf(active_cam.global_position.x / snap_step) * snap_step
-			pos.z = floorf(active_cam.global_position.z / snap_step) * snap_step
-			if lod == 0:
-				details_mat.set_shader_parameter("snap_pos", pos + Vector3(1.0, 0.0, 1.0))
-			# Reposition edge strips and corner tabs [0, 1, 2]
-			var test_x: int = clampi((pos.x - floorf(active_cam.global_position.x
-				/ (snap_step * 2.0)) * snap_step * 2.0) / snap_step + 1, 0, 2)
-			var test_z: int = clampi((pos.z - floorf(active_cam.global_position.z
-				/ (snap_step * 2.0)) * snap_step * 2.0) / snap_step + 1, 0, 2)
+
+			# Snap pos.x and pos.z to the grid
+			var cam_x: float = active_cam.global_position.x
+			var cam_z: float = active_cam.global_position.z
+			pos.x = roundf(cam_x / snap_step) * snap_step
+			pos.z = roundf(cam_z / snap_step) * snap_step
+
+			# Calculate test_x and test_z for edge strips
+			var half_snap_step: float = snap_step * 2.0
+			var aligned_x: float = roundf(cam_x / half_snap_step) * half_snap_step
+			var aligned_z: float = roundf(cam_z / half_snap_step) * half_snap_step
+			var test_x: int = clampi(int((pos.x - aligned_x) / snap_step) + 1, 0, 2)
+			var test_z: int = clampi(int((pos.z - aligned_z) / snap_step) + 1, 0, 2)
 			for mesh in _lod_rids[lod].size():
 				match mesh:
 					TILE:
