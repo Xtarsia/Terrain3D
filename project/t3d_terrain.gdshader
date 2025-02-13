@@ -212,23 +212,23 @@ void vertex() {
 	float lod = length(MODEL_MATRIX[0][0]);
 	v_vertex = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	// circular
-	//float xz_view_dist = length(v_vertex.xz - (camera_pos).xz) / lod;
-	//float vertex_lerp = smoothstep(0.5, 1.0, (xz_view_dist - (mesh_size + 2.0)) / (mesh_size - 2.0));
+	float xz_view_dist = length(v_vertex.xz - (camera_pos).xz) / lod;
+	float vertex_lerp = smoothstep(0.25, 0.95, (xz_view_dist - (mesh_size + 2.0)) / (mesh_size - 2.0));
 	// square
-	float xz_view_dist = max(abs(v_vertex.x - camera_pos.x), abs(v_vertex.z - camera_pos.z)) / lod;
-	float vertex_lerp = smoothstep(0.05, 0.95, (xz_view_dist - (mesh_size + 2.0)) / (mesh_size - 2.0));
+	//float xz_view_dist = max(abs(v_vertex.x - camera_pos.x), abs(v_vertex.z - camera_pos.z)) / lod;
+	//float vertex_lerp = smoothstep(0.0, 1.0, (xz_view_dist - (mesh_size + 2.0)) / (mesh_size - 2.0));
 	// account for edge trims	
-	vec2 start_pos = v_vertex.xz * _region_texel_size;
+	vec2 start_pos = v_vertex.xz * _region_texel_size  * _vertex_density + vec2(0.5 * _region_texel_size);
 	vec2 end_pos = start_pos;
 	vec2 shift = vec2(0.);
 	switch (mode) {
 		case 0:
 			shift = fract(VERTEX.xz * 0.5) * 2.0;
-			end_pos = (v_vertex.xz - shift * lod) * _region_texel_size;
+			end_pos = (v_vertex.xz - shift * lod) * _region_texel_size  * _vertex_density + vec2(0.5 * _region_texel_size);
 			break;
 		case 1:
 			shift = fract(VERTEX.xz * 0.5) * round((fract(v_vertex.xz * 0.25 / lod) - 0.5) * 4.0) * 2.0;
-			end_pos = (v_vertex.xz - shift * lod) * _region_texel_size;
+			end_pos = (v_vertex.xz - shift * lod) * _region_texel_size  * _vertex_density + vec2(0.5 * _region_texel_size);
 			break;
 		case 2:
 			ivec2 shift_pos = ivec2((fract(VERTEX.xz * 0.5) * 4.0));
@@ -239,7 +239,7 @@ void vertex() {
 				vec2(0.0, 0.0), vec2(0.5,-0.5), vec2(0.0, 0.0), vec2(0.5, 0.5)
 			};
 			shift = shift_values[shift_pos.x * 4 + shift_pos.y];
-			end_pos = (v_vertex.xz - shift * lod) * _region_texel_size;
+			end_pos = (v_vertex.xz - shift * lod) * _region_texel_size  * _vertex_density + vec2(0.5 * _region_texel_size);
 			break;
 	}
 	VERTEX.xz -= shift * vertex_lerp;
@@ -271,6 +271,9 @@ void vertex() {
 		// Set final vertex height & calculate vertex normals. 3 lookups.
 		float h, u, v;
 		h = mix(get_height(start_pos), get_height(end_pos), vertex_lerp);
+		float t_start = (texture(_texture_array_albedo, vec3(start_pos * 1024.0 * 1.37 + 0.5, 2.0)).a - 0.5) * 0.2;
+		float t_end = (texture(_texture_array_albedo, vec3(end_pos * 1024.0 * 1.37 + 0.5, 2.0)).a - 0.5) * 0.2;
+		h += mix(t_start, t_end, vertex_lerp);
 		u = get_height(UV2 + vec2(_region_texel_size, 0));
 		v = get_height(UV2 + vec2(0, _region_texel_size));
 		v_vertex.y = h;
@@ -294,9 +297,9 @@ void vertex() {
 
 	// LOD color index
 	vec3[3] col = {
-		mix(vec3(1., 0.33, 0.33),vec3(0.33, 1.0, 0.33), vertex_lerp),
-		mix(vec3(0.33, 1.0, 0.33),vec3(0.33, 0.33, 1.0), vertex_lerp),
-		mix(vec3(0.33, 0.33, 1.0),vec3(1., 0.33, 0.33), vertex_lerp)
+		mix(vec3(0.66, 0.33, 0.33),vec3(0.33, 0.66, 0.33), vertex_lerp),
+		mix(vec3(0.33, 0.66, 0.33),vec3(0.33, 0.33, 0.66), vertex_lerp),
+		mix(vec3(0.33, 0.33, 0.66),vec3(0.66, 0.33, 0.33), vertex_lerp)
 		};
 	int index = int(mod(log2(lod), 3.));
 	COLOR.rgb = col[index];
@@ -607,14 +610,16 @@ void fragment() {
 	float roughness = fma(color_map.a - 0.5, 2.0, normal_rough.a);
 
 	// Apply PBR
+	if (color_mode) {
+		ALBEDO = COLOR.rgb;
+	} else {
 	ALBEDO = albedo_height.rgb * color_map.rgb * macrov;
 	ROUGHNESS = roughness;
 	SPECULAR = 1. - normal_rough.a;
 	NORMAL_MAP = normal_rough.rgb;
 	NORMAL_MAP_DEPTH = 1.0;
-
-	if (color_mode) {
-		ALBEDO = COLOR.rgb;
 	}
+
+
 
 }

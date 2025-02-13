@@ -101,12 +101,19 @@ var scenario: RID
 # RID = _lod_rids[lod][TYPE][instance]
 var _lod_rids: Array[Array] = []
 
+func _clear_clipmap_rids() -> void:
+	for l in _lod_rids.size():
+		for m in _lod_rids[l].size():
+			for i in _lod_rids[l][m].size():
+				RenderingServer.free_rid(_lod_rids[l][m][i])
+	_lod_rids.clear()
+
 # Mesh position data updated on size set
 # LOD0 only
 var trim_a_pos: Array[Vector3] = []
 var trim_b_pos: Array[Vector3] = []
 var tile_pos_lod_0: Array[Vector3] = []
-#var hd_tile_pos: Array[Vector3] = []
+
 # LOD1+
 var fill_a_pos: Array[Vector3] = []
 var fill_b_pos: Array[Vector3] = []
@@ -116,7 +123,6 @@ var offset_a: int = 0
 var offset_b: int = 0
 var offset_c: int = 0
 var edge_pos: Array[Vector3] = []
-
 
 var _position_arrays_init = false
 
@@ -180,27 +186,16 @@ func _update_mesh_size(size: int) -> void:
 		Vector3(-size * 2 - 2, 0, -size - 2)
 	]
 	
-	#hd_tile_pos = []
-	#for x in size:
-		#for y in size:
-			#var pos: Vector3 = Vector3(x * 2.0 - size, 0.0, y * 2.0 - size)
-			#hd_tile_pos.append(pos)
 	_position_arrays_init = true
 
 
-func _clear_clipmap_rids() -> void:
-	for l in _lod_rids.size():
-		for m in _lod_rids[l].size():
-			for i in _lod_rids[l][m].size():
-				RenderingServer.free_rid(_lod_rids[l][m][i])
-	_lod_rids.clear()
+
 
 
 func _generate_clipmap() -> void:
 	if !is_inside_tree():
 		return
-	if _position_arrays_init == false:
-		_update_mesh_size(mesh_size)
+	_update_mesh_size(mesh_size)
 	_clear_clipmap_rids()
 	_array_meshs.clear()
 	# Create initial set of Mesh blocks to build the clipmap
@@ -210,10 +205,6 @@ func _generate_clipmap() -> void:
 	_array_meshs.append(_generate_mesh(Vector2i(2, mesh_size * 4 + 8), mesh_mode))
 	# 2 EdgeB - (mesh_size * 4 + 4) x 2 strips to bridge LOD transitions along X asis
 	_array_meshs.append(_generate_mesh(Vector2i(mesh_size * 4 + 4, 2), mesh_mode))
-	##TODO Remove TABs
-	# 3 Tab - 2 x 2 corner tabs to bridge corner LOD transitions
-	#_array_meshs.append(_generate_mesh(Vector2i(2, 2), mesh_mode))
-	
 	# 3 FillA - 4 x mesh_size
 	_array_meshs.append(_generate_mesh(Vector2i(4, mesh_size), mesh_mode))
 	# 4 FillB - mesh_size x 4
@@ -222,12 +213,6 @@ func _generate_clipmap() -> void:
 	_array_meshs.append(_generate_mesh(Vector2i(2, mesh_size * 4 + 2), mesh_mode))
 	# 6 TrimB - (mesh_size * 4 + 4) x 2 strips for LOD0 X axis edge
 	_array_meshs.append(_generate_mesh(Vector2i(mesh_size * 4 + 2, 2), mesh_mode))
-	
-	#var symetric_detail: bool = mesh_mode #(tessellation == tessellation.DISABLED && mesh_mode or tessellation != tessellation.DISABLED)
-	# 8 HD_TILE_NEAR - 2 x 2 tile
-	#_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, max(tessellation_divisions, 1)))
-	# 9 HD_TILE_FAR - 2 x 2 tile
-	#_array_meshs.append(_generate_mesh(Vector2i(2, 2), symetric_detail, max(tessellation_divisions / 2, 1)))
 	
 	# Setup RenderingServer instances for each LOD level
 	scenario = get_world_3d().scenario
@@ -239,7 +224,7 @@ func _generate_clipmap() -> void:
 		aabb = _array_meshs[TILE].get_aabb()
 		aabb.position.y = -cull_margin
 		aabb.size.y = cull_margin * 2.0
-		var lod_zero_tiles: int = 16 if level == 0  and tessellation_divisions == 0 else 12
+		var lod_zero_tiles: int = 16 if level == 0 else 12
 		for i in lod_zero_tiles:
 			tile_rids.append(RenderingServer.instance_create2(_array_meshs[TILE].get_rid(), scenario))
 			RenderingServer.instance_set_custom_aabb(tile_rids[i], aabb);
@@ -266,16 +251,6 @@ func _generate_clipmap() -> void:
 			RenderingServer.instance_set_custom_aabb(edge_b_rids[i], aabb);
 			RenderingServer.instance_set_layer_mask(edge_b_rids[i], t3d.render_layers)
 		lod.append(edge_b_rids) # index 2 EDGE_B
-		
-		#var tab_rids: Array[RID] = []
-		#aabb = _array_meshs[TAB].get_aabb()
-		#aabb.position.y = -cull_margin
-		#aabb.size.y = cull_margin * 2.0
-		#for i in 4:
-			#tab_rids.append(RenderingServer.instance_create2(_array_meshs[TAB].get_rid(), scenario))
-			#RenderingServer.instance_set_custom_aabb(tab_rids[i], aabb);
-			#RenderingServer.instance_set_layer_mask(tab_rids[i], t3d.render_layers)
-		#lod.append(tab_rids) # index 3 TAB
 		
 		# Fillers only present on levels 1+ blank arrays must be added to
 		# level 0 to ensure correct indexing when updating positions.
@@ -324,36 +299,6 @@ func _generate_clipmap() -> void:
 				RenderingServer.instance_set_custom_aabb(trim_b_rids[i], aabb);
 				RenderingServer.instance_set_layer_mask(trim_b_rids[i], t3d.render_layers)
 			lod.append(trim_b_rids)  # index 7 TRIM_A
-			
-			#if tessellation_divisions != 0:
-				#var hd_tile_rids: Array[RID] = []
-				#aabb = _array_meshs[TAB].get_aabb()
-				#aabb.position.y = -8.0#-cull_margin
-				#aabb.size.y = 16.0#cull_margin * 2.0
-				#for i in hd_tile_pos.size():
-					## Tiles outside the tessellation area are populated with TABs.
-					#var tile_type: int = HD_TILE_NEAR
-					#var shadow: int = tessellation_shadow_cast
-					#var tile_dist: float = Vector2(hd_tile_pos[i].x, hd_tile_pos[i].z).length()
-					#if tessellation_lod_split and tessellation_divisions >= 4:
-						#if tile_dist < min(tessellation_distance / 2, mesh_size):
-							#tile_type = HD_TILE_NEAR
-						#elif tile_dist < min(tessellation_distance, mesh_size):
-							#tile_type = HD_TILE_FAR
-							##shadow = RenderingServer.SHADOW_CASTING_SETTING_ON
-						#else:
-							#tile_type = TAB
-							#shadow = RenderingServer.SHADOW_CASTING_SETTING_ON
-					#elif tile_dist < min(tessellation_distance, mesh_size):
-						#tile_type = HD_TILE_NEAR
-					#else:
-						#tile_type = TAB
-						#shadow = RenderingServer.SHADOW_CASTING_SETTING_ON
-					#hd_tile_rids.append(RenderingServer.instance_create2(_array_meshs[tile_type].get_rid(), scenario))
-					#RenderingServer.instance_set_custom_aabb(hd_tile_rids[i], aabb);
-					#RenderingServer.instance_geometry_set_cast_shadows_setting(hd_tile_rids[i], shadow)
-					#RenderingServer.instance_set_layer_mask(hd_tile_rids[i], t3d.render_layers)
-				#lod.append(hd_tile_rids)
 			
 		# append lod to lod_rids arrays
 		_lod_rids.append(lod)
@@ -542,20 +487,18 @@ func _process(delta: float) -> void:
 	if active_cam.global_position.distance_to(last_cam_pos) > 1.0 * vertex_scaling or update:
 		update = false
 		last_cam_pos = active_cam.global_position
-		# edge offsets updated every snap
 		var pos: Vector3 = Vector3(0.0, 0.0, 0.0)
 		for lod in _lod_rids.size():
-			# Calculate snap_step and lod_scale
 			var snap_step: float = pow(2.0, lod + 1.0) * vertex_scaling
 			var lod_scale: Vector3 = Vector3(pow(2, lod) * vertex_scaling, 1.0, pow(2, lod) * vertex_scaling)
-
-			# Snap pos.x and pos.z to the grid
+			
+			# Snap pos.xz
 			var cam_x: float = active_cam.global_position.x
 			var cam_z: float = active_cam.global_position.z
 			pos.x = roundf(cam_x / snap_step) * snap_step
 			pos.z = roundf(cam_z / snap_step) * snap_step
-
-			# Calculate test_x and test_z for edge strips
+			
+			# test_x and test_z for edge strip positions
 			var half_snap_step: float = snap_step * 2.0
 			var aligned_x: float = roundf(cam_x / half_snap_step) * half_snap_step
 			var aligned_z: float = roundf(cam_z / half_snap_step) * half_snap_step
@@ -617,15 +560,6 @@ func _process(delta: float) -> void:
 							t = t.scaled(lod_scale)
 							t.origin += pos
 							RenderingServer.instance_set_transform(_lod_rids[lod][TRIM_B][instance], t)
-					#HD_TILE_NEAR: # near, far and tabs stored in the same array.
-						#for instance in _lod_rids[lod][HD_TILE_NEAR].size():
-							#var t: Transform3D = Transform3D.IDENTITY
-							#t.origin = hd_tile_pos[instance]
-							#t = t.scaled(lod_scale)
-							#t.origin += pos
-							#var height: float = t3d.data.get_height(t.origin + Vector3(1.0, 0.0, 1.0))
-							#t.origin.y = height if !is_nan(height) else active_cam.global_position.y
-							#RenderingServer.instance_set_transform(_lod_rids[lod][HD_TILE_NEAR][instance], t)
 					_:
 						pass
 
