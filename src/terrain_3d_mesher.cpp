@@ -3,7 +3,7 @@
 #include <godot_cpp/classes/rendering_server.hpp>
 #include <godot_cpp/classes/world3d.hpp>
 
-#include "terrain_3d_geomesh.h"
+#include "terrain_3d_mesher.h"
 
 #include "logger.h"
 
@@ -11,7 +11,7 @@
 // Private Functions
 ///////////////////////////
 
-void Terrain3DGeoMesh::_clear_clipmap() {
+void Terrain3DMesher::_clear_clipmap() {
 	for (int lod = 0; lod < _clipmap_rids.size(); lod++) {
 		Array lod_array = _clipmap_rids[lod];
 		for (int mesh = 0; mesh < lod_array.size(); mesh++) {
@@ -27,7 +27,7 @@ void Terrain3DGeoMesh::_clear_clipmap() {
 	return;
 }
 
-void Terrain3DGeoMesh::_clear_mesh_types() {
+void Terrain3DMesher::_clear_mesh_types() {
 	for (int m = 0; m < _mesh_rids.size(); m++) {
 		RS->free_rid(_mesh_rids[m]);
 	}
@@ -35,7 +35,7 @@ void Terrain3DGeoMesh::_clear_mesh_types() {
 	return;
 }
 
-void Terrain3DGeoMesh::_generate_offset_data(const int p_size) {
+void Terrain3DMesher::_generate_offset_data(const int p_size) {
 	_tile_pos_lod_0.clear();
 	_trim_a_pos.clear();
 	_trim_b_pos.clear();
@@ -100,7 +100,7 @@ void Terrain3DGeoMesh::_generate_offset_data(const int p_size) {
 	return;
 }
 
-void Terrain3DGeoMesh::_generate_mesh_types(const int p_size) {
+void Terrain3DMesher::_generate_mesh_types(const int p_size) {
 	_clear_mesh_types();
 	//Create initial set of Mesh blocks to build the clipmap
 	//# 0 TILE - mesh_size x mesh_size tiles
@@ -126,7 +126,7 @@ void Terrain3DGeoMesh::_generate_mesh_types(const int p_size) {
 	return;
 }
 
-RID Terrain3DGeoMesh::_generate_mesh(const Vector2i &p_size, const bool p_standard_grid) {
+RID Terrain3DMesher::_generate_mesh(const Vector2i &p_size, const bool p_standard_grid) {
 	PackedVector3Array vertices;
 	PackedInt32Array indices;
 	AABB aabb = AABB(V3_ZERO, Vector3(p_size.x, 0.1f, p_size.y));
@@ -170,7 +170,7 @@ RID Terrain3DGeoMesh::_generate_mesh(const Vector2i &p_size, const bool p_standa
 	return _instantiate_mesh(vertices, indices, aabb);
 }
 
-RID Terrain3DGeoMesh::_instantiate_mesh(const PackedVector3Array &p_vertices, const PackedInt32Array &p_indices, const AABB &p_aabb) {
+RID Terrain3DMesher::_instantiate_mesh(const PackedVector3Array &p_vertices, const PackedInt32Array &p_indices, const AABB &p_aabb) {
 	Array arrays;
 	arrays.resize(RenderingServer::ARRAY_MAX);
 	arrays[RenderingServer::ARRAY_VERTEX] = p_vertices;
@@ -197,7 +197,7 @@ RID Terrain3DGeoMesh::_instantiate_mesh(const PackedVector3Array &p_vertices, co
 	return mesh;
 }
 
-void Terrain3DGeoMesh::_generate_clipmap(const int p_size, const int p_lods, const RID &p_scenario) {
+void Terrain3DMesher::_generate_clipmap(const int p_size, const int p_lods, const RID &p_scenario) {
 	_clear_clipmap();
 	_generate_mesh_types(p_size);
 	_generate_offset_data(p_size);
@@ -270,7 +270,7 @@ void Terrain3DGeoMesh::_generate_clipmap(const int p_size, const int p_lods, con
 // Public Functions
 ///////////////////////////
 
-void Terrain3DGeoMesh::initialize(Terrain3D *p_terrain) {
+void Terrain3DMesher::initialize(Terrain3D *p_terrain) {
 	if (p_terrain) {
 		_terrain = p_terrain;
 	} else {
@@ -283,10 +283,10 @@ void Terrain3DGeoMesh::initialize(Terrain3D *p_terrain) {
 	_generate_clipmap(size, lods, _terrain->get_world_3d()->get_scenario());
 	update();
 	update_aabbs();
-	snap(_terrain->get_snapped_position(), _terrain->get_vertex_spacing());
+	snap(_terrain->get_snapped_position());
 }
 
-void Terrain3DGeoMesh::destroy() {
+void Terrain3DMesher::destroy() {
 	_clear_clipmap();
 	_clear_mesh_types();
 	_tile_pos_lod_0.clear();
@@ -297,19 +297,21 @@ void Terrain3DGeoMesh::destroy() {
 	_fill_b_pos.clear();
 }
 
-void Terrain3DGeoMesh::snap(const Vector3 &p_tracked_pos, const real_t p_mesh_density) {
+void Terrain3DMesher::snap(const Vector3 &p_tracked_pos) {
+	IS_INIT(VOID);
+	real_t mesh_density = _terrain->get_vertex_spacing();
 	Vector3 pos = Vector3(0.0, 0.0, 0.0);
 
 	for (int lod = 0; lod < _clipmap_rids.size(); ++lod) {
-		real_t snap_step = pow(2.0, lod + 1.0) * p_mesh_density;
-		Vector3 lod_scale = Vector3(pow(2, lod) * p_mesh_density, 1.0, pow(2, lod) * p_mesh_density);
+		real_t snap_step = pow(2.0, lod + 1.0) * mesh_density;
+		Vector3 lod_scale = Vector3(pow(2, lod) * mesh_density, 1.0, pow(2, lod) * mesh_density);
 
 		// Snap pos.xz
 		pos.x = round(p_tracked_pos.x / snap_step) * snap_step;
 		pos.z = round(p_tracked_pos.z / snap_step) * snap_step;
 
 		// test_x and test_z for edge strip positions
-		real_t next_snap_step = pow(2.0, lod + 2.0) * p_mesh_density;
+		real_t next_snap_step = pow(2.0, lod + 2.0) * mesh_density;
 		real_t next_x = round(p_tracked_pos.x / next_snap_step) * next_snap_step;
 		real_t next_z = round(p_tracked_pos.z / next_snap_step) * next_snap_step;
 		int test_x = CLAMP(int(round((pos.x - next_x) / snap_step)) + 1, 0, 2);
@@ -369,7 +371,7 @@ void Terrain3DGeoMesh::snap(const Vector3 &p_tracked_pos, const real_t p_mesh_de
 	return;
 }
 
-void Terrain3DGeoMesh::update() {
+void Terrain3DMesher::update() {
 	IS_INIT(VOID);
 	if (_terrain->get_world_3d().is_null()) {
 		return;
@@ -414,7 +416,7 @@ void Terrain3DGeoMesh::update() {
 	return;
 }
 
-void Terrain3DGeoMesh::update_aabbs() {
+void Terrain3DMesher::update_aabbs() {
 	IS_DATA_INIT(VOID);
 	real_t cull_margin = _terrain->get_cull_margin();
 	Vector2 height_range = _terrain->get_data()->get_height_range();
@@ -430,5 +432,5 @@ void Terrain3DGeoMesh::update_aabbs() {
 	return;
 }
 
-void Terrain3DGeoMesh::_bind_methods() {
+void Terrain3DMesher::_bind_methods() {
 }

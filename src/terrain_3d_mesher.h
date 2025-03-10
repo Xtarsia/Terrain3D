@@ -11,10 +11,24 @@ using namespace godot;
 
 class Terrain3D;
 
-class Terrain3DGeoMesh : public Object {
-	GDCLASS(Terrain3DGeoMesh, Object);
+class Terrain3DMesher : public Object {
+	GDCLASS(Terrain3DMesher, Object);
 	CLASS_NAME();
-	friend Terrain3D;
+
+// Constants
+public:
+	enum MeshType {
+		TILE,
+		EDGE_A,
+		EDGE_B,
+		FILL_A,
+		FILL_B,
+		STANDARD_TRIM_A,
+		STANDARD_TRIM_B,
+		STANDARD_TILE,
+		STANDARD_EDGE_A,
+		STANDARD_EDGE_B,
+	};
 
 private:
 	Terrain3D *_terrain = nullptr;
@@ -47,28 +61,15 @@ private:
 	PackedVector3Array _edge_pos;
 
 public:
-	Terrain3DGeoMesh() {}
-	~Terrain3DGeoMesh() { destroy(); }
+	Terrain3DMesher() {}
+	~Terrain3DMesher() { destroy(); }
 
 	void initialize(Terrain3D *p_terrain);
 	void destroy();
 
-	void snap(const Vector3 &p_tracked_pos, const real_t p_mesh_density);
+	void snap(const Vector3 &p_tracked_pos);
 	void update();
 	void update_aabbs();
-
-	enum MeshType {
-		TILE,
-		EDGE_A,
-		EDGE_B,
-		FILL_A,
-		FILL_B,
-		STANDARD_TRIM_A,
-		STANDARD_TRIM_B,
-		STANDARD_TILE,
-		STANDARD_EDGE_A,
-		STANDARD_EDGE_B,
-	};
 
 protected:
 	static void _bind_methods();
