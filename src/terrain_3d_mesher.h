@@ -1,9 +1,7 @@
 // Copyright © 2025 Cory Petkovsek, Roope Palmroos, and Contributors.
 
-#ifndef TERRAIN3D_GEOMESH_CLASS_H
-#define TERRAIN3D_GEOMESH_CLASS_H
-
-#include <godot_cpp/templates/vector.hpp>
+#ifndef TERRAIN3D_MESHER_CLASS_H
+#define TERRAIN3D_MESHER_CLASS_H
 
 #include "constants.h"
 
@@ -33,13 +31,14 @@ public:
 private:
 	Terrain3D *_terrain = nullptr;
 
+	void _generate_mesh_types(const int p_mesh_size);
 	RID _generate_mesh(const Vector2i &p_size, const bool p_standard_grid = false);
 	RID _instantiate_mesh(const PackedVector3Array &p_vertices, const PackedInt32Array &p_indices, const AABB &p_aabb);
-	void _generate_offset_data(const int p_mesh_size);
-	void _generate_mesh_types(const int p_mesh_size);
-	void _clear_mesh_types();
 	void _generate_clipmap(const int p_size, const int p_lods, const RID &scenario);
+	void _generate_offset_data(const int p_mesh_size);
+	
 	void _clear_clipmap();
+	void _clear_mesh_types();
 
 	Array _mesh_rids;
 	// lods -> MeshTypes -> instances
@@ -76,4 +75,4 @@ protected:
 };
 // Inline Functions
 
-#endif // TERRAIN3D_GEOMESH_CLASS_H
+#endif // TERRAIN3D_MESHER_CLASS_H

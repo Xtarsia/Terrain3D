@@ -11,95 +11,6 @@
 // Private Functions
 ///////////////////////////
 
-void Terrain3DMesher::_clear_clipmap() {
-	for (int lod = 0; lod < _clipmap_rids.size(); lod++) {
-		Array lod_array = _clipmap_rids[lod];
-		for (int mesh = 0; mesh < lod_array.size(); mesh++) {
-			Array mesh_array = lod_array[mesh];
-			for (int instance = 0; instance < mesh_array.size(); instance++) {
-				RS->free_rid(mesh_array[instance]);
-			}
-			mesh_array.clear();
-		}
-		lod_array.clear();
-	}
-	_clipmap_rids.clear();
-	return;
-}
-
-void Terrain3DMesher::_clear_mesh_types() {
-	for (int m = 0; m < _mesh_rids.size(); m++) {
-		RS->free_rid(_mesh_rids[m]);
-	}
-	_mesh_rids.clear();
-	return;
-}
-
-void Terrain3DMesher::_generate_offset_data(const int p_size) {
-	_tile_pos_lod_0.clear();
-	_trim_a_pos.clear();
-	_trim_b_pos.clear();
-	_edge_pos.clear();
-	_fill_a_pos.clear();
-	_fill_b_pos.clear();
-
-	// LOD0
-	_tile_pos_lod_0.push_back(Vector3(0, 0, p_size));
-	_tile_pos_lod_0.push_back(Vector3(p_size, 0, p_size));
-	_tile_pos_lod_0.push_back(Vector3(p_size, 0, 0));
-	_tile_pos_lod_0.push_back(Vector3(p_size, 0, -p_size));
-	_tile_pos_lod_0.push_back(Vector3(p_size, 0, -p_size * 2));
-	_tile_pos_lod_0.push_back(Vector3(0, 0, -p_size * 2));
-	_tile_pos_lod_0.push_back(Vector3(-p_size, 0, -p_size * 2));
-	_tile_pos_lod_0.push_back(Vector3(-p_size * 2, 0, -p_size * 2));
-	_tile_pos_lod_0.push_back(Vector3(-p_size * 2, 0, -p_size));
-	_tile_pos_lod_0.push_back(Vector3(-p_size * 2, 0, 0));
-	_tile_pos_lod_0.push_back(Vector3(-p_size * 2, 0, p_size));
-	_tile_pos_lod_0.push_back(Vector3(-p_size, 0, p_size));
-	// Inner tiles
-	_tile_pos_lod_0.push_back(Vector3(0, 0, 0));
-	_tile_pos_lod_0.push_back(Vector3(-p_size, 0, 0));
-	_tile_pos_lod_0.push_back(Vector3(0, 0, -p_size));
-	_tile_pos_lod_0.push_back(Vector3(-p_size, 0, -p_size));
-
-	// Trims
-	_trim_a_pos.push_back(Vector3(p_size * 2, 0, -p_size * 2));
-	_trim_a_pos.push_back(Vector3(-p_size * 2 - 2, 0, -p_size * 2 - 2));
-	
-	_trim_b_pos.push_back(Vector3(-p_size * 2, 0, -p_size * 2 - 2));
-	_trim_b_pos.push_back(Vector3(-p_size * 2 - 2, 0, p_size * 2));
-
-	// LOD1+
-	_tile_pos.clear();
-	_tile_pos.push_back(Vector3(2, 0, p_size + 2));
-	_tile_pos.push_back(Vector3(p_size + 2, 0, p_size + 2));
-	_tile_pos.push_back(Vector3(p_size + 2, 0, -2));
-	_tile_pos.push_back(Vector3(p_size + 2, 0, -p_size - 2));
-	_tile_pos.push_back(Vector3(p_size + 2, 0, -p_size * 2 - 2));
-	_tile_pos.push_back(Vector3(-2, 0, -p_size * 2 - 2));
-	_tile_pos.push_back(Vector3(-p_size - 2, 0, -p_size * 2 - 2));
-	_tile_pos.push_back(Vector3(-p_size * 2 - 2, 0, -p_size * 2 - 2));
-	_tile_pos.push_back(Vector3(-p_size * 2 - 2, 0, -p_size + 2));
-	_tile_pos.push_back(Vector3(-p_size * 2 - 2, 0, +2));
-	_tile_pos.push_back(Vector3(-p_size * 2 - 2, 0, p_size + 2));
-	_tile_pos.push_back(Vector3(-p_size + 2, 0, p_size + 2));
-
-	_offset_a = real_t(p_size * 2) + 4.f;
-	_offset_b = real_t(p_size * 2) + 6.f;
-	_offset_c = real_t(p_size * 2) + 2.f;
-		
-	_edge_pos.push_back(Vector3(_offset_c, _offset_c, -_offset_a));
-	_edge_pos.push_back(Vector3(_offset_a, -_offset_a, -_offset_b));
-
-	
-	_fill_a_pos.push_back(Vector3(p_size - 2, 0, -p_size * 2 - 2));
-	_fill_a_pos.push_back(Vector3(-p_size - 2, 0, p_size + 2));
-
-	_fill_b_pos.push_back(Vector3(p_size + 2, 0, p_size - 2));
-	_fill_b_pos.push_back(Vector3(-p_size * 2 - 2, 0, -p_size - 2));
-	return;
-}
-
 void Terrain3DMesher::_generate_mesh_types(const int p_size) {
 	_clear_mesh_types();
 	//Create initial set of Mesh blocks to build the clipmap
@@ -264,6 +175,94 @@ void Terrain3DMesher::_generate_clipmap(const int p_size, const int p_lods, cons
 		// Append LOD to _lod_rids array
 		_clipmap_rids.append(lod);
 	}
+}
+
+void Terrain3DMesher::_generate_offset_data(const int p_size) {
+	_tile_pos_lod_0.clear();
+	_trim_a_pos.clear();
+	_trim_b_pos.clear();
+	_edge_pos.clear();
+	_fill_a_pos.clear();
+	_fill_b_pos.clear();
+
+	// LOD0
+	_tile_pos_lod_0.push_back(Vector3(0, 0, p_size));
+	_tile_pos_lod_0.push_back(Vector3(p_size, 0, p_size));
+	_tile_pos_lod_0.push_back(Vector3(p_size, 0, 0));
+	_tile_pos_lod_0.push_back(Vector3(p_size, 0, -p_size));
+	_tile_pos_lod_0.push_back(Vector3(p_size, 0, -p_size * 2));
+	_tile_pos_lod_0.push_back(Vector3(0, 0, -p_size * 2));
+	_tile_pos_lod_0.push_back(Vector3(-p_size, 0, -p_size * 2));
+	_tile_pos_lod_0.push_back(Vector3(-p_size * 2, 0, -p_size * 2));
+	_tile_pos_lod_0.push_back(Vector3(-p_size * 2, 0, -p_size));
+	_tile_pos_lod_0.push_back(Vector3(-p_size * 2, 0, 0));
+	_tile_pos_lod_0.push_back(Vector3(-p_size * 2, 0, p_size));
+	_tile_pos_lod_0.push_back(Vector3(-p_size, 0, p_size));
+	// Inner tiles
+	_tile_pos_lod_0.push_back(Vector3(0, 0, 0));
+	_tile_pos_lod_0.push_back(Vector3(-p_size, 0, 0));
+	_tile_pos_lod_0.push_back(Vector3(0, 0, -p_size));
+	_tile_pos_lod_0.push_back(Vector3(-p_size, 0, -p_size));
+
+	// Trims
+	_trim_a_pos.push_back(Vector3(p_size * 2, 0, -p_size * 2));
+	_trim_a_pos.push_back(Vector3(-p_size * 2 - 2, 0, -p_size * 2 - 2));
+
+	_trim_b_pos.push_back(Vector3(-p_size * 2, 0, -p_size * 2 - 2));
+	_trim_b_pos.push_back(Vector3(-p_size * 2 - 2, 0, p_size * 2));
+
+	// LOD1+
+	_tile_pos.clear();
+	_tile_pos.push_back(Vector3(2, 0, p_size + 2));
+	_tile_pos.push_back(Vector3(p_size + 2, 0, p_size + 2));
+	_tile_pos.push_back(Vector3(p_size + 2, 0, -2));
+	_tile_pos.push_back(Vector3(p_size + 2, 0, -p_size - 2));
+	_tile_pos.push_back(Vector3(p_size + 2, 0, -p_size * 2 - 2));
+	_tile_pos.push_back(Vector3(-2, 0, -p_size * 2 - 2));
+	_tile_pos.push_back(Vector3(-p_size - 2, 0, -p_size * 2 - 2));
+	_tile_pos.push_back(Vector3(-p_size * 2 - 2, 0, -p_size * 2 - 2));
+	_tile_pos.push_back(Vector3(-p_size * 2 - 2, 0, -p_size + 2));
+	_tile_pos.push_back(Vector3(-p_size * 2 - 2, 0, +2));
+	_tile_pos.push_back(Vector3(-p_size * 2 - 2, 0, p_size + 2));
+	_tile_pos.push_back(Vector3(-p_size + 2, 0, p_size + 2));
+
+	_offset_a = real_t(p_size * 2) + 4.f;
+	_offset_b = real_t(p_size * 2) + 6.f;
+	_offset_c = real_t(p_size * 2) + 2.f;
+
+	_edge_pos.push_back(Vector3(_offset_c, _offset_c, -_offset_a));
+	_edge_pos.push_back(Vector3(_offset_a, -_offset_a, -_offset_b));
+
+	_fill_a_pos.push_back(Vector3(p_size - 2, 0, -p_size * 2 - 2));
+	_fill_a_pos.push_back(Vector3(-p_size - 2, 0, p_size + 2));
+
+	_fill_b_pos.push_back(Vector3(p_size + 2, 0, p_size - 2));
+	_fill_b_pos.push_back(Vector3(-p_size * 2 - 2, 0, -p_size - 2));
+	return;
+}
+
+void Terrain3DMesher::_clear_clipmap() {
+	for (int lod = 0; lod < _clipmap_rids.size(); lod++) {
+		Array lod_array = _clipmap_rids[lod];
+		for (int mesh = 0; mesh < lod_array.size(); mesh++) {
+			Array mesh_array = lod_array[mesh];
+			for (int instance = 0; instance < mesh_array.size(); instance++) {
+				RS->free_rid(mesh_array[instance]);
+			}
+			mesh_array.clear();
+		}
+		lod_array.clear();
+	}
+	_clipmap_rids.clear();
+	return;
+}
+
+void Terrain3DMesher::_clear_mesh_types() {
+	for (int m = 0; m < _mesh_rids.size(); m++) {
+		RS->free_rid(_mesh_rids[m]);
+	}
+	_mesh_rids.clear();
+	return;
 }
 
 ///////////////////////////
