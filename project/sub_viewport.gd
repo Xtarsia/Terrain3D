@@ -3,41 +3,31 @@ extends SubViewport
 
 @onready var rect: TextureRect = $TextureRect
 
+var time: int = 0
+
 @export var source: Image :
 	set(value):
-		if value.get_format() != Image.FORMAT_RF:
-			printerr("Image must be FORMAT_RH")
-			return
+		source = value
 		if not value or value.is_empty():
 			return
-		source = value
+		if value.get_format() != Image.FORMAT_RF:
+			printerr("Image must be FORMAT_RH")
+			source = null
+			return
 		size = source.get_size()
 		rect.texture = ImageTexture.create_from_image(value)
 		render_target_update_mode = SubViewport.UPDATE_ONCE
 		print("Waiting 1 frame for viewport to render")
+		time = Time.get_ticks_usec()
 		await RenderingServer.frame_post_draw
+		
 		vp_image = get_texture().get_image()
+		result = Image.create_from_data(1024, 1024, false, Image.FORMAT_RF, vp_image.get_data())
+		time = Time.get_ticks_usec() - time
+		print(float(time) / 1000000)
 
-@export var vp_image: Image :
-	set(value):
-		vp_image = value
-		for h in value.get_height():
-			for w in value.get_width():
-				var source_height: float = source.get_pixel(h,w).r
-				var dest_height: float = decode_texture_color(value.get_pixel(h,w))
-				assert(source_height == dest_height)
-		print("vp_image 100% match with source after decode check")
-		result = Image.create_from_data(1024, 1024, false, Image.FORMAT_RF, value.get_data())
-
-@export var result: Image :
-	set(value):
-		result = value
-		for h in value.get_height():
-			for w in value.get_width():
-				var source_height: float = source.get_pixel(h,w).r
-				var result_height: float = result.get_pixel(h,w).r
-				assert(source_height == result_height)
-		print("result matches source")
+@export var vp_image: Image
+@export var result: Image
 
 func decode_texture_color(color: Color) -> float:
 	var byte_array = PackedByteArray([
