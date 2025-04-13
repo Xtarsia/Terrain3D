@@ -3,8 +3,8 @@ render_mode blend_disabled;
 
 void fragment() {
 	vec4 source = texelFetch(TEXTURE, ivec2(SCREEN_UV / SCREEN_PIXEL_SIZE), 0);
-	uint encode = floatBitsToUint(source.r);
 
+	uint encode = floatBitsToUint(source.r);
 	COLOR = vec4(
 		float(encode & 0xFFu),
 		float((encode >> 8u) & 0xFFu),
