@@ -23,6 +23,15 @@ render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlic
 #define SKIP_PASS 0
 #define VERTEX_PASS 1
 #define FRAGMENT_PASS 2
+#define COLOR_MAP vec4(1.0, 1.0, 1.0, 0.5)
+
+// Inline Functions
+#define PARABOLA(x) (4.0 * x * (1.0 - x))
+#define DECODE_BLEND(control) float(control >> 14u & 0xFFu)
+#define DECODE_AUTO(region_index, control) (region_index.z < 0 || bool(control & 0x1u))
+#define DECODE_BASE(control) int(control >> 27u & 0x1Fu)
+#define DECODE_OVER(control) int(control >> 22u & 0x1Fu)
+#define DECODE_HOLE(control) bool(control >>2u & 0x1u)
 
 #if CURRENT_RENDERER == RENDERER_COMPATIBILITY
     #define fma(a, b, c) ((a) * (b) + (c))
@@ -89,7 +98,6 @@ struct Material {
 	vec4 nrm_rg;
 	int base;
 	int over;
-	float blend;
 	float nrm_depth;
 	float ao_str;
 };
@@ -168,7 +176,7 @@ void vertex() {
 	// Discard vertices for Holes. 1 lookup
 	ivec3 v_region = get_index_coord(start_pos, VERTEX_PASS);
 	uint control = floatBitsToUint(texelFetch(_control_maps, v_region, 0)).r;
-	bool hole = bool(control >>2u & 0x1u);
+	bool hole = DECODE_HOLE(control);
 
 	// Show holes to all cameras except mouse camera (on exactly 1 layer)
 	if ( !(CAMERA_VISIBLE_LAYERS == _mouse_layer) && 
@@ -260,21 +268,18 @@ vec2 detiling(vec2 uv, vec2 uv_center, int mat_id, inout float normal_rotation){
 	return uv;
 }
 
-vec2 rotate_plane(vec2 plane, float angle) {
-	float new_x = dot(vec2(cos(angle), sin(angle)), plane);
-	angle = fma(PI, 0.5, angle);
-	float new_y = dot(vec2(cos(angle), sin(angle)), plane);
-	return vec2(new_x, new_y);
+mat2 rotate_plane(float angle) {
+	float c = cos(angle), s = sin(angle);
+	return mat2(vec2(c, s), vec2(-s, c));
 }
 
 // 2-4 lookups ( 2-6 with dual scaling )
-void get_material(vec3 i_normal, float i_height, vec4 ddxy, uint control, ivec3 index, mat3 TANGENT_WORLD_MATRIX, out Material out_mat) {
-	out_mat = Material(vec4(0.), vec4(0.), 0, 0, 0.0, 0.0, 0.0);
+void get_material(vec3 i_normal, float i_height, vec4 ddxy, uint control, ivec3 index, mat3 TANGENT_WORLD_MATRIX, out Material out_mat, float blend) {
+	out_mat = Material(vec4(0.), vec4(0.), 0, 0, 0.0, 0.0);
 	vec2 index_pos = vec2(index.xy);
-	int region = index.z;
 	
 	// Translate index position to world space.
-	index_pos += _region_locations[region] * _region_size;
+	index_pos += _region_locations[index.z] * _region_size;
 	index_pos *= _vertex_spacing;
 	
 	vec2 base_uv;
@@ -338,21 +343,22 @@ void get_material(vec3 i_normal, float i_height, vec4 ddxy, uint control, ivec3 
 	out_mat.alb_ht = albedo_ht;
 	out_mat.nrm_rg = normal_rg;
 
-	if (out_mat.blend > 0.) {
+	if (blend > 0.) {
 		// 2 lookups
 		// Setup overlay texture to blend
 		float mat_scale2 = _texture_uv_scale_array[out_mat.over];
 		float normal_angle2 = uv_rotation + p_angle;
 		vec2 matUV2 = detiling(base_uv * mat_scale2, index_pos * mat_scale2, out_mat.over, normal_angle2);
 		vec4 dd2 = ddxy * mat_scale2;
-		dd2.xy = rotate_plane(dd2.xy, -normal_angle2);
-		dd2.zw = rotate_plane(dd2.zw, -normal_angle2);
+		mat2 normal_align2 = rotate_plane(-normal_angle2);
+		dd2.xy *= normal_align2;
+		dd2.zw *= normal_align2;
 		vec4 albedo_ht2 = textureGrad(_texture_array_albedo, vec3(matUV2, float(out_mat.over)), dd2.xy, dd2.zw);
 		vec4 normal_rg2 = textureGrad(_texture_array_normal, vec3(matUV2, float(out_mat.over)), dd2.xy, dd2.zw);
 
 		// Unpack & rotate overlay normal for blending
 		normal_rg2.xyz = unpack_normal(normal_rg2);
-		normal_rg2.xz = rotate_plane(normal_rg2.xz, -normal_angle2);
+		normal_rg2.xz *= normal_align2;
 
 //INSERT: DUAL_SCALING_OVERLAY
 		// Apply color to overlay
@@ -368,19 +374,17 @@ void get_material(vec3 i_normal, float i_height, vec4 ddxy, uint control, ivec3 
 		}
 
 		// Blend overlay and base
-		out_mat.alb_ht = height_blend4(albedo_ht, albedo_ht.a, albedo_ht2, over_blend, out_mat.blend);
-		out_mat.nrm_rg = height_blend4(normal_rg, albedo_ht.a, normal_rg2, over_blend, out_mat.blend);
+		out_mat.alb_ht = height_blend4(albedo_ht, albedo_ht.a, albedo_ht2, over_blend, blend);
+		out_mat.nrm_rg = height_blend4(normal_rg, albedo_ht.a, normal_rg2, over_blend, blend);
 		out_mat.nrm_depth = height_blend1(_texture_normal_depth_array[out_mat.base], albedo_ht.a,
-			_texture_normal_depth_array[out_mat.over], over_blend, out_mat.blend);
+			_texture_normal_depth_array[out_mat.over], over_blend, blend);
 		out_mat.ao_str = height_blend1(_texture_ao_strength_array[out_mat.base], albedo_ht.a,
-			_texture_ao_strength_array[out_mat.over], over_blend, out_mat.blend);
+			_texture_ao_strength_array[out_mat.over], over_blend, blend);
 	}
 	return;
 }
 
 float blend_weights(float weight, float detail) {
-	weight = smoothstep(0.0, 1.0, weight);
-	weight = sqrt(weight * 0.5);
 	float result = max(0.1 * weight, fma(10.0, (weight + detail), 1.0f - (detail + 10.0)));
 	return result;
 }
@@ -448,29 +452,8 @@ void fragment() {
 		depth_blur + 1.,
 		smoothstep(0.0, 1.0, (v_vertex_xz_dist - bias_distance) / bias_distance));
 
-	// Colormap. 1 - 4 lookups
-	#define COLOR_MAP vec4(1.0, 1.0, 1.0, 0.5)
-	vec4 color_map;
-	vec3 region_uv = get_index_uv(uv2);
-	color_map = region_uv.z > -1.0 && !bilerp ? textureLod(_color_maps, region_uv, region_mip) : COLOR_MAP;
-
-	// Branching smooth normals and interpolated color map must be done seperatley with unmodified weights.
+	// Branching smooth normals.
 	if (bilerp) {
-		vec4 col_map[4];
-		col_map[3] = index[3].z > -1 ? texelFetch(_color_maps, index[3], 0) : COLOR_MAP;
-		color_map = col_map[3];
-		#ifdef FILTER_LINEAR
-		col_map[0] = index[0].z > -1 ? texelFetch(_color_maps, index[0], 0) : COLOR_MAP;
-		col_map[1] = index[1].z > -1 ? texelFetch(_color_maps, index[1], 0) : COLOR_MAP;
-		col_map[2] = index[2].z > -1 ? texelFetch(_color_maps, index[2], 0) : COLOR_MAP;
-		
-		color_map = 
-			col_map[0] * weights[0] +
-			col_map[1] * weights[1] +
-			col_map[2] * weights[2] +
-			col_map[3] * weights[3] ;
-		#endif
-
 		// 5 lookups
 		// Fetch the additional required height values for smooth normals
 		h[1] = texelFetch(_height_maps, index[1], 0).r; // 3 (1,1)
@@ -502,70 +485,95 @@ void fragment() {
 	// Used for material world space normal map blending
 	mat3 TANGENT_WORLD_MATRIX = mat3(w_tangent, w_normal, w_binormal);
 
-	// Get last index
-	// 1 lookup + get_material() = 3-7 total
-	uint control[4];
-	control[3] = floatBitsToUint(texelFetch(_control_maps, index[3], 0)).r;
+	// Get index control data
+	// 4 lookups
+	uint control[4] = {
+		floatBitsToUint(texelFetch(_control_maps, index[0], 0).r),
+		floatBitsToUint(texelFetch(_control_maps, index[1], 0).r),
+		floatBitsToUint(texelFetch(_control_maps, index[2], 0).r),
+		floatBitsToUint(texelFetch(_control_maps, index[3], 0).r)
+	};
+
+	// Interpolate blend value
+	float blend = (
+			DECODE_BLEND(control[0]) * weights[0] +
+			DECODE_BLEND(control[1]) * weights[1] +
+			DECODE_BLEND(control[2]) * weights[2] +
+			DECODE_BLEND(control[3]) * weights[3] ) * 0.003921568627450; // 1.0/255.0
+	blend = clamp(fma(blend, 1.01, -0.005), 0., 1.); // clip edges for more defined branching of base/over reads
 
 	Material mat[4];
-	get_material(index_normal[3], h[3], base_derivatives, control[3], index[3], TANGENT_WORLD_MATRIX, mat[3]);
 
+	// Single index fetch: 1 Color map, 2 - 4 textures, 0 - 2 dual scale, 3 to 7 lookups.
+	vec3 region_uv = get_index_uv(uv2);
+	vec4 color_map = region_uv.z > -1.0 ? textureLod(_color_maps, region_uv, region_mip) : COLOR_MAP;
+	get_material(index_normal[3], h[3], base_derivatives, control[3], index[3], TANGENT_WORLD_MATRIX, mat[3], blend);
 	vec4 albedo_height = mat[3].alb_ht;
 	vec4 normal_rough = mat[3].nrm_rg;
 	float normal_map_depth = mat[3].nrm_depth;
 	float ao_strength = mat[3].ao_str;
 
-	// Otherwise do full bilinear interpolation
+	// Bilinear index fetch: 4 Color map, 6 - 12 textures, 0 - 6 dual scale, +10 to +22 lookups.
 	if (bilerp) {
-		// 4 lookups + 3x get_material() = 10-22 total
-		control[0] = floatBitsToUint(texelFetch(_control_maps, index[0], 0)).r;
-		control[1] = floatBitsToUint(texelFetch(_control_maps, index[1], 0)).r;
-		control[2] = floatBitsToUint(texelFetch(_control_maps, index[2], 0)).r;
+		vec4 col_map[4];
+		col_map[3] = index[3].z > -1 ? texelFetch(_color_maps, index[3], 0) : COLOR_MAP;
+		#ifdef FILTER_LINEAR
+		col_map[0] = index[0].z > -1 ? texelFetch(_color_maps, index[0], 0) : COLOR_MAP;
+		col_map[1] = index[1].z > -1 ? texelFetch(_color_maps, index[1], 0) : COLOR_MAP;
+		col_map[2] = index[2].z > -1 ? texelFetch(_color_maps, index[2], 0) : COLOR_MAP;
 
-		get_material(index_normal[0], h[0], base_derivatives, control[0], index[0], TANGENT_WORLD_MATRIX, mat[0]);
-		get_material(index_normal[1], h[1], base_derivatives, control[1], index[1], TANGENT_WORLD_MATRIX, mat[1]);
-		get_material(index_normal[2], h[2], base_derivatives, control[2], index[2], TANGENT_WORLD_MATRIX, mat[2]);
+		color_map =
+			col_map[0] * weights[0] +
+			col_map[1] * weights[1] +
+			col_map[2] * weights[2] +
+			col_map[3] * weights[3] ;
+		#else
+		color_map = col_map[3];
+		#endif
+
+		get_material(index_normal[0], h[0], base_derivatives, control[0], index[0], TANGENT_WORLD_MATRIX, mat[0], blend);
+		get_material(index_normal[1], h[1], base_derivatives, control[1], index[1], TANGENT_WORLD_MATRIX, mat[1], blend);
+		get_material(index_normal[2], h[2], base_derivatives, control[2], index[2], TANGENT_WORLD_MATRIX, mat[2], blend);
 
 		// rebuild weights for detail and noise blending
 		float noise3 = texture(noise_texture, uv * noise3_scale).r * blend_sharpness;
-		#define PARABOLA(x) (4.0 * x * (1.0 - x))
-		weights = smoothstep(0, 1, weights);
+		weights = sqrt(smoothstep(0., 1., weights) * 0.5);
 		weights = vec4(
 			blend_weights(weights.x + PARABOLA(weights.x) * noise3, mat[0].alb_ht.a),
 			blend_weights(weights.y + PARABOLA(weights.y) * noise3, mat[1].alb_ht.a),
 			blend_weights(weights.z + PARABOLA(weights.z) * noise3, mat[2].alb_ht.a),
 			blend_weights(weights.w + PARABOLA(weights.w) * noise3, mat[3].alb_ht.a)
 		);
-		#undef PARABOLA
+
 		// renormalize weights
 		weights *= 1.0 / (weights.x + weights.y + weights.z + weights.w);
-	
+
 		// Interpolate Albedo/Height/Normal/Roughness
-		albedo_height = 
+		albedo_height =
 			mat[0].alb_ht * weights[0] +
 			mat[1].alb_ht * weights[1] +
 			mat[2].alb_ht * weights[2] +
 			mat[3].alb_ht * weights[3] ;
-	
-		normal_rough = 
+
+		normal_rough =
 			mat[0].nrm_rg * weights[0] +
 			mat[1].nrm_rg * weights[1] +
 			mat[2].nrm_rg * weights[2] +
 			mat[3].nrm_rg * weights[3] ;
 
-		normal_map_depth = 
+		normal_map_depth =
 			mat[0].nrm_depth * weights[0] +
 			mat[1].nrm_depth * weights[1] +
 			mat[2].nrm_depth * weights[2] +
 			mat[3].nrm_depth * weights[3] ;
-		
-		ao_strength = 
+
+		ao_strength =
 			mat[0].ao_str * weights[0] +
 			mat[1].ao_str * weights[1] +
 			mat[2].ao_str * weights[2] +
 			mat[3].ao_str * weights[3] ;
 	}
-	
+
 	// Macro variation. 2 lookups
 	vec3 macrov = vec3(1.);
 	if (enable_macro_variation) {

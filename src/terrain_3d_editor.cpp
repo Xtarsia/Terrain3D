@@ -381,25 +381,16 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 									if (base_id == overlay_id && blend < 0.004f) {
 										overlay_id = asset_id;
 									}
-									// Overlay and base texture are the same, reduce blend value
-									if (base_id == asset_id) {
-										blend = CLAMP(blend - brush_value, 0.f, 1.f);
-										if (blend < 0.5f && brush_alpha > 0.5f) {
-											autoshader = false;
-										}
-									} else {
-										// Overlay and base are separate, increase blend value
-										blend = CLAMP(blend + brush_value, 0.f, 1.f);
-										// Overlay already visible, limit ID changes to high brush alpha
-										if (blend > 0.5f && brush_alpha > 0.5f) {
-											overlay_id = asset_id;
-											// Only remove auto shader when blend is past threshold.
-											autoshader = false;
-										}
-										// Overlay not visible at brush edge, write new ID ready for potential next pass
-										if (blend <= 0.5f && brush_alpha <= 0.5f) {
-											overlay_id = asset_id;
-										}
+									blend = CLAMP(blend + brush_value, 0.f, 1.f);
+									// Overlay already visible, limit ID changes to high brush alpha
+									if (blend > 0.5f && brush_alpha > 0.5f) {
+										overlay_id = asset_id;
+										// Only remove auto shader when blend is past threshold.
+										autoshader = false;
+									}
+									// Overlay not visible at brush edge, write new ID ready for potential next pass
+									if (blend <= 0.5f && brush_alpha <= 0.5f) {
+										overlay_id = asset_id;
 									}
 								}
 								if ((base_id == asset_id && blend < 0.5f) || (base_id != asset_id && blend >= 0.5f)) {

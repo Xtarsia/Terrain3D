@@ -10,18 +10,17 @@ uniform int auto_overlay_texture : hint_range(0, 31) = 1;
 
 //INSERT: AUTO_SHADER_TEXTURE_ID
 	// Enable Autoshader if outside regions or painted in regions, otherwise manual painted
-	bool auto_shader = region < 0 || bool(control & 0x1u);
-	out_mat.base = int(auto_shader) * auto_base_texture + int(!auto_shader) * int(control >>27u & 0x1Fu);
-	out_mat.over = int(auto_shader) * auto_overlay_texture + int(!auto_shader) * int(control >> 22u & 0x1Fu);
-	out_mat.blend = float(auto_shader) * clamp(
+	bool auto_shader = DECODE_AUTO(index, control);
+	out_mat.base = int(auto_shader) * auto_base_texture + int(!auto_shader) * DECODE_BASE(control);
+	out_mat.over = int(auto_shader) * auto_overlay_texture + int(!auto_shader) * DECODE_OVER(control);
+	blend = float(auto_shader) * clamp(
 			(auto_slope * 2. * ( TANGENT_WORLD_MATRIX[1].y - 1.) + 1.)
 			- auto_height_reduction * .01 * v_vertex.y // Reduce as vertices get higher
 			, 0., 1.) + 
-			 float(!auto_shader) * float(control >>14u & 0xFFu) * 0.003921568627450; // 1./255.0		
+			 float(!auto_shader) * blend;
 
 //INSERT: TEXTURE_ID
-	out_mat.base = int(control >>27u & 0x1Fu);
-	out_mat.over = int(control >> 22u & 0x1Fu);
-	out_mat.blend = float(control >>14u & 0xFFu) * 0.003921568627450; // 1./255.0
+	out_mat.base = DECODE_BASE(control);
+	out_mat.over = DECODE_OVER(control);
 
 )"
