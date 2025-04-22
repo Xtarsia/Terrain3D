@@ -195,6 +195,32 @@ R"(
 		AO = 1.0;
 	}
 
+//INSERT: DEBUG_TURBULENCE
+	// Show turbulent areas of the terrain surface
+	{
+		const vec3 __offsets = vec3(0, 1, 2);
+		vec2 __index_id = floor((INV_VIEW_MATRIX * vec4(VERTEX,1.0)).xz);
+		float __h[6];
+		__h[0] = texelFetch(_height_maps, get_index_coord(__index_id + __offsets.xy, FRAGMENT_PASS), 0).r;
+		__h[1] = texelFetch(_height_maps, get_index_coord(__index_id + __offsets.yy, FRAGMENT_PASS), 0).r;
+		__h[2] = texelFetch(_height_maps, get_index_coord(__index_id + __offsets.yx, FRAGMENT_PASS), 0).r;
+		__h[3] = texelFetch(_height_maps, get_index_coord(__index_id + __offsets.xx, FRAGMENT_PASS), 0).r;
+		__h[4] = texelFetch(_height_maps, get_index_coord(__index_id + __offsets.zx, FRAGMENT_PASS), 0).r;
+		__h[5] = texelFetch(_height_maps, get_index_coord(__index_id + __offsets.xz, FRAGMENT_PASS), 0).r;
+
+		vec3 __normal[3];
+		__normal[0] = normalize(vec3(__h[0] - __h[1], _vertex_spacing, __h[0] - __h[5]));
+		__normal[1] = normalize(vec3(__h[2] - __h[4], _vertex_spacing, __h[2] - __h[1]));
+		__normal[2] = normalize(vec3(__h[3] - __h[2], _vertex_spacing, __h[3] - __h[0]));
+
+		float __turbulence = max(length(__normal[2] - __normal[1]),length(__normal[2] - __normal[0]));
+		ALBEDO = vec3(0.01 + pow(__turbulence, 8.));
+		ROUGHNESS = 0.7;
+		SPECULAR = 0.;
+		NORMAL_MAP = vec3(0.5, 0.5, 1.0);
+		AO = 1.0;
+	}
+
 //INSERT: OVERLAY_REGION_GRID
 	// Show region grid
 	{

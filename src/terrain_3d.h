@@ -250,6 +250,8 @@ public:
 	bool get_show_texture_normal() const { return _material.is_valid() ? _material->get_show_texture_normal() : false; }
 	void set_show_texture_rough(const bool p_enabled) { _material.is_valid() ? _material->set_show_texture_rough(p_enabled) : void(); }
 	bool get_show_texture_rough() const { return _material.is_valid() ? _material->get_show_texture_rough() : false; }
+	void set_show_turbulence(const bool p_enabled) { _material.is_valid() ? _material->set_show_turbulence(p_enabled) : void(); }
+	bool get_show_turbulence() const { return _material.is_valid() ? _material->get_show_turbulence() : false; }
 
 protected:
 	void _notification(const int p_what);
