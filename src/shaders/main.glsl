@@ -26,7 +26,6 @@ render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlic
 #define COLOR_MAP vec4(1.0, 1.0, 1.0, 0.5)
 
 // Inline Functions
-#define PARABOLA(x) (4.0 * x * (1.0 - x))
 #define DECODE_BLEND(control) float(control >> 14u & 0xFFu)
 #define DECODE_AUTO(region_index, control) (region_index.z < 0 || bool(control & 0x1u))
 #define DECODE_BASE(control) int(control >> 27u & 0x1Fu)
@@ -535,14 +534,14 @@ void fragment() {
 		get_material(index_normal[1], h[1], base_derivatives, control[1], index[1], TANGENT_WORLD_MATRIX, mat[1], blend);
 		get_material(index_normal[2], h[2], base_derivatives, control[2], index[2], TANGENT_WORLD_MATRIX, mat[2], blend);
 
-		// rebuild weights for detail and noise blending
-		float noise3 = texture(noise_texture, uv * noise3_scale).r * blend_sharpness;
+		// Rebuild weights for detail and noise blending
+		float noise3 = texture(noise_texture, uv * noise3_scale).r - 0.5;
 		weights = sqrt(smoothstep(0., 1., weights) * 0.5);
 		weights = vec4(
-			blend_weights(weights.x + PARABOLA(weights.x) * noise3, mat[0].alb_ht.a),
-			blend_weights(weights.y + PARABOLA(weights.y) * noise3, mat[1].alb_ht.a),
-			blend_weights(weights.z + PARABOLA(weights.z) * noise3, mat[2].alb_ht.a),
-			blend_weights(weights.w + PARABOLA(weights.w) * noise3, mat[3].alb_ht.a)
+			blend_weights(weights.x, clamp(mat[0].alb_ht.a + noise3, 0., 1.)),
+			blend_weights(weights.y, clamp(mat[1].alb_ht.a + noise3, 0., 1.)),
+			blend_weights(weights.z, clamp(mat[2].alb_ht.a + noise3, 0., 1.)),
+			blend_weights(weights.w, clamp(mat[3].alb_ht.a + noise3, 0., 1.))
 		);
 
 		// renormalize weights

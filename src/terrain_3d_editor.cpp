@@ -393,7 +393,7 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 										overlay_id = asset_id;
 									}
 								}
-								if ((base_id == asset_id && blend < 0.5f) || (base_id != asset_id && blend >= 0.5f)) {
+								if ((base_id == asset_id && blend < 0.5f) || (overlay_id == asset_id && blend >= 0.5f)) {
 									// Set angle & scale
 									if (enable_angle && !autoshader && brush_alpha > 0.5f) {
 										if (dynamic_angle) {
