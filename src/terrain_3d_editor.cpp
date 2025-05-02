@@ -377,22 +377,33 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 								real_t spray_strength = CLAMP(strength * 0.05f, 0.004f, .25f);
 								real_t brush_value = CLAMP(brush_alpha * spray_strength, 0.f, 1.f);
 								if (enable_texture && brush_alpha * strength * 11.f > 0.1f) {
-									// Painted area, set overlay immediatley
-									if (base_id == overlay_id && blend < 0.004f) {
-										overlay_id = asset_id;
+									if (asset_id != base_id && asset_id != overlay_id) {
+										if (blend >= 0.5f) {
+											blend = CLAMP(blend + brush_value, 0.f, 1.f);
+										} else {
+											blend = CLAMP(blend - brush_value, 0.f, 1.f);
+										}
+										if (blend <= 1.0f / 254.f) {
+											overlay_id = asset_id;
+										} else if (blend >= (1.f - 1.0f / 254.f)) {
+											base_id = asset_id;
+										}
 									}
-									blend = CLAMP(blend + brush_value, 0.f, 1.f);
-									// Overlay already visible, limit ID changes to high brush alpha
-									if (blend > 0.5f && brush_alpha > 0.5f) {
-										overlay_id = asset_id;
-										// Only remove auto shader when blend is past threshold.
-										autoshader = false;
+
+									if (base_id == asset_id) {
+										blend = CLAMP(blend - brush_value, 0.f, 1.f);
+										if (blend < 0.5f) {
+											autoshader = false;
+										}
 									}
-									// Overlay not visible at brush edge, write new ID ready for potential next pass
-									if (blend <= 0.5f && brush_alpha <= 0.5f) {
-										overlay_id = asset_id;
+									if (overlay_id == asset_id) {
+										blend = CLAMP(blend + brush_value, 0.f, 1.f);
+										if (blend >= 0.5f) {
+											autoshader = false;
+										}
 									}
 								}
+
 								if ((base_id == asset_id && blend < 0.5f) || (overlay_id == asset_id && blend >= 0.5f)) {
 									// Set angle & scale
 									if (enable_angle && !autoshader && brush_alpha > 0.5f) {
