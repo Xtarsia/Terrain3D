@@ -23,7 +23,7 @@ render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlic
 #define DIV_255 0.003921568627450
 
 // Inline Functions
-#define DECODE_BLEND(control) float(control >> 14u & 0xFFu)
+#define DECODE_BLEND(control) float(control >> 14u & 0xFFu) * DIV_255
 #define DECODE_AUTO(control) bool(control & 0x1u)
 #define DECODE_BASE(control) int(control >> 27u & 0x1Fu)
 #define DECODE_OVER(control) int(control >> 22u & 0x1Fu)
@@ -224,7 +224,7 @@ float world_noise(vec2 p) {
     return a;
 }
 
-float get_noise_height(const vec2 uv) {
+float get_noise_height(vec2 uv) {
 	float weight = region_blend(uv);
 	// only calculate world noise when it could be visibile.
 	if (weight <= 1.0 - world_noise_region_blend) {
@@ -327,7 +327,7 @@ vec2 rotate_around(vec2 point, vec2 pivot, float angle){
 
 vec2 detiling(vec2 uv, vec2 uv_center, int mat_id, inout float normal_rotation){
 	if ((_texture_detile_array[mat_id].x + _texture_detile_array[mat_id].y) >= 0.001){
-		uv_center = floor(uv_center) + 0.5;
+		uv_center = floor(uv_center + 0.5);
 		float detile = fma(random(uv_center), 2.0, -1.0) * TAU; // -180deg to 180deg
 		// Rotation
 		float rotation = detile * _texture_detile_array[mat_id].x;
@@ -345,7 +345,6 @@ mat2 rotate_plane(float angle) {
 	return mat2(vec2(c, s), vec2(-s, c));
 }
 
-		//// 2 lookups
 struct i_data {
 	int base;
 	int over;
@@ -353,9 +352,21 @@ struct i_data {
 	float angle;
 	float scale;
 	bool auto;
+	float w_base;
+	float w_over;
 };
 
-#define I_DATA(c) i_data(DECODE_BASE(c), DECODE_OVER(c), DECODE_BLEND(c) * DIV_255, DECODE_ANGLE(c), DECODE_SCALE(c), DECODE_AUTO(c))
+#define I_DATA(c) i_data(DECODE_BASE(c), DECODE_OVER(c), DECODE_BLEND(c), DECODE_ANGLE(c), DECODE_SCALE(c), DECODE_AUTO(c), 0., 0.)
+
+// Computes total accumulated for a given texture_id across all 4 indicies.
+float accumulate_weight(int texture_id, i_data data[4], vec4 weights) {
+	float w = 0.0;
+	for (int i = 0; i < 4; i++) {
+		w += weights[i] * (1.0 - data[i].blend) * float(data[i].base == texture_id);
+		w += weights[i] * data[i].blend * float(data[i].over == texture_id);
+	}
+	return w;
+}
 
 void fragment() {
 	// Recover UVs
@@ -374,14 +385,6 @@ void fragment() {
 		invert.x * invert.y  // 3
 	);
 
-	vec3 base_ddx = dFdxCoarse(v_vertex);
-	vec3 base_ddy = dFdyCoarse(v_vertex);
-	vec4 base_derivatives = vec4(base_ddx.xz, base_ddy.xz);
-	// Calculate the effective mipmap for regionspace, and when less than 0,
-	// skip all extra lookups required for bilinear blend.
-	float region_mip = log2(max(length(base_ddx.xz), length(base_ddy.xz)) * _vertex_density);
-	bool bilerp = region_mip < 0.0;
-
 	ivec3 index[4];
 	// control map lookups, used for some normal lookups as well
 	index[0] = get_index_coord(index_id + offsets.xy, FRAGMENT_PASS);
@@ -389,9 +392,17 @@ void fragment() {
 	index[2] = get_index_coord(index_id + offsets.yx, FRAGMENT_PASS);
 	index[3] = get_index_coord(index_id + offsets.xx, FRAGMENT_PASS);
 
+	vec3 base_ddx = dFdxCoarse(v_vertex);
+	vec3 base_ddy = dFdyCoarse(v_vertex);
+	vec4 base_derivatives = vec4(base_ddx.xz, base_ddy.xz);
+	// Calculate the effective mipmap for regionspace, and when less than 0,
+	// or outside of regions, skip all extra lookups required for bilinear blend.
+	float region_mip = log2(max(length(base_ddx.xz), length(base_ddy.xz)) * _vertex_density);
+	bool bilerp = region_mip < 0.0 && index[3].z > 0;
+
 	// Terrain normals
 	vec3 index_normal[4];
-	float h[8];
+	float h[4];
 	// allows additional derivatives, eg world noise, brush previews etc
 	float u = 0.0;
 	float v = 0.0;
@@ -415,15 +426,6 @@ void fragment() {
 	// Set flat world normal - overriden if bilerp is true
 	vec3 w_normal = index_normal[3];
 
-	// Setting this here, instead of after the branch appears to be ~10% faster.
-	// Likley as flat derivatives seem more cache friendly for texture lookups.
-	if (enable_projection && w_normal.y < projection_threshold) {
-		vec3 p_tangent = normalize(cross(w_normal, vec3(0.0, 0.0, 1.0)));
-		vec3 p_binormal = normalize(cross(p_tangent, w_normal));
-		base_derivatives.xy = vec2(dot(base_ddx, p_tangent), dot(base_ddx, p_binormal));
-		base_derivatives.zw = vec2(dot(base_ddy, p_tangent), dot(base_ddy, p_binormal));
-	}
-
 	// Adjust derivatives for mipmap bias and depth blur effect
 	base_derivatives *=  mix(mipmap_bias,
 		depth_blur + 1.,
@@ -434,15 +436,15 @@ void fragment() {
 		// 5 lookups
 		// Fetch the additional required height values for smooth normals
 		h[1] = texelFetch(_height_maps, index[1], 0).r; // 3 (1,1)
-		h[4] = texelFetch(_height_maps, get_index_coord(index_id + offsets.yz, FRAGMENT_PASS), 0).r; // 4 (1,2)
-		h[5] = texelFetch(_height_maps, get_index_coord(index_id + offsets.zy, FRAGMENT_PASS), 0).r; // 5 (2,1)
-		h[6] = texelFetch(_height_maps, get_index_coord(index_id + offsets.zx, FRAGMENT_PASS), 0).r; // 6 (2,0)
-		h[7] = texelFetch(_height_maps, get_index_coord(index_id + offsets.xz, FRAGMENT_PASS), 0).r; // 7 (0,2)
+		float h_4 = texelFetch(_height_maps, get_index_coord(index_id + offsets.yz, FRAGMENT_PASS), 0).r; // 4 (1,2)
+		float h_5 = texelFetch(_height_maps, get_index_coord(index_id + offsets.zy, FRAGMENT_PASS), 0).r; // 5 (2,1)
+		float h_6 = texelFetch(_height_maps, get_index_coord(index_id + offsets.zx, FRAGMENT_PASS), 0).r; // 6 (2,0)
+		float h_7 = texelFetch(_height_maps, get_index_coord(index_id + offsets.xz, FRAGMENT_PASS), 0).r; // 7 (0,2)
 
 		// Calculate the normal for the remaining index ids.
-		index_normal[0] = normalize(vec3(h[0] - h[1] + u, _vertex_spacing, h[0] - h[7] + v));
-		index_normal[1] = normalize(vec3(h[1] - h[5] + u, _vertex_spacing, h[1] - h[4] + v));
-		index_normal[2] = normalize(vec3(h[2] - h[6] + u, _vertex_spacing, h[2] - h[1] + v));
+		index_normal[0] = normalize(vec3(h[0] - h[1] + u, _vertex_spacing, h[0] - h_7 + v));
+		index_normal[1] = normalize(vec3(h[1] - h_5 + u, _vertex_spacing, h[1] - h_4 + v));
+		index_normal[2] = normalize(vec3(h[2] - h_6 + u, _vertex_spacing, h[2] - h[1] + v));
 
 		// Set interpolated world normal
 		w_normal =
@@ -480,10 +482,9 @@ void fragment() {
 	};
 
 	// Autoshader
-	float auto_blend = clamp((auto_slope * 2. * ( TANGENT_WORLD_MATRIX[1].y - 1.) + 1.)
+	float auto_blend = clamp((auto_slope * 2. * ( w_normal.y - 1.) + 1.)
 			- auto_height_reduction * .01 * v_vertex.y // Reduce as vertices get higher
 			, 0., 1.);
-
 	for (int i = 3; i > -1; i--) {
 		if (index[i].z < 0 || data[i].auto) {
 			data[i].base = auto_base_texture;
@@ -492,62 +493,56 @@ void fragment() {
 		}
 	}
 
+	// Set per texture ID weighting.
+	for (int i = 3; i > -1; i--) {
+		data[i].w_base = accumulate_weight(data[i].base, data, weights);
+		data[i].w_over = accumulate_weight(data[i].over, data, weights);
+	}
+
 	// pre-outs
 	vec4 normal_rough = vec4(0.);
 	vec4 albedo_height = vec4(0.);
 	float normal_map_depth = 0.;
 	float ao_strength = 0.;
 
-	// Set per texture ID weighting.
-	float t_weight[32] = float[32](
-		0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.
-	);
-
-	// This seems to be very heavy on performance.
-	for (int i = 3; i > -1; i--) {
-		t_weight[data[i].base] += weights[i] * clamp(1.0 - data[i].blend, 0., 1.);
-		t_weight[data[i].over] += weights[i] * clamp(data[i].blend, 0., 1.);
-	}
-
-
 	float total_weight = 0.;
 	float sharpness = mix(8., 32., blend_sharpness * blend_sharpness * blend_sharpness);
 
-	//TODO - unroll this, and the inner loop, branching like this does seem to work,
-	// but it may be more reliable on older hardware to unroll.
 	for (int i = 3; i > -1; i--) {
 		if (!bilerp && i < 3) {
 			break;
 		}
+
 		// Index position for detiling & projection.
 		vec2 i_pos = vec2(index[i].xy);
 		i_pos += _region_locations[index[i].z] * _region_size;
 		i_pos *= _vertex_spacing;
 
 		// Projection
+		vec4 i_dd = base_derivatives;
 		vec2 i_uv = uv;
 		float p_angle = 0.0;
-		if (index_normal[i].y >= projection_threshold || !enable_projection) {
-			i_uv = uv;
-		} else {
+		if (index_normal[i].y <= projection_threshold && enable_projection) {
 			// Project UVs and determine surface normal angle
 			// Quantize the normal otherwise textures lose continuity across domains
 			// Avoid potential singularitys for unit length normal, usually worst case would be
 			// sqrt(3.0)/2.0, however as we are nullifying y component and renormalizing,
 			// we can use sqrt(2.0)/2.0, as a lower bound.
-			vec3 p_normal = normalize(vec3(index_normal[i].x, 0., index_normal[i].z));
+			vec3 p_normal = vec3(index_normal[i].x, 0., index_normal[i].z);
 			p_normal = normalize(round(p_normal * SQRT2_HALF * projection_angular_division));
-			vec3 p_tangent = normalize(cross(p_normal, vec3(0., 1., 0.)));
-			vec3 p_binormal = normalize(cross(p_tangent, p_normal));
+			vec3 p_tangent = cross(p_normal, vec3(0., 1., 0.));
+			vec3 p_binormal = cross(p_tangent, p_normal);
 			p_angle = atan(-index_normal[i].x, -index_normal[i].z);
-			i_uv = vec2(dot(v_vertex, p_tangent), dot(v_vertex, p_binormal));
 			// Project uv_center for detiling
 			vec3 p_pos = vec3(i_pos.x, h[i], i_pos.y);
 			i_pos = floor(vec2(dot(p_pos, p_tangent), dot(p_pos, p_binormal)));
+			i_uv = vec2(dot(v_vertex, p_tangent), dot(v_vertex, p_binormal));
+			i_dd.xy = vec2(dot(base_ddx, p_tangent), dot(base_ddx, p_binormal));
+			i_dd.zw = vec2(dot(base_ddy, p_tangent), dot(base_ddy, p_binormal));
 		}
 
 		// Control map scale & rotation
-		vec4 i_dd = base_derivatives * data[i].scale;
+		i_dd *= data[i].scale;
 		i_uv *= data[i].scale;
 		i_pos *= data[i].scale;
 		i_uv = rotate_around(i_uv, vec2(0), data[i].angle);
@@ -577,13 +572,14 @@ void fragment() {
 		// world normal adjustment requires acess to base layer from next iteration
 		vec4 nrm = vec4(0.,1.,0.,1.); // if base is skipped dont reduce any of the overlay height value
 		for (int l = 0; l < 2; l++) {
-			if (l == 0 && data[i].blend >= 1.0) {
+			if (l == 0 && data[i].blend >= 0.995) {
 				continue;
 			}
-			if (l == 1 && data[i].blend <= 0.0) {
+			if (l == 1 && data[i].blend <= 0.005) {
 				continue;
 			}
 			int id = l == 0 ? data[i].base : data[i].over;
+			float id_w = l == 0 ? data[i].w_base : data[i].w_over;
 			// do this before its overwriten
 			float world_normal = (l == 0 ? 1. : clamp((TANGENT_WORLD_MATRIX * normalize(nrm.xyz)).y, 0., 1.));
 			float id_scale = _texture_uv_scale_array[id];
@@ -605,7 +601,7 @@ void fragment() {
 				nrm = mix(nrm, far_nrm, far_factor);
 			}
 
-			float id_weight = exp2(sharpness * log2(weights[i] + t_weight[id] + alb.a * world_normal)) * weights[i];
+			float id_weight = exp2(sharpness * log2(weights[i] + id_w + alb.a * world_normal));
 			albedo_height += alb * id_weight;
 			normal_rough += nrm * id_weight;
 			normal_map_depth += _texture_normal_depth_array[id] * id_weight;
