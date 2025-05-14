@@ -82,9 +82,15 @@ Generating normals in the shader works fine, and modern GPUs can easily handle t
 
 ### Material Creation
 
-Next, the control maps are queried for each of the 4 grid points and stored in `control[0]`-`control[3]`. The control map bit packed format is defined in [Controlmap Format](controlmap_format.md). 
+Next, the control maps are queried for each of the 4 grid points and stored in `control[0]`-`control[3]`. The control map bit packed format is defined in [Controlmap Format](controlmap_format.md).
 
-The textures at each point are looked up and stored in an array of structs. If there is an overlay texture, the two are height-blended here. Then the pixel position within the 4 grid points is bilinearly interpolated to get the weighting for the final pixel values.
+The control maps are then decoded into an array of data structs, which contains the texture IDs for both layers, blend, and a weight value for each layer.
+
+If the Autoshader is enabled, the data struct is modified according at this point.
+
+Then, the data is itterated over to calculate the total weighting of each texture ID, which allows smooth interpolation across indicies during the material accumulation.
+
+The textures at each point are looked up and accumulated based on a calculated wegiht derived from the total ID weight calculated earlier, the current bilinear weight for that index, and the height value of the currently read texture.
 
 Where possible, texture lookups are branched and in some cases only 2 samples are required, bringing VRAM bandwith requirements to a minimum.
 

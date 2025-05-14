@@ -55,6 +55,7 @@ To use it:
 * `WorldBackground` as `Noise` exposes additional shader settings, such as octaves and LOD. You can adjust these settings for performance. However this world generating noise is expensive. Consider not using it at all in a commercial game, and instead obscure your background with meshes, or use an HDR skybox with mountains built in.
 * Reduce the size of the mesh and levels of detail by reducing `Mesh/Size` (`mesh_size`) or `Mesh/Lods` (`mesh_lods`) in the `Terrain3D` node.
 * Don't use `Renderer/Cull Margin`. It should only be needed if using the noise background. Otherwise the AABB should be correctly calculated via editing, so there is no need to expand the cull margin. Keeping it enabled can cost more processing time.
+* For cases where performance is paramount, an example `lightweight` shader is provided in `extras/shaders`. This shader is designed to do the minimum possible amount of texture lookups, whilst still providing basic textureing, including height blending. Normals are also fully calculated in `vertex()`. For low end hardward, mobile, or VR applications this shader can significantly increase the terrain pixel shading speed, the tradeoff being features such as projection, detiling, and paintable rotation etc are disabled.
 
 
 ## Shaders
@@ -76,9 +77,7 @@ Older style asthetics has a few different looks:
 
 **Low-poly Style** often has large, flat shaded polygons. To get the best results:
 * Increase `vertex_spacing` to a large value like 10
-* Start with a low-poly shader in `extras/shaders`
-
-Extend the shaders to make it your own. The low poly shaders don't come with texturing, but you can combine the flat normal technique with the default textured shader if you want elements of both styles.
+* Enable `Flat Terrain Normals` in the material settings.
 
 
 ### Day/Night cycles & light under the terrain
