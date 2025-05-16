@@ -35,7 +35,7 @@ There are a handful of tools to familiarize yourself with:
 In an area where autoshading has been disabled, each vertex has a base texture, an overlay texture, and a blending value. If the autoshader is enabled, painting textures will disable the autoshader in that area. 
 
 * Use the `Paint Texture` tool to cover large sections with a single texture. This tool sets the blend value to `0.0` and both layers to the same ID, ensuring only texture reads for the painted texture. You can and should paint similar but different textures in an area for a natural variety. e.g. gravel and dirt; mud, dirt, and rocks.
-* Use the `Spray Texture` tool to blend in textures to give it a natural look increases the weight of a selected texture, meaning "show more of this texture". If the selected texture isnt present, this tool will reduce lowest weighted texture to zero before setting the new texture.
+* Use the `Spray Texture` tool to blend in textures to give it a natural look, by gradually increasing the weight of the selected texture. The `ctrl` modifier will lower the weight of only the selected texture. If the selected texture isnt present, this tool will reduce lowest weighted texture to zero before setting the new texture.
 * Example: Use the Paint tool for both a grass field and a dirt pathway. Then use the Spray tool and repeatedly switch between grass and dirt to blend the edges of the path randomly until it looks realistic.
 * Use the [control texture](../api/class_terrain3dmaterial.rst#class-terrain3dmaterial-property-show-control-texture) and [control blend](../api/class_terrain3dmaterial.rst#class-terrain3dmaterial-property-show-control-blend) debug views to understand how your textures are painted and blended. 
 
@@ -55,9 +55,9 @@ Since the paint brushes will disable the autoshader, it's easy to make artifacts
 Let's say we want to paint a pathway through grass, surrounded by autoshaded hills:
 
 * Find a flat or evenly sloped area with a uniform texture. Avoid corners where the autoshader transitions between textures. In our example, find a flat grassy area.
-* Use the `Paint Base Texture` tool to paint the same grass texture the autoshader is using in the flat area. The changes won't be visible unless you disable the autoshader in the material, or enable the autoshader debug view. But you will be simultanously disabling the painted autoshader, and painting the same texture.
+* Use the `Paint Texture` tool to paint the same grass texture the autoshader is using in the flat area. The changes won't be visible unless you disable the autoshader in the material, or enable the autoshader debug view. But you will be simultanously disabling the painted autoshader, and painting the same texture.
 * Use the same tool to paint a pathway texture.
-* Use the `Spray Overlay Texture` tool to blend the edges.
+* Use the `Spray Texture` tool to blend the edges.
 
 You can see the manual painting technique is the same as above. The key step here is invisibly carving out a manually painted section by laying down a base texture the same as the autoshader. If you go too far out with the manual painting, you can use the `Autoshader` tool to bring it back in.
 
