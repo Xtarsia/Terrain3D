@@ -516,6 +516,9 @@ void Terrain3DMaterial::_update_maps() {
 
 	real_t mesh_size = real_t(_terrain->get_mesh_size());
 	RS->material_set_param(_material, "_mesh_size", mesh_size);
+
+	real_t subdiv = real_t(pow(2, _terrain->get_tesselation_level()));
+	RS->material_set_param(_material, "_subdiv", subdiv);
 }
 
 // Called from signal connected in Terrain3D, emitted by texture_list

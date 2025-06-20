@@ -47,6 +47,7 @@ render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlic
 // Private uniforms
 uniform vec3 _camera_pos = vec3(0.f);
 uniform float _mesh_size = 48.f;
+uniform float _subdiv = 1.f;
 uniform uint _background_mode = 1u; // NONE = 0, FLAT = 1, NOISE = 2
 uniform uint _mouse_layer = 0x80000000u; // Layer 32
 uniform float _vertex_spacing = 1.0;
@@ -141,6 +142,25 @@ vec3 get_index_uv(const vec2 uv2) {
 	return vec3(uv2 - _region_locations[layer_index], float(layer_index));
 }
 
+float interpolated_height(vec2 pos) {
+	const vec2 offsets = vec2(0, 1);
+	vec2 index_id = floor(pos);
+	ivec3 index[4];
+	index[0] = get_index_coord(index_id + offsets.xy, FRAGMENT_PASS);
+	index[1] = get_index_coord(index_id + offsets.yy, FRAGMENT_PASS);
+	index[2] = get_index_coord(index_id + offsets.yx, FRAGMENT_PASS);
+	index[3] = get_index_coord(index_id + offsets.xx, FRAGMENT_PASS);
+	float h0 = texelFetch(_height_maps, index[0], 0).r;
+	float h1 = texelFetch(_height_maps, index[1], 0).r;
+	float h2 = texelFetch(_height_maps, index[2], 0).r;
+	float h3 = texelFetch(_height_maps, index[3], 0).r;
+	vec2 f = fract(pos);
+	vec2 i = 1.0 - f;
+	vec4 w = vec4(i.x * f.y, f.x * f.y, f.x * i.y, i.x * i.y);
+	float h = h0 * w[0] + h1 * w[1] + h2 * w[2] + h3 * w[3];
+	return h;
+}
+
 //INSERT: WORLD_NOISE1
 void vertex() {
 	// Get vertex of flat plane in world coordinates and set world UV
@@ -154,11 +174,11 @@ void vertex() {
 	float vertex_lerp = smoothstep(0.55, 0.95, (v_vertex_xz_dist / scale - _mesh_size - 4.0) / (_mesh_size - 2.0));
 	vec2 v_fract = fract(VERTEX.xz * 0.5) * 2.0;
 	// For LOD0 morph from a regular grid to an alternating grid to align with LOD1+
-	vec2 shift = (scale < _vertex_spacing + 1e-6) ? // LOD0 or not
+	vec2 shift = (scale < _vertex_spacing / _subdiv + 1e-6) ? // LOD0 or not
 		// Shift from regular to symetric
 		mix(v_fract, vec2(v_fract.x, -v_fract.y),
-			round(fract(round(mod(v_vertex.z * _vertex_density, 4.0)) *
-			round(mod(v_vertex.x * _vertex_density, 4.0)) * 0.25))
+			round(fract(round(mod(v_vertex.z * _vertex_density * _subdiv, 4.0)) *
+			round(mod(v_vertex.x * _vertex_density * _subdiv, 4.0)) * 0.25))
 			) :
 		// Symetric shift
 		v_fract * round((fract(v_vertex.xz * 0.25 / scale) - 0.5) * 4.0);
@@ -177,21 +197,30 @@ void vertex() {
 	uint control = floatBitsToUint(texelFetch(_control_maps, v_region, 0)).r;
 	bool hole = DECODE_HOLE(control);
 
+	vec3 displacement = vec3(0.);
 	// Show holes to all cameras except mouse camera (on exactly 1 layer)
 	if ( !(CAMERA_VISIBLE_LAYERS == _mouse_layer) && 
 			(hole || (_background_mode == 0u && v_region.z == -1))) {
 		v_vertex.x = 0. / 0.;
-	} else {		
+	} else {
 		// Set final vertex height & calculate vertex normals. 3 lookups
-		ivec3 coord_a = get_index_coord(start_pos, VERTEX_PASS);
-		ivec3 coord_b = get_index_coord(end_pos, VERTEX_PASS);
-		float h = mix(texelFetch(_height_maps, coord_a, 0).r,texelFetch(_height_maps, coord_b, 0).r,vertex_lerp);
+		float h;
+		if (scale < _vertex_spacing) {
+			h = mix(interpolated_height(start_pos), interpolated_height(end_pos), vertex_lerp);
+		} else {
+			ivec3 coord_a = get_index_coord(start_pos, VERTEX_PASS);
+			ivec3 coord_b = get_index_coord(end_pos, VERTEX_PASS);
+			h = mix(texelFetch(_height_maps, coord_a, 0).r,texelFetch(_height_maps, coord_b, 0).r,vertex_lerp);
+		}
 //INSERT: WORLD_NOISE2
+		if (!(CAMERA_VISIBLE_LAYERS == _mouse_layer)) {
+		// Set displacement
+		}
 		v_vertex.y = h;
 	}
 
 	// Convert model space to view space w/ skip_vertex_transform render mode
-	VERTEX = (VIEW_MATRIX * vec4(v_vertex, 1.0)).xyz;
+	VERTEX = (VIEW_MATRIX * vec4(v_vertex + displacement, 1.0)).xyz;
 	NORMAL = normalize((MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	BINORMAL = normalize((MODELVIEW_MATRIX * vec4(BINORMAL, 0.0)).xyz);
 	TANGENT = normalize((MODELVIEW_MATRIX * vec4(TANGENT, 0.0)).xyz);

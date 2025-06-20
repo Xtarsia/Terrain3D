@@ -122,7 +122,7 @@ void Terrain3D::__physics_process(const double p_delta) {
 		Vector3 cam_pos = _camera->get_global_position();
 		Vector2 cam_pos_2d = Vector2(cam_pos.x, cam_pos.z);
 		RS->material_set_param(_material->get_material_rid(), "_camera_pos", cam_pos);
-		if (_camera_last_position.distance_to(cam_pos_2d) > 0.2f) {
+		if (_camera_last_position.distance_to(cam_pos_2d) > 0.03f) {
 			if (_mesher) {
 				_mesher->snap(cam_pos);
 			}
@@ -576,6 +576,17 @@ void Terrain3D::set_mesh_size(const int p_size) {
 	if (_mesh_size != p_size) {
 		LOG(INFO, "Setting mesh size: ", p_size);
 		_mesh_size = p_size;
+		if (_mesher && _material.is_valid()) {
+			_material->_update_maps();
+			_mesher->initialize(this);
+		}
+	}
+}
+
+void Terrain3D::set_tesselation_level(const int p_level) {
+	if (_tesselation_level != p_level) {
+		LOG(INFO, "Setting tesselation level: ", p_level);
+		_tesselation_level = CLAMP(p_level, 0, 5);
 		if (_mesher && _material.is_valid()) {
 			_material->_update_maps();
 			_mesher->initialize(this);
@@ -1052,6 +1063,8 @@ void Terrain3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_mesh_lods"), &Terrain3D::get_mesh_lods);
 	ClassDB::bind_method(D_METHOD("set_mesh_size", "size"), &Terrain3D::set_mesh_size);
 	ClassDB::bind_method(D_METHOD("get_mesh_size"), &Terrain3D::get_mesh_size);
+	ClassDB::bind_method(D_METHOD("set_tesselation_level", "size"), &Terrain3D::set_tesselation_level);
+	ClassDB::bind_method(D_METHOD("get_tesselation_level"), &Terrain3D::get_tesselation_level);
 	ClassDB::bind_method(D_METHOD("set_vertex_spacing", "scale"), &Terrain3D::set_vertex_spacing);
 	ClassDB::bind_method(D_METHOD("get_vertex_spacing"), &Terrain3D::get_vertex_spacing);
 	ClassDB::bind_method(D_METHOD("get_snapped_position"), &Terrain3D::get_snapped_position);
@@ -1149,6 +1162,7 @@ void Terrain3D::_bind_methods() {
 	ADD_GROUP("Mesh", "");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "mesh_lods", PROPERTY_HINT_RANGE, "1,10,1"), "set_mesh_lods", "get_mesh_lods");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "mesh_size", PROPERTY_HINT_RANGE, "8,64,2"), "set_mesh_size", "get_mesh_size");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "tesselation_level", PROPERTY_HINT_RANGE, "0,5,1"), "set_tesselation_level", "get_tesselation_level");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "vertex_spacing", PROPERTY_HINT_RANGE, "0.25,10.0,0.05,or_greater"), "set_vertex_spacing", "get_vertex_spacing");
 
 	ADD_GROUP("Rendering", "");
