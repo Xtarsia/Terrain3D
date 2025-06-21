@@ -326,6 +326,7 @@ void Terrain3DAssets::_update_texture_settings() {
 		_texture_roughness_mods.clear();
 		_texture_uv_scales.clear();
 		_texture_detiles.clear();
+		_texture_displacements.clear();
 
 		for (int i = 0; i < _texture_list.size(); i++) {
 			Ref<Terrain3DTextureAsset> texture_set = _texture_list[i];
@@ -338,6 +339,7 @@ void Terrain3DAssets::_update_texture_settings() {
 			_texture_roughness_mods.push_back(texture_set->get_roughness());
 			_texture_uv_scales.push_back(texture_set->get_uv_scale());
 			_texture_detiles.push_back(Vector2(texture_set->get_detiling_rotation(), texture_set->get_detiling_shift()));
+			_texture_displacements.push_back(Vector2(texture_set->get_displacement_offset(), texture_set->get_displacement_scale()));
 		}
 	}
 	emit_signal("textures_changed");
@@ -682,6 +684,7 @@ void Terrain3DAssets::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_texture_roughness_mods"), &Terrain3DAssets::get_texture_roughness_mods);
 	ClassDB::bind_method(D_METHOD("get_texture_uv_scales"), &Terrain3DAssets::get_texture_uv_scales);
 	ClassDB::bind_method(D_METHOD("get_texture_detiles"), &Terrain3DAssets::get_texture_detiles);
+	ClassDB::bind_method(D_METHOD("get_texture_displacements"), &Terrain3DAssets::get_texture_displacements);
 	ClassDB::bind_method(D_METHOD("clear_textures", "update"), &Terrain3DAssets::clear_textures, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("update_texture_list"), &Terrain3DAssets::update_texture_list);
 
