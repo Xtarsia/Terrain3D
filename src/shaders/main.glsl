@@ -164,6 +164,8 @@ float interpolated_height(vec2 pos) {
 	return h;
 }
 
+//INSERT: DISPLACEMENT1
+
 //INSERT: WORLD_NOISE1
 void vertex() {
 	// Get vertex of flat plane in world coordinates and set world UV
@@ -206,8 +208,9 @@ void vertex() {
 			(hole || (_background_mode == 0u && v_region.z == -1))) {
 		v_vertex.x = 0. / 0.;
 	} else {
-		// Set final vertex height & calculate vertex normals. 3 lookups
+		// Set final vertex height.
 		float h;
+		// This branch is static for each of the clipmap segments
 		if (scale < _vertex_spacing) {
 			h = mix(interpolated_height(start_pos), interpolated_height(end_pos), vertex_lerp);
 		} else {
@@ -216,9 +219,7 @@ void vertex() {
 			h = mix(texelFetch(_height_maps, coord_a, 0).r,texelFetch(_height_maps, coord_b, 0).r,vertex_lerp);
 		}
 //INSERT: WORLD_NOISE2
-		if (!(CAMERA_VISIBLE_LAYERS == _mouse_layer)) {
-		// Set displacement
-		}
+//INSERT: DISPLACEMENT2
 		v_vertex.y = h;
 	}
 
@@ -244,8 +245,9 @@ vec2 rotate_vec2(const vec2 v, const vec2 cs) {
 }
 
 // 2-4 lookups ( 2-6 with dual scaling )
-void accumulate_material(vec3 base_ddx, vec3 base_ddy, const float weight, const ivec3 index, const uint control,
-			const vec2 texture_weight, const ivec2 texture_id, const vec3 i_normal, float h, inout material mat) {
+void accumulate_material(const vec3 base_ddx, const vec3 base_ddy, const mat3 TNB, const float weight, const ivec3 index,
+			const uint control, const vec2 texture_weight, const ivec2 texture_id, const vec3 i_normal,
+			const float h, inout material mat) {
 
 	// Applying scaling before projection reduces the number of multiplys ops required.
 	vec3 i_vertex = v_vertex;
@@ -292,9 +294,8 @@ void accumulate_material(vec3 base_ddx, vec3 base_ddy, const float weight, const
 
 	// Blend adjustment of Higher ID from Lower ID normal map in world space.
 	float world_normal = 1.;
-	vec3 T = normalize(base_ddx), B = -normalize(base_ddy);
 	// mat3 multiply, reduced to 2x fma and 1x mult.
-	#define FAST_WORLD_NORMAL(n) fma(T, vec3(n.x), fma(B, vec3(n.z), i_normal * vec3(n.y)))
+	#define FAST_WORLD_NORMAL(n) fma(TNB[0], vec3(n.x), fma(TNB[2], vec3(n.z), TNB[1] * vec3(n.y)))
 	
 	float blend = DECODE_BLEND(control); // only used for branching.
 	float sharpness = fma(56., blend_sharpness, 8.);
@@ -493,14 +494,16 @@ void fragment() {
 			index_normal[3] * weights[3] ;
 	}
 
+	vec3 w_tangent = normalize(cross(w_normal, vec3(0.0, 0.0, 1.0)));
+	vec3 w_binormal = normalize(cross(w_normal, w_tangent));
+	mat3 TNB = mat3(w_tangent, w_normal, w_binormal);
+
 	// Apply terrain normals
 	if (flat_terrain_normals) {
 		NORMAL = normalize(cross(dFdyCoarse(VERTEX),dFdxCoarse(VERTEX)));
 		TANGENT = normalize(cross(NORMAL, VIEW_MATRIX[2].xyz));
 		BINORMAL = normalize(cross(NORMAL, TANGENT));
 	} else {
-		vec3 w_tangent = normalize(cross(w_normal, vec3(0.0, 0.0, 1.0)));
-		vec3 w_binormal = normalize(cross(w_normal, w_tangent));
 		NORMAL = mat3(VIEW_MATRIX) * w_normal;
 		TANGENT = mat3(VIEW_MATRIX) * w_tangent;
 		BINORMAL = mat3(VIEW_MATRIX) * w_binormal;
@@ -561,16 +564,16 @@ void fragment() {
 	material mat = material(vec4(0.0), vec4(0.0), 0., 0., 0.);
 
 	// 2 - 4 lookups, 2 - 6 if dual scale texture
-	accumulate_material(base_ddx, base_ddy, weights[3], index[3], control[3], t_weights[3],
+	accumulate_material(base_ddx, base_ddy, TNB, weights[3], index[3], control[3], t_weights[3],
 		texture_ids[3], index_normal[3], h[3], mat);
 
 	// 6 - 12 lookups, 6 - 18 if dual scale texture
 	if (bilerp) {
-		accumulate_material(base_ddx, base_ddy, weights[2], index[2], control[2], t_weights[2],
+		accumulate_material(base_ddx, base_ddy, TNB, weights[2], index[2], control[2], t_weights[2],
 			texture_ids[2], index_normal[2], h[2], mat);
-		accumulate_material(base_ddx, base_ddy, weights[1], index[1], control[1], t_weights[1],
+		accumulate_material(base_ddx, base_ddy, TNB, weights[1], index[1], control[1], t_weights[1],
 			texture_ids[1], index_normal[1], h[1], mat);
-		accumulate_material(base_ddx, base_ddy, weights[0], index[0], control[0], t_weights[0],
+		accumulate_material(base_ddx, base_ddy, TNB, weights[0], index[0], control[0], t_weights[0],
 			texture_ids[0], index_normal[0], h[0], mat);
 	}
 

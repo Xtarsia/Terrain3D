@@ -45,6 +45,7 @@ private:
 	TextureFiltering _texture_filtering = LINEAR;
 	bool _dual_scaling = false;
 	bool _auto_shader = false;
+	bool _displacement = false;
 
 	// Overlays
 	bool _show_region_grid = false;
@@ -104,6 +105,8 @@ public:
 	bool get_auto_shader() const { return _auto_shader; }
 	void set_dual_scaling(const bool p_enabled);
 	bool get_dual_scaling() const { return _dual_scaling; }
+	void set_displacement(const bool p_enabled);
+	bool get_displacement() const { return _displacement; }
 
 	void enable_shader_override(const bool p_enabled);
 	bool is_shader_override_enabled() const { return _shader_override_enabled; }

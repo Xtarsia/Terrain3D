@@ -33,6 +33,9 @@ void Terrain3DMaterial::_preload_shaders() {
 #include "shaders/dual_scaling.glsl"
 			, "dual_scaling");
 	_parse_shader(
+#include "shaders/displacement.glsl"
+			, "displacement");
+	_parse_shader(
 #include "shaders/debug_views.glsl"
 			, "debug_views");
 	_parse_shader(
@@ -144,6 +147,10 @@ String Terrain3DMaterial::_generate_shader_code() const {
 		excludes.push_back("DUAL_SCALING_CONDITION_1");
 		excludes.push_back("DUAL_SCALING_MIX");
 		excludes.push_back("TRI_SCALING");
+	}
+	if (!_displacement) {
+		excludes.push_back("DISPLACEMENT1");
+		excludes.push_back("DISPLACEMENT2");
 	}
 	String shader = _apply_inserts(_shader_code["main"], excludes);
 	return shader;
@@ -630,6 +637,12 @@ void Terrain3DMaterial::set_dual_scaling(const bool p_enabled) {
 	_update_shader();
 }
 
+void Terrain3DMaterial::set_displacement(const bool p_enabled) {
+	LOG(INFO, "Enable displacement: ", p_enabled);
+	_displacement = p_enabled;
+	_update_shader();
+}
+
 void Terrain3DMaterial::enable_shader_override(const bool p_enabled) {
 	LOG(INFO, "Enable shader override: ", p_enabled);
 	_shader_override_enabled = p_enabled;
@@ -957,6 +970,8 @@ void Terrain3DMaterial::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_auto_shader"), &Terrain3DMaterial::get_auto_shader);
 	ClassDB::bind_method(D_METHOD("set_dual_scaling", "enabled"), &Terrain3DMaterial::set_dual_scaling);
 	ClassDB::bind_method(D_METHOD("get_dual_scaling"), &Terrain3DMaterial::get_dual_scaling);
+	ClassDB::bind_method(D_METHOD("set_displacement", "enabled"), &Terrain3DMaterial::set_displacement);
+	ClassDB::bind_method(D_METHOD("get_displacement"), &Terrain3DMaterial::get_displacement);
 
 	ClassDB::bind_method(D_METHOD("enable_shader_override", "enabled"), &Terrain3DMaterial::enable_shader_override);
 	ClassDB::bind_method(D_METHOD("is_shader_override_enabled"), &Terrain3DMaterial::is_shader_override_enabled);
@@ -1014,6 +1029,7 @@ void Terrain3DMaterial::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "texture_filtering", PROPERTY_HINT_ENUM, "Linear,Nearest"), "set_texture_filtering", "get_texture_filtering");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_shader"), "set_auto_shader", "get_auto_shader");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "dual_scaling"), "set_dual_scaling", "get_dual_scaling");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "displacement"), "set_displacement", "get_displacement");
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "shader_override_enabled"), "enable_shader_override", "is_shader_override_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "shader_override", PROPERTY_HINT_RESOURCE_TYPE, "Shader"), "set_shader_override", "get_shader_override");
