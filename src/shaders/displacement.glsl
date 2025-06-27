@@ -8,7 +8,7 @@ uniform vec3 _displacement_buffer_pos = vec3(0);
 uniform highp sampler2D _displacement_buffer : repeat_enable, hint_default_black;
 
 vec3 get_displacement(vec2 pos) {
-	vec2 d_uv = (pos - _displacement_buffer_pos.xz) / (_mesh_size * 2.0) + 0.5;
+	vec2 d_uv = (pos - _displacement_buffer_pos.xz * _vertex_density) / (_mesh_size * 2.0) + 0.5;
 	if (all(greaterThanEqual(d_uv, vec2(0.0))) && all(lessThanEqual(d_uv, vec2(1.0)))) {
 		highp vec3 nrm_h = textureLod(_displacement_buffer, d_uv, 0.).rgb;
 		float height = nrm_h.z - 0.5;
@@ -16,7 +16,7 @@ vec3 get_displacement(vec2 pos) {
 		nrm_h.z = sqrt(clamp(1.0 - dot(nrm_h.xy, nrm_h.xy), 0.0, 1.0));
 		nrm_h = nrm_h.xzy * height * displacement_scale;
 		// radial fadeout
-		float fade = smoothstep(0.0, 0.5, 1.0 - length((pos - _camera_pos.xz) / (_mesh_size * 2.0) * 2.0));
+		float fade = smoothstep(0.0, 0.5, 1.0 - length((pos - _camera_pos.xz * _vertex_density) / (_mesh_size * 2.0) * 2.0));
 		return nrm_h * fade;
 	}
 	return vec3(0.);
