@@ -8,7 +8,7 @@ uniform vec3 _displacement_buffer_pos = vec3(0);
 uniform highp sampler2D _displacement_buffer : repeat_enable, hint_default_black;
 
 vec3 get_displacement(vec2 pos) {
-	vec2 d_uv = (pos - _displacement_buffer_pos.xz * _vertex_density) / (_mesh_size * 2.0) + 0.5;
+	vec2 d_uv = (pos - (0.5 / _subdiv) - _displacement_buffer_pos.xz * _vertex_density) / (_mesh_size) + 0.5;
 	if (all(greaterThanEqual(d_uv, vec2(0.0))) && all(lessThanEqual(d_uv, vec2(1.0)))) {
 		highp vec3 nrm_h = textureLod(_displacement_buffer, d_uv, 0.).rgb;
 		float height = nrm_h.z - 0.5;

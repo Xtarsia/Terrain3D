@@ -245,9 +245,9 @@ vec2 rotate_vec2(const vec2 v, const vec2 cs) {
 }
 
 // 2-4 lookups ( 2-6 with dual scaling )
-void accumulate_material(const vec3 base_ddx, const vec3 base_ddy, const mat3 TNB, const float weight, const ivec3 index,
+void accumulate_material(vec3 base_ddx, vec3 base_ddy, const mat3 TNB, const float weight, const ivec3 index,
 			const uint control, const vec2 texture_weight, const ivec2 texture_id, const vec3 i_normal,
-			const float h, inout material mat) {
+			float h, inout material mat) {
 
 	// Applying scaling before projection reduces the number of multiplys ops required.
 	vec3 i_vertex = v_vertex;

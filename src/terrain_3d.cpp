@@ -126,7 +126,7 @@ void Terrain3D::__physics_process(const double p_delta) {
 			if (_mesher) {
 				_mesher->snap(cam_pos);
 			}
-			_snapped_position = (cam_pos / _vertex_spacing).floor() * _vertex_spacing;
+			_snapped_position = (cam_pos / _vertex_spacing * pow(2.f, _tesselation_level)).floor() * _vertex_spacing / pow(2.f, _tesselation_level);
 			_camera_last_position = cam_pos_2d;
 			if (_collision && _collision->is_dynamic_mode()) {
 				_collision->update();

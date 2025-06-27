@@ -77,7 +77,7 @@ private:
 	// Meshes
 	int _mesh_lods = 7;
 	int _mesh_size = 48;
-	int _tesselation_level = 4;
+	int _tesselation_level = 3;
 	real_t _vertex_spacing = 1.0f;
 	Vector3 _snapped_position = V3_ZERO;
 
