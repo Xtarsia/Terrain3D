@@ -54,18 +54,18 @@ func get_camera_relative_input() -> Vector3:
 	if Input.is_key_pressed(KEY_Q): # Down
 		velocity.y -= JUMP_SPEED + MOVE_SPEED*.016
 	if Input.is_key_pressed(KEY_KP_ADD) or Input.is_key_pressed(KEY_EQUAL):
-		MOVE_SPEED = clamp(MOVE_SPEED + .5, 5, 9999)
+		MOVE_SPEED = clamp(MOVE_SPEED + .5, 2, 9999)
 	if Input.is_key_pressed(KEY_KP_SUBTRACT) or Input.is_key_pressed(KEY_MINUS):
-		MOVE_SPEED = clamp(MOVE_SPEED - .5, 5, 9999)
+		MOVE_SPEED = clamp(MOVE_SPEED - .5, 2, 9999)
 	return input_dir
 
 
 func _input(p_event: InputEvent) -> void:
 	if p_event is InputEventMouseButton and p_event.pressed:
 		if p_event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			MOVE_SPEED = clamp(MOVE_SPEED + 5, 5, 9999)
+			MOVE_SPEED = clamp(MOVE_SPEED + 0.5, 2, 9999)
 		elif p_event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			MOVE_SPEED = clamp(MOVE_SPEED - 5, 5, 9999)
+			MOVE_SPEED = clamp(MOVE_SPEED - 0.5, 2, 9999)
 	
 	elif p_event is InputEventKey:
 		if p_event.pressed:
