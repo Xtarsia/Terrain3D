@@ -231,10 +231,19 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 				real_t srcf = src.r;
 				// In case data in existing map has nan or inf saved, check, and reset to real number if required.
 				srcf = std::isnan(srcf) || std::isnan(srcf) ? 0.f : srcf;
+				// Save current bitpacked data for this pixel
+				uint32_t h_data = as_uint(srcf) & 0x000000FFu;				
 				real_t destf = srcf;
 
 				switch (_operation) {
 					case ADD: {
+						if (_tool == HOLES) {
+							if (brush_alpha > 0.5f) {
+								// set hole for testing
+								h_data |= uint32_t(_operation == ADD);
+							}
+							break;
+						}
 						if (_tool == HEIGHT) {
 							// Height
 							destf = Math::lerp(srcf, height, CLAMP(brush_alpha * strength, 0.f, 1.f));
@@ -249,6 +258,13 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 						break;
 					}
 					case SUBTRACT: {
+						if (_tool == HOLES) {
+							if (brush_alpha > 0.5f) {
+								// remove hole for testing
+								h_data = 0x00000000u;
+							}
+							break;
+						}
 						if (_tool == HEIGHT) {
 							// Height, but GDScript has already picked height at cursor
 							destf = Math::lerp(srcf, height, CLAMP(brush_alpha * strength, 0.f, 1.f));
@@ -298,6 +314,9 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 					default:
 						break;
 				}
+				// Restore bit packed data for this pixel
+				destf = as_float((as_uint(destf) & ~0x000000FFu) | h_data);
+
 				dest = Color(destf, 0.f, 0.f, 1.f);
 				region->update_height(destf);
 				data->update_master_height(destf);
@@ -447,12 +466,6 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 							autoshader = (_operation == ADD);
 							uvscale = 0.f;
 							uvrotation = 0.f;
-						}
-						break;
-					}
-					case HOLES: {
-						if (brush_alpha > 0.5f) {
-							hole = (_operation == ADD);
 						}
 						break;
 					}
