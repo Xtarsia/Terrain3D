@@ -10,7 +10,6 @@
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/rendering_server.hpp>
-#include <godot_cpp/classes/static_body3d.hpp>
 #include <godot_cpp/classes/sub_viewport.hpp>
 
 #include "constants.h"
@@ -77,7 +76,7 @@ private:
 	// Meshes
 	int _mesh_lods = 7;
 	int _mesh_size = 48;
-	int _tessellation_level = 3;
+	int _tessellation_level = 0;
 	real_t _vertex_spacing = 1.0f;
 
 	// Rendering
@@ -178,10 +177,10 @@ public:
 	void update_region_labels();
 
 	// Meshes
-	void set_mesh_lods(const int p_count);
-	int get_mesh_lods() const { return _mesh_lods; }
 	void set_mesh_size(const int p_size);
 	int get_mesh_size() const { return _mesh_size; }
+	void set_mesh_lods(const int p_count);
+	int get_mesh_lods() const { return _mesh_lods; }
 	void set_tessellation_level(const int p_level);
 	int get_tessellation_level() const { return _tessellation_level; }
 	void set_vertex_spacing(const real_t p_spacing);
