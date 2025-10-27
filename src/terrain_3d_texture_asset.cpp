@@ -43,8 +43,8 @@ void Terrain3DTextureAsset::clear() {
 	_normal_depth = 0.5f;
 	_roughness = 0.f;
 	_ao_strength = 0.5f;
-	_displacement_offset = 0.45f;
-	_displacement_scale = .1f;
+	_displacement_offset = 0.f;
+	_displacement_scale = 0.f;
 	_uv_scale = 0.1f;
 	_vertical_projection = false;
 	_detiling_rotation = 0.0f;
@@ -158,14 +158,14 @@ void Terrain3DTextureAsset::set_ao_strength(const real_t p_ao_strength) {
 }
 
 void Terrain3DTextureAsset::set_displacement_offset(const real_t p_displacement_offset) {
-	_displacement_offset = CLAMP(p_displacement_offset, 0.0f, 1.0f);
+	_displacement_offset = CLAMP(p_displacement_offset, -1.0f, 1.0f);
 	LOG(INFO, "Setting displacement_offset: ", _displacement_offset);
 	LOG(DEBUG, "Emitting setting_changed");
 	emit_signal("setting_changed");
 }
 
 void Terrain3DTextureAsset::set_displacement_scale(const real_t p_displacement_scale) {
-	_displacement_scale = CLAMP(p_displacement_scale, 0.0f, 1.0f);
+	_displacement_scale = CLAMP(p_displacement_scale, 0.0f, 2.0f);
 	LOG(INFO, "Setting displacement_scale: ", _displacement_scale);
 	LOG(DEBUG, "Emitting setting_changed");
 	emit_signal("setting_changed");
@@ -249,8 +249,8 @@ void Terrain3DTextureAsset::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "normal_depth", PROPERTY_HINT_RANGE, "0.0, 2.0"), "set_normal_depth", "get_normal_depth");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "roughness", PROPERTY_HINT_RANGE, "-1.0, 1.0"), "set_roughness", "get_roughness");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "ao_strength", PROPERTY_HINT_RANGE, "0.0, 2.0"), "set_ao_strength", "get_ao_strength");
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "displacement_offset", PROPERTY_HINT_RANGE, "0.0, 1.0"), "set_displacement_offset", "get_displacement_offset");
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "displacement_scale", PROPERTY_HINT_RANGE, "0.0, 1.0"), "set_displacement_scale", "get_displacement_scale");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "displacement_offset", PROPERTY_HINT_RANGE, "-1.0, 1.0"), "set_displacement_offset", "get_displacement_offset");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "displacement_scale", PROPERTY_HINT_RANGE, "0.0, 2.0"), "set_displacement_scale", "get_displacement_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "uv_scale", PROPERTY_HINT_RANGE, "0.001, 2.0, or_greater"), "set_uv_scale", "get_uv_scale");
 	ADD_GROUP("Projection", "");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "vertical_projection", PROPERTY_HINT_NONE), "set_vertical_projection", "get_vertical_projection");

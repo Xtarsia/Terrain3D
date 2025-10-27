@@ -57,6 +57,7 @@ uniform highp sampler2DArray _control_maps : repeat_disable;
 
 // Public uniforms
 group_uniforms general;
+uniform float blend_sharpness : hint_range(0, 1) = 0.5;
 uniform bool vertical_projection = true;
 uniform float projection_threshold : hint_range(0.0, 0.99, 0.01) = 0.8;
 group_uniforms;
@@ -170,7 +171,7 @@ void accumulate_material(const mat3 TNB, const float weight, const ivec3 index,
 	#define FAST_WORLD_NORMAL(n) fma(TNB[0], vec3(n.x), fma(TNB[2], vec3(n.z), TNB[1] * vec3(n.y)))
 
 	float blend = DECODE_BLEND(control); // only used for branching.
-	float sharpness = fma(11., displacement_sharpness, 1.);
+	float sharpness = fma(56., blend_sharpness * displacement_sharpness, 8.);
 
 	// 1st Texture Asset ID
 	if (blend < 1.0) {
@@ -202,9 +203,11 @@ void accumulate_material(const mat3 TNB, const float weight, const ivec3 index,
 
 		world_normal = FAST_WORLD_NORMAL(nrm).y;
 
-		h = fma(h, _texture_displacement_array[id].y, _texture_displacement_array[id].x);
-
 		float id_weight = exp2(sharpness * log2(weight + id_w + h)) * weight;
+
+		// height is modified after weight calculation so that asset offset and scale values do not interfear with material blending.
+		h = clamp((h - 0.5) * _texture_displacement_array[id].y + 0.5 + _texture_displacement_array[id].x, 0., 1.);
+
 		mat.height = fma(h, id_weight, mat.height);
 		mat.total_weight += id_weight;
 	}
@@ -231,9 +234,13 @@ void accumulate_material(const mat3 TNB, const float weight, const ivec3 index,
 			fma(id_cs_angle.y, c_cs_angle.x, id_cs_angle.x * c_cs_angle.y));
 
 		float h = textureLod(_texture_array_albedo, vec3(id_uv, float(id)), 0.).a;
-		h = fma(h, _texture_displacement_array[id].y, _texture_displacement_array[id].x);
+		// Normals are not required for 2nd ID as they are not used to adjust the weights.
 
 		float id_weight = exp2(sharpness * log2(weight + id_w + h * clamp(world_normal, 0., 1.))) * weight;
+
+		// height is modified after weight calculation so that asset offset and scale values do not interfear with material blending.
+		h = clamp((h - 0.5) * _texture_displacement_array[id].y + 0.5 + _texture_displacement_array[id].x, 0., 1.);
+
 		mat.height = fma(h, id_weight, mat.height);
 		mat.total_weight += id_weight;
 	}
@@ -368,11 +375,11 @@ void fragment() {
 		texture_ids[0], index_normal[0], h[0], mat, v_vertex);
 
 	// normalize accumulated values back to 0.0 - 1.0 range.
-	float weight_inv = 1.0 / mat.total_weight;
+	float weight_inv = 1.0 / max(mat.total_weight, 1e-8);
 	mat.height *= weight_inv;
 
 	// Output
-	COLOR.rgb = fma(w_normal * (mat.height - 0.5), vec3(0.5), vec3(0.5));
+	COLOR.rgb = clamp(fma(w_normal * (mat.height - 0.5), vec3(0.5), vec3(0.5)), 0.0, 1.0);
 
 }
 )"

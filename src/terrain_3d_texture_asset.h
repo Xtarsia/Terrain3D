@@ -20,8 +20,8 @@ class Terrain3DTextureAsset : public Terrain3DAssetResource {
 	real_t _normal_depth = 0.5f;
 	real_t _roughness = 0.f;
 	real_t _ao_strength = 0.5f;
-	real_t _displacement_offset = 0.45f;
-	real_t _displacement_scale = .1f;
+	real_t _displacement_offset = 0.0f;
+	real_t _displacement_scale = 0.0f;
 	real_t _uv_scale = 0.1f;
 	bool _vertical_projection = false;
 	real_t _detiling_rotation = 0.0f;
