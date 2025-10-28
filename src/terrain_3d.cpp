@@ -581,6 +581,9 @@ void Terrain3D::snap() {
 	if (_collision) {
 		_collision->reset_target_position();
 	}
+	if (_tessellation_level > 0) {
+		_last_buffer_position = V2_MAX;
+	}
 }
 
 void Terrain3D::set_region_size(const RegionSize p_size) {

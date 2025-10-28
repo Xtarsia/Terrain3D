@@ -681,6 +681,8 @@ void Terrain3DMaterial::update(bool p_full) {
 	IS_INIT(VOID);
 	if (_terrain->get_tessellation_level() > 0) {
 		_update_uniforms(_buffer_material);
+		// Snap to update buffer
+		_terrain->snap();
 	}
 }
 
