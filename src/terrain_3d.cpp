@@ -107,15 +107,25 @@ void Terrain3D::__physics_process(const double p_delta) {
 		LOG(DEBUG, "Camera is null, getting the current one");
 		_grab_camera();
 	}
-	if (_mesher) {
+	if (_tessellation_level > 0) {
+		if (_mesher && _d_buffer_vp && _material.is_valid()) {
+			// If clipmap target has moved enough, re-center buffer on the target.
+			Vector2 target_pos_2d = v3v2(get_clipmap_target_position());
+			real_t tessellation_density = 1.f / pow(2.f, _tessellation_level);
+			real_t vertex_spacing = _vertex_spacing * tessellation_density;
+			if (!(MAX(abs(_last_buffer_position.x - target_pos_2d.x), abs(_last_buffer_position.y - target_pos_2d.y)) < vertex_spacing)) {
+				_last_buffer_position = target_pos_2d;
+				RS->material_set_param(_material->get_buffer_material_rid(), "_target_pos", get_clipmap_target_position());
+				_d_buffer_vp->set_update_mode(SubViewport::UPDATE_ONCE);
+				// Only call snap on _mesher if the buffer has snapped, prevents stuttering.
+				_mesher->snap();
+			}
+		}
+	} else if (_mesher) {
 		_mesher->snap();
 	}
 	if (_collision && _collision->is_dynamic_mode()) {
 		_collision->update();
-	}
-	if (_d_buffer_vp && _tessellation_level > 0) {
-		RS->material_set_param(_material->get_buffer_material_rid(), "_target_pos", get_clipmap_target_position());
-		_d_buffer_vp->set_update_mode(SubViewport::UPDATE_ONCE);
 	}
 }
 

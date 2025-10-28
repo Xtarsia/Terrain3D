@@ -95,6 +95,7 @@ private:
 	// Displacement Buffer
 	SubViewport *_d_buffer_vp = nullptr;
 	ColorRect *_d_buffer_rect = nullptr;
+	Vector2 _last_buffer_position = V2_MAX;
 
 	// Parent containers for child nodes
 	Node3D *_label_parent;
