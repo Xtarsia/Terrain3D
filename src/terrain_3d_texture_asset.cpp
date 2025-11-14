@@ -43,7 +43,7 @@ void Terrain3DTextureAsset::clear() {
 	_normal_texture.unref();
 	_normal_depth = 0.5f;
 	_roughness = 0.f;
-	_ao_strength = 0.5f;
+	_ao_light_effect = 0.0f;
 	_displacement_offset = 0.f;
 	_displacement_scale = 0.f;
 	_uv_scale = 0.1f;
@@ -148,9 +148,9 @@ void Terrain3DTextureAsset::set_roughness(const real_t p_roughness) {
 	emit_signal("setting_changed");
 }
 
-void Terrain3DTextureAsset::set_ao_strength(const real_t p_ao_strength) {
-	SET_IF_DIFF(_ao_strength, CLAMP(p_ao_strength, 0.0f, 2.0f));
-	LOG(INFO, "Setting ao_strength: ", _ao_strength);
+void Terrain3DTextureAsset::set_ao_light_effect(const real_t p_ao_light_effect) {
+	SET_IF_DIFF(_ao_light_effect, CLAMP(p_ao_light_effect, 0.0f, 2.0f));
+	LOG(INFO, "Setting ao_light_effect: ", _ao_light_effect);
 	LOG(DEBUG, "Emitting setting_changed");
 	emit_signal("setting_changed");
 }
@@ -224,8 +224,8 @@ void Terrain3DTextureAsset::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_normal_depth"), &Terrain3DTextureAsset::get_normal_depth);
 	ClassDB::bind_method(D_METHOD("set_roughness", "roughness"), &Terrain3DTextureAsset::set_roughness);
 	ClassDB::bind_method(D_METHOD("get_roughness"), &Terrain3DTextureAsset::get_roughness);
-	ClassDB::bind_method(D_METHOD("set_ao_strength", "ao_strength"), &Terrain3DTextureAsset::set_ao_strength);
-	ClassDB::bind_method(D_METHOD("get_ao_strength"), &Terrain3DTextureAsset::get_ao_strength);
+	ClassDB::bind_method(D_METHOD("set_ao_light_effect", "ao_light_effect"), &Terrain3DTextureAsset::set_ao_light_effect);
+	ClassDB::bind_method(D_METHOD("get_ao_light_effect"), &Terrain3DTextureAsset::get_ao_light_effect);
 	ClassDB::bind_method(D_METHOD("set_displacement_offset", "displacement_offset"), &Terrain3DTextureAsset::set_displacement_offset);
 	ClassDB::bind_method(D_METHOD("get_displacement_offset"), &Terrain3DTextureAsset::get_displacement_offset);
 	ClassDB::bind_method(D_METHOD("set_displacement_scale", "displacement_scale"), &Terrain3DTextureAsset::set_displacement_scale);
@@ -246,7 +246,7 @@ void Terrain3DTextureAsset::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "normal_texture", PROPERTY_HINT_RESOURCE_TYPE, "ImageTexture,CompressedTexture2D"), "set_normal_texture", "get_normal_texture");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "normal_depth", PROPERTY_HINT_RANGE, "0.0, 2.0"), "set_normal_depth", "get_normal_depth");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "roughness", PROPERTY_HINT_RANGE, "-1.0, 1.0"), "set_roughness", "get_roughness");
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "ao_strength", PROPERTY_HINT_RANGE, "0.0, 2.0"), "set_ao_strength", "get_ao_strength");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "ao_light_effect", PROPERTY_HINT_RANGE, "0.0, 2.0"), "set_ao_light_effect", "get_ao_light_effect");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "displacement_offset", PROPERTY_HINT_RANGE, "-1.0, 1.0"), "set_displacement_offset", "get_displacement_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "displacement_scale", PROPERTY_HINT_RANGE, "0.0, 2.0"), "set_displacement_scale", "get_displacement_scale");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "uv_scale", PROPERTY_HINT_RANGE, "0.001, 2.0, or_greater"), "set_uv_scale", "get_uv_scale");
