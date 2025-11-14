@@ -15,7 +15,8 @@ enum {
 	IMAGE_ALBEDO,
 	IMAGE_HEIGHT,
 	IMAGE_NORMAL,
-	IMAGE_ROUGHNESS
+	IMAGE_ROUGHNESS,
+	IMAGE_AO
 }
 
 var plugin: EditorPlugin
@@ -40,7 +41,7 @@ var last_opened_directory: String
 var last_saved_directory: String
 var packing_albedo: bool = false
 var queue_pack_normal_roughness: bool = false
-var images: Array[Image] = [null, null, null, null]
+var images: Array[Image] = [null, null, null, null, null]
 var status_label: Label
 var no_op: Callable = func(): pass
 var last_file_selected_fn: Callable = no_op
@@ -116,13 +117,14 @@ func pack_textures_popup() -> void:
 	_init_texture_picker(window.find_child("HeightVBox"), IMAGE_HEIGHT)
 	_init_texture_picker(window.find_child("NormalVBox"), IMAGE_NORMAL)
 	_init_texture_picker(window.find_child("RoughnessVBox"), IMAGE_ROUGHNESS)
+	_init_texture_picker(window.find_child("AmbientOcclusionVBox"), IMAGE_AO)
 
 	(window.find_child("PackButton") as Button).pressed.connect(_on_pack_button_pressed)
 
 
 func _on_close_requested() -> void:
 	last_file_selected_fn = no_op
-	images = [null, null, null, null]
+	images = [null, null, null, null, null]
 	window.queue_free()
 	window = null
 
@@ -298,6 +300,9 @@ func _set_wh_labels(p_image_index: int, width: int, height: int) -> void:
 		3:
 			window.find_child("RoughnessW").text = w
 			window.find_child("RoughnessH").text = h
+		4:
+			window.find_child("AmbientOcclusionW").text = w
+			window.find_child("AmbientOcclusionH").text = h
 
 
 func _show_message(p_level: int, p_text: String) -> void:
@@ -354,10 +359,10 @@ func _on_save_file_selected(p_dst_path) -> void:
 	last_saved_directory = p_dst_path.get_base_dir() + "/"
 	var error: int
 	if packing_albedo:
-		error = _pack_textures(images[IMAGE_ALBEDO], images[IMAGE_HEIGHT], p_dst_path, false,
+		error = _pack_textures(images[IMAGE_ALBEDO], images[IMAGE_HEIGHT], null, p_dst_path, false,
 		invert_height_checkbox.button_pressed, false, normalize_height_checkbox.button_pressed, height_channel_selected)
 	else:
-		error = _pack_textures(images[IMAGE_NORMAL], images[IMAGE_ROUGHNESS], p_dst_path,
+		error = _pack_textures(images[IMAGE_NORMAL], images[IMAGE_ROUGHNESS], images[IMAGE_AO], p_dst_path,
 			invert_green_checkbox.button_pressed, invert_smooth_checkbox.button_pressed,
 			align_normals_checkbox.button_pressed, false, roughness_channel_selected)
 	
@@ -434,7 +439,7 @@ func _align_normals(source: Image, iteration: int = 0) -> void:
 		_align_normals(source, iteration)
 
 
-func _pack_textures(p_rgb_image: Image, p_a_image: Image, p_dst_path: String, p_invert_green: bool,
+func _pack_textures(p_rgb_image: Image, p_a_image: Image, p_ao_image: Image, p_dst_path: String, p_invert_green: bool,
 	p_invert_smooth: bool, p_align_normals: bool, p_normalize_height: bool, p_alpha_channel: int) -> Error:
 	if p_rgb_image and p_a_image:
 		if p_rgb_image.get_size() != p_a_image.get_size() and !resize_toggle_checkbox.button_pressed:
@@ -451,7 +456,7 @@ func _pack_textures(p_rgb_image: Image, p_a_image: Image, p_dst_path: String, p_
 		elif p_align_normals:
 			_show_message(INFO, "Alignment OK, skipping Normal Orthogonalization")
 	
-		var output_image: Image = Terrain3DUtil.pack_image(p_rgb_image, p_a_image,
+		var output_image: Image = Terrain3DUtil.pack_image(p_rgb_image, p_a_image, p_ao_image,
 			p_invert_green, p_invert_smooth, p_normalize_height, p_alpha_channel)
 	
 		if not output_image:
