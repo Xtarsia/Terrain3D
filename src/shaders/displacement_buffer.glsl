@@ -67,7 +67,7 @@ group_uniforms;
 // Uniforms that are shared with the main shader are automatically synchronised.
 // Subgroups should work as expected.
 group_uniforms displacement;
-uniform float displacement_sharpness : hint_range(0.0, 1.0, 0.01) = 0.5;
+uniform float _displacement_sharpness : hint_range(0.0, 1.0, 0.01) = 0.25;
 group_uniforms;
 
 // Varyings & Types
@@ -171,7 +171,7 @@ void accumulate_material(const mat3 TNB, const float weight, const ivec3 index,
 	#define FAST_WORLD_NORMAL(n) fma(TNB[0], vec3(n.x), fma(TNB[2], vec3(n.z), TNB[1] * vec3(n.y)))
 
 	float blend = DECODE_BLEND(control); // only used for branching.
-	float sharpness = fma(60., blend_sharpness * displacement_sharpness, 4.);
+	float sharpness = fma(60., blend_sharpness * _displacement_sharpness, 4.);
 
 	// 1st Texture Asset ID
 	if (blend < 1.0) {

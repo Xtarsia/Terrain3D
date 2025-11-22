@@ -588,6 +588,7 @@ void Terrain3DMaterial::_update_uniforms(const RID &p_material) {
 	RS->material_set_param(p_material, "_subdiv", subdiv);
 	RS->material_set_param(p_material, "_tessellation_level", tessellation_level);
 	RS->material_set_param(p_material, "_displacement_scale", _displacement_scale);
+	RS->material_set_param(p_material, "_displacement_sharpness", _displacement_sharpness);
 
 	Ref<Terrain3DAssets> asset_list = _terrain->get_assets();
 	LOG(INFO, "Updating texture arrays in shader");
@@ -691,6 +692,15 @@ void Terrain3DMaterial::set_displacement_scale(const real_t p_displacement_scale
 	SET_IF_DIFF(_displacement_scale, CLAMP(p_displacement_scale, 0.f, 2.f));
 	LOG(INFO, "Setting displacement scale: ", p_displacement_scale);
 	update();
+}
+
+void Terrain3DMaterial::set_displacement_sharpness(const real_t p_displacement_sharpness) {
+	SET_IF_DIFF(_displacement_sharpness, CLAMP(p_displacement_sharpness, 0.f, 1.f));
+	LOG(INFO, "Setting displacement sharpness: ", p_displacement_sharpness);
+	update();
+	if (_terrain) {
+		_terrain->snap();
+	}
 }
 
 void Terrain3DMaterial::set_world_background(const WorldBackground p_background) {
@@ -1081,11 +1091,6 @@ bool Terrain3DMaterial::_set(const StringName &p_name, const Variant &p_property
 		return true;
 	}
 
-	// Force displacement buffer to update when sharpness is modified.
-	if (p_name == StringName("displacement_sharpness")) {
-		_terrain->snap();
-	}
-
 	// If value is an object, assume a Texture. RS only wants RIDs, but
 	// Inspector wants the object, so set the RID and save the latter for _get
 	if (p_property.get_type() == Variant::OBJECT) {
@@ -1159,6 +1164,8 @@ void Terrain3DMaterial::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_buffer_shader_override"), &Terrain3DMaterial::get_buffer_shader_override);
 	ClassDB::bind_method(D_METHOD("set_displacement_scale", "scale"), &Terrain3DMaterial::set_displacement_scale);
 	ClassDB::bind_method(D_METHOD("get_displacement_scale"), &Terrain3DMaterial::get_displacement_scale);
+	ClassDB::bind_method(D_METHOD("set_displacement_sharpness", "sharpness"), &Terrain3DMaterial::set_displacement_sharpness);
+	ClassDB::bind_method(D_METHOD("get_displacement_sharpness"), &Terrain3DMaterial::get_displacement_sharpness);
 
 	ClassDB::bind_method(D_METHOD("set_shader_param", "name", "value"), &Terrain3DMaterial::set_shader_param);
 	ClassDB::bind_method(D_METHOD("get_shader_param", "name"), &Terrain3DMaterial::get_shader_param);
@@ -1228,6 +1235,7 @@ void Terrain3DMaterial::_bind_methods() {
 	// Hidden in Material, aliased in Terrain3D
 	// Displacement settings
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "displacement_scale", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_displacement_scale", "get_displacement_scale");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "displacement_sharpness", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_displacement_sharpness", "get_displacement_sharpness");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "buffer_shader_override_enabled", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "enable_buffer_shader_override", "is_buffer_shader_override_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "buffer_shader_override", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_buffer_shader_override", "get_buffer_shader_override");
 	//ADD_GROUP("Debug Views", "show_");

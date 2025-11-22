@@ -42,6 +42,7 @@ private:
 	bool _buffer_shader_override_enabled = false;
 	Ref<Shader> _buffer_shader_override; // User's shader we copy code from
 	real_t _displacement_scale = 1.0f;
+	real_t _displacement_sharpness = 0.5f;
 
 	// Material Features
 	WorldBackground _world_background = FLAT;
@@ -105,6 +106,8 @@ public:
 	// Material settings
 	void set_displacement_scale(const real_t p_displacement_scale);
 	real_t get_displacement_scale() const { return _displacement_scale; }
+	void set_displacement_sharpness(const real_t p_displacement_sharpness);
+	real_t get_displacement_sharpness() const { return _displacement_sharpness; }
 	void set_world_background(const WorldBackground p_background);
 	WorldBackground get_world_background() const { return _world_background; }
 	void set_texture_filtering(const TextureFiltering p_filtering);
