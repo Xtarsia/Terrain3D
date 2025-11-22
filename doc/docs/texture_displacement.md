@@ -13,6 +13,8 @@ For a more detailed terrain mesh, you can enable texture height based displaceme
 
 Generally, it is recommended to keep `mesh_size` as high as performance allows, and `vertex_spacing` at `1.0` for the best results. Both parameters will have a noticable effect on the subdivision density.
 
+Under the `Mesh/Displacement` subgroup you can set the global `Displacement Scale`. This is the maximum distance that 2 adjacent verticies can be vertically seperated by. Setting this 1.0 would mean a maximum of + 0.5m, and -0.5m deviation from the collision mesh.
+
 
 ## Configuring Textures
 
@@ -20,7 +22,11 @@ Generally, it is recommended to keep `mesh_size` as high as performance allows, 
 
 Included in the `Terrain3DTextureAsset` settings, are `displacement_offset` and `displacement_scale`.
 
-To aid setting up a given material with a clear view, you can disable `Rendering/Show Instances`, as well as hiding any other nodes in the scene tree that obscure the terrain surface. Enabling the `Displacement Buffer` debug view will show the amount that vertices have been displaced. Black areas match collision exactly. Red shows depressions into the terrain, and Green for extrusions above the terrain. You can also set `UV scale` to the default `0.1` and adjust back later as the ratio between the displacement and UV scales is maintained.
+To aid setting up a given material with a clear view, you can disable `Rendering/Show Instances`, as well as hiding any other nodes in the scene tree that obscure the terrain surface. Enabling the `Displacement Buffer` debug view will show the amount that vertices have been displaced. Black areas match collision exactly. Red shows depressions into the terrain, and Green for extrusions above the terrain. 
+
+You can also change `collision mode` to editor collision, and enable view gizmos, which will show the collision mesh for direct comparison. 
+
+You can also set `UV scale` to the default `0.1` and adjust back later as the ratio between the displacement and UV scales is maintained.
 
 ```{image} images/displacement_buffer.png
 :target: ../_images/displacement_buffer.png
@@ -41,4 +47,6 @@ The `Material/Displacement Sharpness` parameter is an additonal modifier to `Mat
 
 To calculate displacement, an atlas texture buffer is created via a viewport and canvas_item shader. This buffer updates only when the clipmap mesh moves to save on computational cost.
 
-You can access the buffer shader by enabling `Material/Buffer Shader Override Enabled`, which will generate the default for you. Though primarily for development use, it could be modified to read from a persistent buffer for real-time effects like footsteps in sand or mud, or to change how the blending of height textures is handled.
+You can access the buffer shader by enabling `Mesh/Displacement/Buffer Shader Override Enabled`, which will generate the default for you. Though primarily for development use, it could be modified to read from a persistent buffer for real-time effects like footsteps in sand or mud, or to change how the blending of height textures is handled.
+
+Custom uniforms added will show up in the `Material` properties, it is generally advised to keep custom uniforms inside the `group_uniforms displacement` uniform group in the shader code for easier access in the inspector.
