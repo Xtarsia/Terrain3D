@@ -187,6 +187,14 @@ public:
 	void set_vertex_spacing(const real_t p_spacing);
 	real_t get_vertex_spacing() const { return _vertex_spacing; }
 
+	// Material Displacement Aliases
+	void set_displacement_scale(const real_t p_displacement_scale) { _material.is_valid() ? _material->set_displacement_scale(p_displacement_scale) : void(); }
+	real_t get_displacement_scale() const { return _material.is_valid() ? _material->get_displacement_scale() : 1.f; }
+	void enable_buffer_shader_override(const bool p_enabled) { _material.is_valid() ? _material->enable_buffer_shader_override(p_enabled) : void(); }
+	bool is_buffer_shader_override_enabled() const { return _material.is_valid() ? _material->is_buffer_shader_override_enabled() : false; }
+	void set_buffer_shader_override(const Ref<Shader> &p_shader) { return _material.is_valid() ? _material->set_buffer_shader_override(p_shader) : void();}
+	Ref<Shader> get_buffer_shader_override() const { return _material.is_valid() ? _material->get_buffer_shader_override() : Ref<Shader>(); }
+
 	// Rendering
 	void set_render_layers(const uint32_t p_layers);
 	uint32_t get_render_layers() const { return _render_layers; };

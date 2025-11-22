@@ -587,6 +587,7 @@ void Terrain3DMaterial::_update_uniforms(const RID &p_material) {
 	real_t subdiv = pow(2.f, tessellation_level);
 	RS->material_set_param(p_material, "_subdiv", subdiv);
 	RS->material_set_param(p_material, "_tessellation_level", tessellation_level);
+	RS->material_set_param(p_material, "_displacement_scale", _displacement_scale);
 
 	Ref<Terrain3DAssets> asset_list = _terrain->get_assets();
 	LOG(INFO, "Updating texture arrays in shader");
@@ -684,6 +685,12 @@ void Terrain3DMaterial::update(bool p_full) {
 		// Snap to update buffer
 		_terrain->snap();
 	}
+}
+
+void Terrain3DMaterial::set_displacement_scale(const real_t p_displacement_scale) {
+	SET_IF_DIFF(_displacement_scale, CLAMP(p_displacement_scale, 0.f, 2.f));
+	LOG(INFO, "Setting displacement scale: ", p_displacement_scale);
+	update();
 }
 
 void Terrain3DMaterial::set_world_background(const WorldBackground p_background) {
@@ -1145,6 +1152,8 @@ void Terrain3DMaterial::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_buffer_shader_override_enabled"), &Terrain3DMaterial::is_buffer_shader_override_enabled);
 	ClassDB::bind_method(D_METHOD("set_buffer_shader_override", "shader"), &Terrain3DMaterial::set_buffer_shader_override);
 	ClassDB::bind_method(D_METHOD("get_buffer_shader_override"), &Terrain3DMaterial::get_buffer_shader_override);
+	ClassDB::bind_method(D_METHOD("set_displacement_scale", "scale"), &Terrain3DMaterial::set_displacement_scale);
+	ClassDB::bind_method(D_METHOD("get_displacement_scale"), &Terrain3DMaterial::get_displacement_scale);
 
 	ClassDB::bind_method(D_METHOD("set_shader_param", "name", "value"), &Terrain3DMaterial::set_shader_param);
 	ClassDB::bind_method(D_METHOD("get_shader_param", "name"), &Terrain3DMaterial::get_shader_param);
@@ -1202,8 +1211,6 @@ void Terrain3DMaterial::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "dual_scaling_enabled"), "set_dual_scaling", "get_dual_scaling");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "shader_override_enabled"), "set_shader_override_enabled", "is_shader_override_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "shader_override", PROPERTY_HINT_RESOURCE_TYPE, "Shader"), "set_shader_override", "get_shader_override");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "buffer_shader_override_enabled"), "enable_buffer_shader_override", "is_buffer_shader_override_enabled");
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "buffer_shader_override", PROPERTY_HINT_RESOURCE_TYPE, "Shader"), "set_buffer_shader_override", "get_buffer_shader_override");
 
 	// Hidden in Material, aliased in Terrain3D
 	//ADD_GROUP("Overlays", "show_");
@@ -1214,6 +1221,10 @@ void Terrain3DMaterial::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_navigation", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_show_navigation", "get_show_navigation");
 
 	// Hidden in Material, aliased in Terrain3D
+	// Displacement settings
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "displacement_scale", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_displacement_scale", "get_displacement_scale");
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "buffer_shader_override_enabled", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "enable_buffer_shader_override", "is_buffer_shader_override_enabled");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "buffer_shader_override", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_buffer_shader_override", "get_buffer_shader_override");
 	//ADD_GROUP("Debug Views", "show_");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_checkered", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_show_checkered", "get_show_checkered");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "show_grey", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_show_grey", "get_show_grey");

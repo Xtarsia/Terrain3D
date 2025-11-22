@@ -4,9 +4,7 @@ R"(
 
 //INSERT: DISPLACEMENT_UNIFORMS
 #define DISPLACEMENT
-group_uniforms displacement;
-uniform float displacement_scale : hint_range(0.0, 2.0, 0.01) = 1.0;
-group_uniforms;
+uniform float _displacement_scale : hint_range(0.0, 2.0, 0.01) = 1.0;
 uniform highp sampler2D _displacement_buffer : repeat_disable, filter_linear;
 
 //INSERT: DISPLACEMENT_FUNCTIONS
@@ -19,7 +17,7 @@ vec3 get_displacement(vec2 pos, float scale) {
 	highp vec3 disp = vec3(0.);
 	if (all(greaterThanEqual(d_uv, vec2(0.0))) && all(lessThanEqual(d_uv, vec2(1.0)))) {
 		disp = textureLod(_displacement_buffer, d_uv, 0.).rgb * 2.0 - 1.0;
-		disp *= displacement_scale;
+		disp *= _displacement_scale;
 	}
 	return disp;
 }
