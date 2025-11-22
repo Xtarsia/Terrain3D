@@ -1081,6 +1081,11 @@ bool Terrain3DMaterial::_set(const StringName &p_name, const Variant &p_property
 		return true;
 	}
 
+	// Force displacement buffer to update when sharpness is modified.
+	if (p_name == StringName("displacement_sharpness")) {
+		_terrain->snap();
+	}
+
 	// If value is an object, assume a Texture. RS only wants RIDs, but
 	// Inspector wants the object, so set the RID and save the latter for _get
 	if (p_property.get_type() == Variant::OBJECT) {
