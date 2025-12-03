@@ -316,6 +316,7 @@ void Terrain3DMesher::snap() {
 	IS_INIT(VOID);
 	// Always update target position in shader
 	Vector3 target_pos = _terrain->get_clipmap_target_position();
+	LOG(EXTREME, "Mesher Snapping to target pos:", target_pos);
 	RS->material_set_param(_terrain->get_material()->get_material_rid(), "_target_pos", target_pos);
 
 	// If clipmap target hasn't moved enough, skip
