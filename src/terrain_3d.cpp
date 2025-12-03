@@ -103,6 +103,7 @@ void Terrain3D::_initialize() {
 void Terrain3D::__physics_process(const double p_delta) {
 	if (!_initialized)
 		return;
+	LOG(EXTREME, "Physics tick: ", p_delta);
 	if (!_camera.is_valid()) {
 		LOG(DEBUG, "Camera is null, getting the current one");
 		_grab_camera();
