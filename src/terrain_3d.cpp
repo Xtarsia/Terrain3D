@@ -123,6 +123,7 @@ void Terrain3D::__physics_process(const double p_delta) {
 			}
 		}
 	} else if (_mesher) {
+		LOG(EXTREME, "Mesher is valid");
 		_mesher->snap();
 	}
 	if (_collision && _collision->is_dynamic_mode()) {
