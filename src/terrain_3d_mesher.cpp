@@ -323,6 +323,7 @@ void Terrain3DMesher::snap() {
 	Vector2 target_pos_2d = v3v2(target_pos);
 	real_t tessellation_density = 1.f / pow(2.f, _terrain->get_tessellation_level());
 	real_t vertex_spacing = _terrain->get_vertex_spacing() * tessellation_density;
+	LOG(EXTREME, "spacing: ", vertex_spacing, " tess: ", tessellation_density, " pos_2d: ", target_pos_2d);
 	if (MAX(abs(_last_target_position.x - target_pos_2d.x), abs(_last_target_position.y - target_pos_2d.y)) < vertex_spacing) {
 		LOG(EXTREME, "Mesher Snapping Skipped, last pos:", _last_target_position);
 		return;
