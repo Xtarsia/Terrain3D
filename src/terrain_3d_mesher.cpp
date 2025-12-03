@@ -316,16 +316,16 @@ void Terrain3DMesher::snap() {
 	IS_INIT(VOID);
 	// Always update target position in shader
 	Vector3 target_pos = _terrain->get_clipmap_target_position();
-	LOG(EXTREME, "Mesher Snapping to target pos:", target_pos);
 	RS->material_set_param(_terrain->get_material()->get_material_rid(), "_target_pos", target_pos);
 
 	// If clipmap target hasn't moved enough, skip
 	Vector2 target_pos_2d = v3v2(target_pos);
 	real_t tessellation_density = 1.f / pow(2.f, _terrain->get_tessellation_level());
 	real_t vertex_spacing = _terrain->get_vertex_spacing() * tessellation_density;
-	LOG(EXTREME, "spacing: ", vertex_spacing, " tess: ", tessellation_density, " pos_2d: ", target_pos_2d);
+	LOG(EXTREME, "last_pos: ", _last_target_position, " new_pos: ", target_pos_2d);
+	LOG(EXTREME, "max-diff: ", MAX(abs(_last_target_position.x - target_pos_2d.x), abs(_last_target_position.y - target_pos_2d.y)));
 	if (MAX(abs(_last_target_position.x - target_pos_2d.x), abs(_last_target_position.y - target_pos_2d.y)) < vertex_spacing) {
-		LOG(EXTREME, "Mesher Snapping Skipped, last pos:", _last_target_position);
+		LOG(EXTREME, "Mesher Snapping Skipped");
 		return;
 	}
 
