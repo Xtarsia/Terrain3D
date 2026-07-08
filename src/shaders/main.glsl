@@ -33,7 +33,7 @@ render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_sc
 #define DECODE_ANGLE(control) float(control >>10u & 0xFu) * TAU_16TH
 // This math recreates the scale value directly rather than using an 8 float const array.
 #define DECODE_SCALE(control) (0.9 - float(((control >>7u & 0x7u) + 3u) % 8u + 1u) * 0.1)
-#define DECODE_HOLE(control) bool(control >>2u & 0x1u)
+#define DECODE_HOLE(height) bool(height & 0x1u)
 
 #if CURRENT_RENDERER == RENDERER_COMPATIBILITY
     #define fma(a, b, c) ((a) * (b) + (c))
@@ -198,8 +198,7 @@ void vertex() {
 
 	// Discard vertices for Holes. 1 lookup
 	ivec3 v_region = get_index_coord(start_pos);
-	uint control = floatBitsToUint(texelFetch(_control_maps, v_region, 0)).r;
-	bool hole = DECODE_HOLE(control);
+	bool hole = DECODE_HOLE(floatBitsToUint(texelFetch(_height_maps, v_region, 0)).r);
 
 	vec3 displacement = vec3(0.);
 	// Show holes to all cameras except mouse camera (on exactly 1 layer)

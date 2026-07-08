@@ -227,79 +227,88 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 			real_t brush_alpha = brush_image->get_pixelv(brush_pixel_position).r;
 			brush_alpha = real_t(Math::pow(double(brush_alpha), double(gamma)));
 			brush_alpha = std::isnan(brush_alpha) ? 0.f : brush_alpha;
-			Color src = map->get_pixelv(map_pixel_position);
+			const Color src = map->get_pixelv(map_pixel_position);
 			Color dest = src;
 
 			if (map_type == TYPE_HEIGHT) {
-				real_t srcf = src.r;
+				real_t srcf = src.r; // extract the float value for use when modifying height values.
 				// In case data in existing map has nan or inf saved, check, and reset to real number if required.
-				srcf = std::isnan(srcf) ? 0.f : srcf;
+				srcf = std::isnan(srcf) || std::isinf(srcf) ? 0.f : srcf;
 				real_t destf = srcf;
 
-				switch (_operation) {
-					case ADD: {
-						if (_tool == HEIGHT) {
-							// Height
-							destf = Math::lerp(srcf, height, CLAMP(brush_alpha * strength, 0.f, 1.f));
-						} else if (modifier_alt && !std::isnan(p_global_position.y)) {
-							// Lift troughs
-							real_t brush_center_y = p_global_position.y + brush_alpha * strength;
-							destf = Math::clamp(brush_center_y, srcf, srcf + brush_alpha * strength);
-						} else {
-							// Raise
-							destf = srcf + (brush_alpha * strength);
-						}
-						break;
+				if (_tool == HOLES) {
+					if (brush_alpha > 0.5f) {
+						// Set 1bit hole value, leaving the other 31 bits un-changed.
+						destf = as_float((as_uint(destf) & 0xFFFFFFFEu) | ((_operation == ADD) ? 1u : 0u));
 					}
-					case SUBTRACT: {
-						if (_tool == HEIGHT) {
-							// Height, but GDScript has already picked height at cursor
-							destf = Math::lerp(srcf, height, CLAMP(brush_alpha * strength, 0.f, 1.f));
-						} else if (modifier_alt && !std::isnan(p_global_position.y)) {
-							// Flatten peaks
-							real_t brush_center_y = p_global_position.y - brush_alpha * strength;
-							destf = Math::clamp(brush_center_y, srcf - brush_alpha * strength, srcf);
-						} else {
-							// Lower
-							destf = srcf - (brush_alpha * strength);
-						}
-						break;
-					}
-					case AVERAGE: {
-						real_t avg_default = _terrain->get_material()->get_world_background() == 0u ? srcf : 0.f;
-						real_t avg = _average(AVG_HEIGHT, brush_global_position, srcf, avg_default);
-						destf = Math::lerp(srcf, avg, CLAMP(brush_alpha * strength * 2.f, .02f, 1.f));
-						break;
-					}
-					case GRADIENT: {
-						if (gradient_points.size() == 2) {
-							Vector3 point_1 = gradient_points[0];
-							Vector3 point_2 = gradient_points[1];
-							Vector2 point_1_xz = Vector2(point_1.x, point_1.z);
-							Vector2 point_2_xz = Vector2(point_2.x, point_2.z);
-							Vector2 dir = point_2_xz - point_1_xz;
-							if (dir.length_squared() < 0.01f) {
-								return;
+				} else {
+					switch (_operation) {
+						case ADD: {
+							if (_tool == HEIGHT) {
+								// Height
+								destf = Math::lerp(srcf, height, CLAMP(brush_alpha * strength, 0.f, 1.f));
+							} else if (modifier_alt && !std::isnan(p_global_position.y)) {
+								// Lift troughs
+								real_t brush_center_y = p_global_position.y + brush_alpha * strength;
+								destf = Math::clamp(brush_center_y, srcf, srcf + brush_alpha * strength);
+							} else {
+								// Raise
+								destf = srcf + (brush_alpha * strength);
 							}
-							Vector2 brush_xz = Vector2(brush_global_position.x, brush_global_position.z);
-
-							if (_operation_movement.length_squared() > 0.f) {
-								// Ramp up/down only in the direction of movement, to avoid giving winding
-								// paths one edge higher than the other.
-								Vector2 movement_xz = Vector2(_operation_movement.x, _operation_movement.z).normalized();
-								Vector2 offset = movement_xz * Vector2(brush_offset).dot(movement_xz);
-								brush_xz = Vector2(p_global_position.x + offset.x, p_global_position.z + offset.y);
-							}
-
-							real_t weight = dir.normalized().dot(brush_xz - point_1_xz) / dir.length();
-							weight = Math::clamp(weight, (real_t)0.0f, (real_t)1.0f);
-							real_t height = Math::lerp(point_1.y, point_2.y, weight);
-							destf = Math::lerp(srcf, height, CLAMP(brush_alpha * strength, 0.f, 1.f));
+							break;
 						}
-						break;
+						case SUBTRACT: {
+							if (_tool == HEIGHT) {
+								// Height, but GDScript has already picked height at cursor
+								destf = Math::lerp(srcf, height, CLAMP(brush_alpha * strength, 0.f, 1.f));
+							} else if (modifier_alt && !std::isnan(p_global_position.y)) {
+								// Flatten peaks
+								real_t brush_center_y = p_global_position.y - brush_alpha * strength;
+								destf = Math::clamp(brush_center_y, srcf - brush_alpha * strength, srcf);
+							} else {
+								// Lower
+								destf = srcf - (brush_alpha * strength);
+							}
+							break;
+						}
+						case AVERAGE: {
+							real_t avg_default = _terrain->get_material()->get_world_background() == 0u ? srcf : 0.f;
+							real_t avg = _average(AVG_HEIGHT, brush_global_position, srcf, avg_default);
+							destf = Math::lerp(srcf, avg, CLAMP(brush_alpha * strength * 2.f, .02f, 1.f));
+							break;
+						}
+						case GRADIENT: {
+							if (gradient_points.size() == 2) {
+								Vector3 point_1 = gradient_points[0];
+								Vector3 point_2 = gradient_points[1];
+								Vector2 point_1_xz = Vector2(point_1.x, point_1.z);
+								Vector2 point_2_xz = Vector2(point_2.x, point_2.z);
+								Vector2 dir = point_2_xz - point_1_xz;
+								if (dir.length_squared() < 0.01f) {
+									return;
+								}
+								Vector2 brush_xz = Vector2(brush_global_position.x, brush_global_position.z);
+
+								if (_operation_movement.length_squared() > 0.f) {
+									// Ramp up/down only in the direction of movement, to avoid giving winding
+									// paths one edge higher than the other.
+									Vector2 movement_xz = Vector2(_operation_movement.x, _operation_movement.z).normalized();
+									Vector2 offset = movement_xz * Vector2(brush_offset).dot(movement_xz);
+									brush_xz = Vector2(p_global_position.x + offset.x, p_global_position.z + offset.y);
+								}
+
+								real_t weight = dir.normalized().dot(brush_xz - point_1_xz) / dir.length();
+								weight = Math::clamp(weight, (real_t)0.0f, (real_t)1.0f);
+								real_t height = Math::lerp(point_1.y, point_2.y, weight);
+								destf = Math::lerp(srcf, height, CLAMP(brush_alpha * strength, 0.f, 1.f));
+							}
+							break;
+						}
+						default:
+							break;
 					}
-					default:
-						break;
+					// Set 24bit height value, leaving the last 8 bits from the source un-changed.
+					destf = as_float((as_uint(src.r) & 0x000000FFu) | (as_uint(destf) & 0xFFFFFF00u));
 				}
 				dest = Color(destf, 0.f, 0.f, 1.f);
 				region->update_height(destf);
@@ -450,12 +459,6 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 							autoshader = (_operation == ADD);
 							uvscale = 0.f;
 							uvrotation = 0.f;
-						}
-						break;
-					}
-					case HOLES: {
-						if (brush_alpha > 0.5f) {
-							hole = (_operation == ADD);
 						}
 						break;
 					}

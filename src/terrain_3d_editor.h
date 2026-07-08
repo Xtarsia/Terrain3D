@@ -134,12 +134,12 @@ inline MapType Terrain3DEditor::_get_map_type() const {
 	switch (_tool) {
 		case SCULPT:
 		case HEIGHT:
+		case HOLES:
 		case INSTANCER:
 			return TYPE_HEIGHT;
 			break;
 		case TEXTURE:
 		case AUTOSHADER:
-		case HOLES:
 		case NAVIGATION:
 		case ANGLE:
 		case SCALE:
