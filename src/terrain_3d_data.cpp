@@ -362,37 +362,16 @@ void Terrain3DData::load_directory(const String &p_dir) {
 
 	_clear();
 	for (const String &fname : files) {
-		String path = p_dir + String("/") + fname;
-		LOG(DEBUG, "Loading region from ", path);
 		Vector2i loc = Util::filename_to_location(fname);
 		if (loc.x == INT32_MAX) {
 			LOG(ERROR, "Cannot get region location from file name: ", fname);
 			continue;
 		}
-		Ref<Terrain3DRegion> region = ResourceLoader::get_singleton()->load(path, "Terrain3DRegion", ResourceLoader::CACHE_MODE_IGNORE);
-		if (region.is_null()) {
-			LOG(ERROR, "Cannot load region at ", path);
-			continue;
-		}
-		LOG(INFO, "Loaded region: ", loc, " size: ", region->get_region_size());
-		if (_regions.is_empty()) {
-			_terrain->set_region_size((Terrain3D::RegionSize)region->get_region_size());
-		} else {
-			if (_terrain->get_region_size() != (Terrain3D::RegionSize)region->get_region_size()) {
-				LOG(ERROR, "Region size mismatch. First loaded: ", _terrain->get_region_size(), " next: ",
-						region->get_region_size(), " in file: ", path);
-				return;
-			}
-		}
-		region->take_over_path(path);
-		region->set_location(loc);
-		region->set_version(CURRENT_DATA_VERSION); // Sends upgrade warning if old version
-		add_region(region, false);
+		load_region(loc, p_dir, false);
 	}
 	update_maps(TYPE_MAX, true, false);
 }
 
-//TODO have load_directory call load_region, or make a load_file that loads a specific path
 void Terrain3DData::load_region(const Vector2i &p_region_loc, const String &p_dir, const bool p_update) {
 	LOG(INFO, "Loading region from location ", p_region_loc);
 	String path = p_dir + String("/") + Util::location_to_filename(p_region_loc);
