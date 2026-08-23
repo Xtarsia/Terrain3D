@@ -395,6 +395,53 @@ void Terrain3DData::load_region(const Vector2i &p_region_loc, const String &p_di
 	}
 	region->take_over_path(path);
 	region->set_location(p_region_loc);
+
+	// Upgrade data if needed.
+	if (region->get_version() < 0.94f) {
+		Ref<Image> control_map = region->get_control_map();
+		Ref<Image> height_map = region->get_height_map();
+
+		if (control_map.is_valid() && height_map.is_valid()) {
+			int width = control_map->get_width();
+			int height = control_map->get_height();
+
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					Color control_pixel = control_map->get_pixel(x, y);
+					Color height_pixel = height_map->get_pixel(x, y);
+
+					uint32_t c_map = as_uint(control_pixel.r);
+					uint32_t tex_1 = (c_map >> 27) & 0x1F; // base_id -> tex_1
+					uint32_t tex_2 = (c_map >> 22) & 0x1F; // overlay_id -> tex_2
+					uint32_t autoshader = c_map & 0x1;
+
+					real_t blend = real_t((c_map >> 7) & 0xFF) / 255.0f; // convert weights, with 3rd weight at 0.
+					Vector3 weights = Vector3(1.0f - blend, blend, 0.0f).normalized();
+
+					uint32_t weight_1 = uint32_t(CLAMP(weights.x, 0.0f, 1.0f) * 255.0f + 0.5f);
+					uint32_t weight_2 = uint32_t(CLAMP(weights.y, 0.0f, 1.0f) * 255.0f + 0.5f);
+
+					uint32_t dest_c_map = 0u;
+					dest_c_map |= (tex_1 & 0x1F) << 27;
+					dest_c_map |= (tex_2 & 0x1F) << 22;
+					// tex_3 is blank, defaulting to the 1st texture.
+					dest_c_map |= (weight_1 & 0xFF) << 9;
+					dest_c_map |= (weight_2 & 0xFF) << 1;
+					dest_c_map |= autoshader & 0x1;
+
+					control_map->set_pixel(x, y, Color(as_float(dest_c_map), 0.f, 0.f, 1.f));
+
+					height_pixel.r = as_float(
+							(as_uint(height_pixel.r) & 0xFFFFFFFCu) | // preserve 30 heightmap bits
+							((as_uint(control_pixel.r) >> 2) & 0x1u) | //store control map hole bit in last place
+							(as_uint(control_pixel.r) & 0x2u)); // store control map nav bit in penultimate place
+
+					height_map->set_pixel(x, y, height_pixel);
+				}
+			}
+		}
+	};
+
 	region->set_version(CURRENT_DATA_VERSION); // Sends upgrade warning if old version
 	add_region(region, p_update);
 }
