@@ -236,10 +236,21 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 				srcf = std::isnan(srcf) || std::isinf(srcf) ? 0.f : srcf;
 				real_t destf = srcf;
 
-				if (_tool == HOLES) {
+				if (_tool == HOLES || _tool == NAVIGATION) {
 					if (brush_alpha > 0.5f) {
-						// Set 1bit hole value, leaving the other 31 bits un-changed.
-						destf = as_float((as_uint(destf) & 0xFFFFFFFEu) | ((_operation == ADD) ? 1u : 0u));
+						switch (_tool) {
+							case HOLES: {
+								// Set 1 bit hole value, leaving the other 31 bits un-changed.
+								destf = as_float((as_uint(destf) & 0xFFFFFFFEu) | ((_operation == ADD) ? 1u : 0u));
+								break;
+								}
+							case NAVIGATION: {
+								// Set 1 bit navigation value, leaving the other 31 bits unchanged.
+								destf = as_float((as_uint(destf) & 0xFFFFFFFDu) | (((_operation == ADD) ? 1u : 0u) << 1u));
+								break;
+							}
+						}
+
 					}
 				} else {
 					switch (_operation) {
@@ -318,133 +329,74 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 
 			} else if (map_type == TYPE_CONTROL) {
 				// Get current bit field from pixel
-				uint32_t base_id = get_base(src.r);
-				uint32_t overlay_id = get_overlay(src.r);
-				real_t blend = real_t(get_blend(src.r)) / 255.f;
-				uint32_t uvrotation = get_uv_rotation(src.r);
-				uint32_t uvscale = get_uv_scale(src.r);
-				bool hole = is_hole(src.r);
-				bool navigation = is_nav(src.r);
-				bool autoshader = is_auto(src.r);
-				// Lookup to shift values saved to control map so that 0 (default) is the first entry
-				// Shader scale array is aligned to match this.
-				std::array<uint32_t, 8> scale_align = { 5, 6, 7, 0, 1, 2, 3, 4 };
+				uint32_t c_map = as_uint(src.r);
+				uint32_t tex_1 = c_map << 27 & 0x1F;
+				uint32_t tex_2 = c_map << 22 & 0x1F;
+				uint32_t tex_3 = c_map << 17 & 0x1F;
+				real_t w_1 = real_t(c_map << 9 & 0xFF);
+				real_t w_2 = real_t(c_map << 1 & 0xFF);
+				real_t w_3 = sqrt(1.0f - w_1 * w_1 - w_2 * w_2); // reconstructed
+
+				Vector3i tex_ids(tex_1, tex_2, tex_3);
+				Vector3 weights = Vector3(w_1, w_2, w_3).normalized();
+				bool autoshader = (c_map & 0x1) == 1;
 
 				switch (_tool) {
 					case TEXTURE: {
 						if (!data->is_in_slope(brush_global_position, slope_range)) {
 							continue;
 						}
+						real_t spray_strength = CLAMP(strength * 0.05f, 0.004f, .25f);
+						real_t brush_value = CLAMP(brush_alpha * spray_strength, 0.f, 1.f);
 						switch (_operation) {
-							// Base Paint
+							// currently un-used, but could be a literal replace A with B, ignoring weights?
 							case REPLACE: {
-								if (brush_alpha > 0.5f) {
-									if (enable_texture) {
-										// Set base & overlay texture
-										base_id = asset_id;
-										overlay_id = asset_id;
-										// Erase blend value
-										blend = 0.f;
+								break;
+							}
+							// reduce lowest weight to 0 if selected tex not preset, then set tex for that weight, and raise weight of selected tex.
+							case ADD: {
+								int index = -1;
+								for (int i = 0; i < 3; i++) {
+									if (tex_ids[i] == asset_id) {
+										index = i;
+										break;
+									}
+								}
+
+								if (index >= 0) {
+									weights[index] = CLAMP(weights[index] + brush_value, 0.f, 1.1f);
+									if (brush_alpha > 0.5f && weights[index] > 0.5f) {
 										autoshader = false;
 									}
-									// Set angle & scale
-									if (base_id == asset_id && enable_angle && !autoshader) {
-										if (dynamic_angle) {
-											// Angle from mouse movement.
-											angle = Vector2(-_operation_movement.x, _operation_movement.z).angle();
-											// Avoid negative, align texture "up" with mouse direction.
-											angle = real_t(Math::fmod(Math::rad_to_deg(angle) + 450.f, real_t(360.f)));
-										}
-										// Convert from degrees to 0 - 15 value range
-										uvrotation = uint32_t(CLAMP(Math::round(angle / 22.5f), 0.f, 15.f));
-									}
-									if (base_id == asset_id && enable_scale && !autoshader) {
-										// Offset negative and convert from percentage to 0 - 7 bit value range
-										// Maintain 0 = 0, remap negatives to end.
-										uvscale = scale_align[uint8_t(CLAMP(Math::round((scale + 60.f) / 20.f), 0.f, 7.f))];
+								} else {
+									int lowest = weights.min_axis_index();
+									if (weights[lowest] <= 0.f) {
+										tex_ids[lowest] = asset_id;
+									} else {
+										weights[lowest] = CLAMP(weights[lowest] - brush_value, 0.f, 1.1f);
 									}
 								}
+								weights = weights.normalized();
 								break;
 							}
 
-							// Add asset id, and increase weighting
-							case ADD: {
-								real_t spray_strength = CLAMP(strength * 0.05f, 0.004f, .25f);
-								real_t brush_value = CLAMP(brush_alpha * spray_strength, 0.f, 1.f);
-								if (enable_texture && brush_alpha * strength * 11.f > 0.1f) {
-									// Pick lowest weighted id, and lower to zero before setting new asset id.
-									if (asset_id != base_id && asset_id != overlay_id) {
-										if (modifier_alt) {
-											if (blend < 0.5f) {
-												overlay_id = asset_id;
-											} else {
-												base_id = asset_id;
-											}
-										} else {
-											if (blend >= 0.5f) {
-												blend = CLAMP(blend + brush_value, 0.f, 1.f);
-											} else {
-												blend = CLAMP(blend - brush_value, 0.f, 1.f);
-											}
-											if (blend <= 1.0f / 254.f) {
-												overlay_id = asset_id;
-											} else if (blend >= (1.f - 1.0f / 254.f)) {
-												base_id = asset_id;
-											}
-										}
-									}
-
-									if (base_id == asset_id) {
-										blend = CLAMP(blend - brush_value, 0.f, 1.f);
-										if (brush_alpha > 0.5f && blend < 0.5f) {
-											autoshader = false;
-										}
-									}
-									if (overlay_id == asset_id) {
-										blend = CLAMP(blend + brush_value, 0.f, 1.f);
-										if (brush_alpha > 0.5f && blend >= 0.5f) {
-											autoshader = false;
-										}
-									}
-								}
-
-								if ((base_id == asset_id && blend < 0.5f) || (overlay_id == asset_id && blend >= 0.5f)) {
-									// Set angle & scale
-									if (enable_angle && !autoshader && brush_alpha > 0.5f) {
-										if (dynamic_angle) {
-											// Angle from mouse movement.
-											angle = Vector2(-_operation_movement.x, _operation_movement.z).angle();
-											// Avoid negative, align texture "up" with mouse direction.
-											angle = real_t(Math::fmod(Math::rad_to_deg(angle) + 450.f, real_t(360.f)));
-										}
-										// Convert from degrees to 0 - 15 value range
-										uvrotation = uint32_t(CLAMP(Math::round(angle / 22.5f), 0.f, 15.f));
-									}
-									if (enable_scale && !autoshader && brush_alpha > 0.5f) {
-										// Offset negative and convert from percentage to 0 - 7 bit value range
-										// Maintain 0 = 0, remap negatives to end.
-										uvscale = scale_align[uint8_t(CLAMP(Math::round((scale + 60.f) / 20.f), 0.f, 7.f))];
-									}
-								}
-								break;
-							}
-
-							// Lower weight of current asset id
 							case SUBTRACT: {
-								real_t spray_strength = CLAMP(strength * 0.05f, 0.004f, .25f);
-								real_t brush_value = CLAMP(brush_alpha * spray_strength, 0.f, 1.f);
-								if (base_id == asset_id) {
-									blend = CLAMP(blend + brush_value, 0.f, 1.f);
+								int index = -1;
+								for (int i = 0; i < 3; i++) {
+									if (tex_ids[i] == asset_id) {
+										index = i;
+										break;
+									}
 								}
-								if (overlay_id == asset_id) {
-									blend = CLAMP(blend - brush_value, 0.f, 1.f);
+								if (index >= 0) {
+									weights[index] = CLAMP(weights[index] - brush_value, 0.f, 1.1f);
 								}
+								weights = weights.normalized();
 								break;
 							}
 
 							case AVERAGE: {
-								real_t avg = _average(AVG_BLEND, brush_global_position, src.r, 0.f, modifier_alt) / 255.f;
-								blend = Math::lerp(blend, avg, CLAMP(brush_alpha * strength * 2.f, .02f, 1.f));
+								weights = Vector3(weights + Vector3(1.f, 1.f, 1.f) * brush_value).normalized();
 								break;
 							}
 
@@ -454,34 +406,31 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 						}
 						break;
 					}
+
 					case AUTOSHADER: {
 						if (brush_alpha > 0.5f) {
 							autoshader = (_operation == ADD);
-							uvscale = 0.f;
-							uvrotation = 0.f;
 						}
 						break;
 					}
-					case NAVIGATION: {
-						if (brush_alpha > 0.5f) {
-							navigation = (_operation == ADD);
-						}
-						break;
-					}
+
 					default: {
 						break;
 					}
 				}
 
-				// Convert back to bitfield
-				uint32_t blend_int = uint32_t(CLAMP(Math::round(blend * 255.f), 0.f, 255.f));
-				uint32_t bits = enc_base(base_id) | enc_overlay(overlay_id) |
-						enc_blend(blend_int) | enc_uv_rotation(uvrotation) |
-						enc_uv_scale(uvscale) | enc_hole(hole) |
-						enc_nav(navigation) | enc_auto(autoshader);
-
+				// Apply values back to bitfield
+				uint32_t dest_c_map = 0u;
+				dest_c_map |= CLAMP(tex_ids.x & 0x1F, 0u, 31u) << 27;
+				dest_c_map |= CLAMP(tex_ids.y & 0x1F, 0u, 31u) << 22;
+				dest_c_map |= CLAMP(tex_ids.z & 0x1F, 0u, 31u) << 17;
+				uint32_t weight_1 = uint32_t(CLAMP(w_1, 0.0f, 1.0f) * 255.0f + 0.5f);
+				uint32_t weight_2 = uint32_t(CLAMP(w_2, 0.0f, 1.0f) * 255.0f + 0.5f);
+				dest_c_map |= (weight_1 & 0xFF) << 9;
+				dest_c_map |= (weight_2 & 0xFF) << 1;
+				dest_c_map |= (autoshader & 0x1);
 				// Write back to pixel in FORMAT_RF. Must be a 32-bit float
-				dest = Color(as_float(bits), 0.f, 0.f, 1.f);
+				dest = Color(as_float(dest_c_map), 0.f, 0.f, 1.f);
 
 			} else if (map_type == TYPE_COLOR) {
 				// Filter by visible texture
