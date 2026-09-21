@@ -330,15 +330,15 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 			} else if (map_type == TYPE_CONTROL) {
 				// Get current bit field from pixel
 				uint32_t c_map = as_uint(src.r);
-				uint32_t tex_1 = c_map << 27 & 0x1F;
-				uint32_t tex_2 = c_map << 22 & 0x1F;
-				uint32_t tex_3 = c_map << 17 & 0x1F;
-				real_t w_1 = real_t(c_map << 9 & 0xFF);
-				real_t w_2 = real_t(c_map << 1 & 0xFF);
-				real_t w_3 = sqrt(1.0f - w_1 * w_1 - w_2 * w_2); // reconstructed
+				int32_t tex_1 = (c_map >> 27) & 0x1F;
+				int32_t tex_2 = (c_map >> 22) & 0x1F;
+				int32_t tex_3 = (c_map >> 17) & 0x1F;
+				real_t w_1 = real_t((c_map >> 9) & 0xFF) / 255.0f;
+				real_t w_2 = real_t((c_map >> 1) & 0xFF) / 255.0f;
+				real_t w_3 = MAX(0.0f, 1.0f - w_1 - w_2);
 
 				Vector3i tex_ids(tex_1, tex_2, tex_3);
-				Vector3 weights = Vector3(w_1, w_2, w_3).normalized();
+				Vector3 weights = Vector3(w_1, w_2, w_3);
 				bool autoshader = (c_map & 0x1) == 1;
 
 				switch (_tool) {
@@ -346,7 +346,7 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 						if (!data->is_in_slope(brush_global_position, slope_range)) {
 							continue;
 						}
-						real_t spray_strength = CLAMP(strength * 0.05f, 0.004f, .25f);
+						real_t spray_strength = CLAMP(strength * 0.025f, 0.005f, .25f);
 						real_t brush_value = CLAMP(brush_alpha * spray_strength, 0.f, 1.f);
 						switch (_operation) {
 							// currently un-used, but could be a literal replace A with B, ignoring weights?
@@ -364,19 +364,37 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 								}
 
 								if (index >= 0) {
-									weights[index] = CLAMP(weights[index] + brush_value, 0.f, 1.1f);
+									for (int i = 0; i < 3; i++) {
+										if (i == index) {
+											weights[i] = MAX(weights[i] + brush_value, 0.0f);
+										} else {
+											weights[i] = MAX(weights[i] - brush_value * 0.5f, 0.0f);
+										}
+									}
+
 									if (brush_alpha > 0.5f && weights[index] > 0.5f) {
 										autoshader = false;
 									}
 								} else {
-									int lowest = weights.min_axis_index();
-									if (weights[lowest] <= 0.f) {
-										tex_ids[lowest] = asset_id;
-									} else {
-										weights[lowest] = CLAMP(weights[lowest] - brush_value, 0.f, 1.1f);
+									index = weights.min_axis_index();
+									for (int i = 0; i < 3; i++) {
+										if (i == index) {
+											weights[i] = MAX(weights[i] - brush_value, 0.0f);
+										} else {
+											weights[i] = MAX(weights[i] + brush_value * 0.5f, 0.0f);
+										}
+									}
+									if (weights[index] < (1.f / 255.f)) {
+										tex_ids[index] = asset_id;
 									}
 								}
-								weights = weights.normalized();
+
+								// Restore the barycentric invariant.
+								real_t total = weights.x + weights.y + weights.z;
+								if (total > 0.0f) {
+									weights /= total;
+								}
+
 								break;
 							}
 
@@ -388,15 +406,29 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 										break;
 									}
 								}
-								if (index >= 0) {
-									weights[index] = CLAMP(weights[index] - brush_value, 0.f, 1.1f);
+								if (index >= 0 && weights[index] > 0.0f) {
+									for (int i = 0; i < 3; i++) {
+										if (i == index) {
+											weights[i] = MAX(weights[i] - brush_value, 0.0f);
+										} else {
+											weights[i] = MAX(weights[i] + brush_value * 0.5f, 0.0f);
+										}
+									}
+									real_t total = weights.x + weights.y + weights.z;
+									if (total > 0.0f) {
+										weights /= total;
+									}
 								}
-								weights = weights.normalized();
 								break;
 							}
 
 							case AVERAGE: {
-								weights = Vector3(weights + Vector3(1.f, 1.f, 1.f) * brush_value).normalized();
+								real_t amount = CLAMP(brush_value * 2.f, 0.f, 1.f);
+								weights = weights.lerp(Vector3(1.f, 1.f, 1.f) / 3.f, amount);
+								real_t total = weights.x + weights.y + weights.z;
+								if (total > 0.f) {
+									weights /= total;
+								}
 								break;
 							}
 
@@ -421,11 +453,11 @@ void Terrain3DEditor::_operate_map(const Vector3 &p_global_position, const real_
 
 				// Apply values back to bitfield
 				uint32_t dest_c_map = 0u;
-				dest_c_map |= CLAMP(tex_ids.x & 0x1F, 0u, 31u) << 27;
-				dest_c_map |= CLAMP(tex_ids.y & 0x1F, 0u, 31u) << 22;
-				dest_c_map |= CLAMP(tex_ids.z & 0x1F, 0u, 31u) << 17;
-				uint32_t weight_1 = uint32_t(CLAMP(w_1, 0.0f, 1.0f) * 255.0f + 0.5f);
-				uint32_t weight_2 = uint32_t(CLAMP(w_2, 0.0f, 1.0f) * 255.0f + 0.5f);
+				dest_c_map |= CLAMP(tex_ids.x & 0x1F, 0, 31) << 27;
+				dest_c_map |= CLAMP(tex_ids.y & 0x1F, 0, 31) << 22;
+				dest_c_map |= CLAMP(tex_ids.z & 0x1F, 0, 31) << 17;
+				uint32_t weight_1 = uint32_t(CLAMP(weights.x, 0.0f, 1.0f) * 255.0f + 0.5f);
+				uint32_t weight_2 = uint32_t(CLAMP(weights.y, 0.0f, 1.0f) * 255.0f + 0.5f);
 				dest_c_map |= (weight_1 & 0xFF) << 9;
 				dest_c_map |= (weight_2 & 0xFF) << 1;
 				dest_c_map |= (autoshader & 0x1);

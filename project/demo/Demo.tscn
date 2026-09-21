@@ -32,7 +32,6 @@ assets = ExtResource("8_g2of2")
 collision_target = NodePath("../Player")
 collision_mask = 3
 clipmap_target = NodePath("../Player")
-tessellation_level = 3
 mesh_size = 96
 cull_margin = 450.0
 ocean_enabled = true

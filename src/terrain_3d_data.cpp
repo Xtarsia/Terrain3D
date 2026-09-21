@@ -415,7 +415,7 @@ void Terrain3DData::load_region(const Vector2i &p_region_loc, const String &p_di
 					uint32_t tex_2 = (c_map >> 22) & 0x1F; // overlay_id -> tex_2
 					uint32_t autoshader = c_map & 0x1;
 
-					real_t blend = real_t((c_map >> 7) & 0xFF) / 255.0f; // convert weights, with 3rd weight at 0.
+					real_t blend = real_t((c_map >> 14) & 0xFF) / 255.0f; // convert weights, with 3rd weight at 0.
 					Vector3 weights = Vector3(1.0f - blend, blend, 0.0f).normalized();
 
 					uint32_t weight_1 = uint32_t(CLAMP(weights.x, 0.0f, 1.0f) * 255.0f + 0.5f);
@@ -424,7 +424,7 @@ void Terrain3DData::load_region(const Vector2i &p_region_loc, const String &p_di
 					uint32_t dest_c_map = 0u;
 					dest_c_map |= (tex_1 & 0x1F) << 27;
 					dest_c_map |= (tex_2 & 0x1F) << 22;
-					// tex_3 is blank, defaulting to the 1st texture.
+					dest_c_map |= (2u & 0x1F) << 17; // defaulting to the 3rd texture ID in the array.
 					dest_c_map |= (weight_1 & 0xFF) << 9;
 					dest_c_map |= (weight_2 & 0xFF) << 1;
 					dest_c_map |= autoshader & 0x1;

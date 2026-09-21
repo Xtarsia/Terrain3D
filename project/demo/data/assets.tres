@@ -1,10 +1,12 @@
-[gd_resource type="Terrain3DAssets" load_steps=11 format=3 uid="uid://dal3jhw6241qg"]
+[gd_resource type="Terrain3DAssets" load_steps=14 format=3 uid="uid://dal3jhw6241qg"]
 
 [ext_resource type="PackedScene" uid="uid://bn5nf4esciwex" path="res://demo/assets/models/LOD5Example.tscn" id="1_4jrdu"]
-[ext_resource type="Texture2D" uid="uid://c88j3oj0lf6om" path="res://demo/assets/textures/rock023_alb_ht.png" id="2_pog6b"]
-[ext_resource type="Texture2D" uid="uid://ddprscrpsofah" path="res://demo/assets/textures/ground037_alb_ht.png" id="3_g8f2m"]
-[ext_resource type="Texture2D" uid="uid://dabyathlpy04p" path="res://demo/assets/textures/rock023_nrm_rgh.png" id="3_wncaf"]
-[ext_resource type="Texture2D" uid="uid://g80pbqtklcws" path="res://demo/assets/textures/ground037_nrm_rgh.png" id="4_aw5y1"]
+[ext_resource type="Texture2D" uid="uid://bn4fsbws1r2md" path="res://demo/assets/textures/Rock023_2K-ALB_H.png" id="2_e6edf"]
+[ext_resource type="Texture2D" uid="uid://ddrflqqtjpqq1" path="res://demo/assets/textures/Rock023_2K-NRM_AO_R.png" id="3_cmr6o"]
+[ext_resource type="Texture2D" uid="uid://ch3nb767116tw" path="res://demo/assets/textures/Ground037_2K-ALB_H.png" id="4_uyhyi"]
+[ext_resource type="Texture2D" uid="uid://cggw12dkthgmu" path="res://demo/assets/textures/Ground037_2K-NRM_AO_R.png" id="5_xlng6"]
+[ext_resource type="Texture2D" uid="uid://72l28jlv2nr1" path="res://demo/assets/textures/Ground054_2K-ALB_H.png" id="6_3wxcx"]
+[ext_resource type="Texture2D" uid="uid://c5il0t32idup3" path="res://demo/assets/textures/Ground054_2K-NRM_AO_R.png" id="7_g6711"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_b2vqk"]
 transparency = 4
@@ -38,25 +40,39 @@ lod4_range = 256.0
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_lha57"]
 name = "Cliff"
-albedo_texture = ExtResource("2_pog6b")
-normal_texture = ExtResource("3_wncaf")
+albedo_texture = ExtResource("2_e6edf")
+normal_texture = ExtResource("3_cmr6o")
 normal_depth = 1.5
 ao_strength = 1.0
-ao_light_affect = 0.8
-roughness = -0.05
+roughness = 0.136
 displacement_scale = 0.65
 
 [sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_od0q7"]
 name = "Grass"
 id = 1
 albedo_color = Color(0.67451, 0.74902, 0.686275, 1)
-albedo_texture = ExtResource("3_g8f2m")
-normal_texture = ExtResource("4_aw5y1")
-normal_depth = 1.4
-ao_strength = 1.0
+albedo_texture = ExtResource("4_uyhyi")
+normal_texture = ExtResource("5_xlng6")
+normal_depth = 1.5
+ao_light_affect = 1.0
+roughness = 0.364
 displacement_scale = 0.2
-detiling_rotation = 0.161
+uv_scale = 0.25
+detiling_rotation = 0.882
+detiling_shift = 0.324
+
+[sub_resource type="Terrain3DTextureAsset" id="Terrain3DTextureAsset_uyhyi"]
+name = "Ground054_2K-ALB_H"
+id = 2
+albedo_texture = ExtResource("6_3wxcx")
+normal_texture = ExtResource("7_g6711")
+normal_depth = 1.125
+ao_strength = 1.0
+ao_light_affect = 0.5
+roughness = -0.139
+detiling_rotation = 0.07
+detiling_shift = 0.059
 
 [resource]
 mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_2qf8x"), SubResource("Terrain3DMeshAsset_y3ibi")])
-texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_lha57"), SubResource("Terrain3DTextureAsset_od0q7")])
+texture_list = Array[Terrain3DTextureAsset]([SubResource("Terrain3DTextureAsset_lha57"), SubResource("Terrain3DTextureAsset_od0q7"), SubResource("Terrain3DTextureAsset_uyhyi")])
